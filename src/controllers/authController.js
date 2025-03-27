@@ -300,4 +300,233 @@ const changePassword = async (req, res) => {
   }
 };
 
-module.exports = { login, validate, register, changePassword };
+// Endpoint para listar todos los usuarios
+const getAllUsers = async (req, res) => {
+  try {
+    const pool = await poolPromise;
+    const result = await pool.request().query(`
+      SELECT 
+        u.ID_USUARIO, 
+        u.NOMBRES, 
+        u.APELLIDOS, 
+        u.DNI, 
+        u.CORREO, 
+        u.CELULAR, 
+        u.NRO_DPTO, 
+        u.FECHA_NACIMIENTO, 
+        u.COMITE, 
+        u.USUARIO, 
+        u.ID_TIPO_USUARIO,
+        u.ID_SEXO,
+        t.DETALLE_USUARIO AS ROL,
+        s.DESCRIPCION AS SEXO
+      FROM MAE_USUARIO u
+      LEFT JOIN MAE_TIPO_USUARIO t ON u.ID_TIPO_USUARIO = t.ID_TIPO_USUARIO
+      LEFT JOIN MAE_SEXO s ON u.ID_SEXO = s.ID_SEXO
+      WHERE u.ESTADO = 1
+    `);
+
+    const users = result.recordset;
+    res.status(200).json(users);
+  } catch (error) {
+    console.error('Error al obtener los usuarios:', error);
+    res.status(500).json({ message: 'Error del servidor', error: error.message });
+  }
+};
+
+// Endpoint para listar todos los movimientos (ingresos y salidas)
+const getAllMovements = async (req, res) => {
+  try {
+    const pool = await poolPromise;
+    const result = await pool.request().query(`
+      SELECT 
+        m.ID_ACCESO,
+        m.ID_USUARIO,
+        u.NOMBRES,
+        u.CORREO,
+        u.NRO_DPTO,
+        m.FECHA_ACCESO,
+        m.EXITO,
+        m.MOTIVO_FALLO,
+        m.PUERTA
+      FROM MAE_ACCESO m
+      LEFT JOIN MAE_USUARIO u ON m.ID_USUARIO = u.ID_USUARIO
+      WHERE m.ESTADO = 1
+      ORDER BY m.FECHA_ACCESO DESC
+    `);
+
+    const movements = result.recordset;
+    res.status(200).json(movements);
+  } catch (error) {
+    console.error('Error al obtener los movimientos:', error);
+    res.status(500).json({ message: 'Error del servidor', error: error.message });
+  }
+};
+
+// Endpoint para actualizar un usuario
+const updateUser = async (req, res) => {
+  const { id } = req.params;
+  const {
+    nro_dpto,
+    nombres,
+    apellidos,
+    dni,
+    correo,
+    celular,
+    contacto_emergencia,
+    fecha_nacimiento,
+    id_tipo_usuario,
+    id_sexo,
+    detalle,
+    observaciones,
+    comite,
+    usuario,
+  } = req.body;
+
+  // Validación de campos requeridos
+  if (
+    !nombres ||
+    !apellidos ||
+    !dni ||
+    !correo ||
+    !celular ||
+    !id_tipo_usuario ||
+    !id_sexo ||
+    !usuario
+  ) {
+    return res.status(400).json({ message: 'Todos los campos requeridos deben estar completos' });
+  }
+
+  // Validación del formato del correo
+  if (!validateEmail(correo)) {
+    return res.status(400).json({ message: 'Formato de correo inválido' });
+  }
+
+  // Validación del DNI (8 dígitos)
+  if (!/^[0-9]{8}$/.test(dni)) {
+    return res.status(400).json({ message: 'El DNI debe tener exactamente 8 dígitos' });
+  }
+
+  // Validación del celular (comienza con 9, 9 dígitos)
+  if (!/^[9][0-9]{8}$/.test(celular)) {
+    return res.status(400).json({ message: 'El celular debe comenzar con 9 y tener 9 dígitos' });
+  }
+
+  // Validación del contacto de emergencia (si se proporciona)
+  if (contacto_emergencia && !/^[9][0-9]{8}$/.test(contacto_emergencia)) {
+    return res.status(400).json({
+      message: 'El contacto de emergencia debe comenzar con 9 y tener 9 dígitos',
+    });
+  }
+
+  try {
+    const pool = await poolPromise;
+
+    // Verificar si el correo, DNI o usuario ya están registrados (excluyendo el usuario actual)
+    const existingUser = await pool.request()
+      .input('id_usuario', id)
+      .input('correo', correo)
+      .input('dni', dni)
+      .input('usuario', usuario)
+      .query(`
+        SELECT 1
+        FROM MAE_USUARIO
+        WHERE (CORREO = @correo OR DNI = @dni OR USUARIO = @usuario)
+        AND ID_USUARIO != @id_usuario
+      `);
+
+    if (existingUser.recordset.length > 0) {
+      return res.status(400).json({ message: 'El correo, DNI o usuario ya está registrado' });
+    }
+
+    // Actualizar el usuario
+    await pool.request()
+      .input('id_usuario', id)
+      .input('nro_dpto', nro_dpto || null)
+      .input('nombres', nombres)
+      .input('apellidos', apellidos)
+      .input('dni', dni)
+      .input('correo', correo)
+      .input('celular', celular)
+      .input('contacto_emergencia', contacto_emergencia || null)
+      .input('fecha_nacimiento', fecha_nacimiento || null)
+      .input('id_tipo_usuario', id_tipo_usuario)
+      .input('id_sexo', id_sexo)
+      .input('detalle', detalle || null)
+      .input('observaciones', observaciones || null)
+      .input('comite', comite ? 1 : 0)
+      .input('usuario', usuario)
+      .query(`
+        UPDATE MAE_USUARIO
+        SET
+          NRO_DPTO = @nro_dpto,
+          NOMBRES = @nombres,
+          APELLIDOS = @apellidos,
+          DNI = @dni,
+          CORREO = @correo,
+          CELULAR = @celular,
+          CONTACTO_EMERGENCIA = @contacto_emergencia,
+          FECHA_NACIMIENTO = @fecha_nacimiento,
+          ID_TIPO_USUARIO = @id_tipo_usuario,
+          ID_SEXO = @id_sexo,
+          DETALLE = @detalle,
+          OBSERVACIONES = @observaciones,
+          COMITE = @comite,
+          USUARIO = @usuario
+        WHERE ID_USUARIO = @id_usuario
+      `);
+
+    res.status(200).json({ message: 'Usuario actualizado exitosamente' });
+  } catch (error) {
+    console.error('Error al actualizar usuario:', error);
+    res.status(500).json({ message: 'Error del servidor', error: error.message });
+  }
+};
+
+// Endpoint para eliminar un usuario (cambio lógico de estado)
+const deleteUser = async (req, res) => {
+  const { id } = req.params;
+
+  try {
+    const pool = await poolPromise;
+
+    // Verificar si el usuario existe
+    const userExists = await pool.request()
+      .input('id_usuario', id)
+      .query(`
+        SELECT 1
+        FROM MAE_USUARIO
+        WHERE ID_USUARIO = @id_usuario AND ESTADO = 1
+      `);
+
+    if (userExists.recordset.length === 0) {
+      return res.status(404).json({ message: 'Usuario no encontrado' });
+    }
+
+    // Realizar un borrado lógico (cambiar ESTADO a 0)
+    await pool.request()
+      .input('id_usuario', id)
+      .query(`
+        UPDATE MAE_USUARIO
+        SET ESTADO = 0
+        WHERE ID_USUARIO = @id_usuario
+      `);
+
+    res.status(200).json({ message: 'Usuario eliminado exitosamente' });
+  } catch (error) {
+    console.error('Error al eliminar usuario:', error);
+    res.status(500).json({ message: 'Error del servidor', error: error.message });
+  }
+};
+
+// Exportar todas las funciones
+module.exports = {
+  login,
+  validate,
+  register,
+  changePassword,
+  getAllUsers,
+  getAllMovements,
+  updateUser,
+  deleteUser,
+};
