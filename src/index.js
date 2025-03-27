@@ -4,7 +4,7 @@ const authRoutes = require('./routes/authRoutes');
 const doorRoutes = require('./routes/doorRoutes');
 const movementRoutes = require('./routes/movementRoutes');
 const userRoutes = require('./routes/userRoutes');
-const { login, validate } = require('./controllers/authController');
+const { login, validate ,register,changePassword} = require('./controllers/authController');
 
 const app = express();
 
@@ -24,6 +24,8 @@ app.use('/api', movementRoutes);
 app.use('/api', userRoutes);
 app.post('/api/login', login);
 app.get('/api/validate', validate);
+app.get('/api/register', register);
+app.get('/api/changePassword', changePassword);
 
 const PORT = process.env.PORT || 4000;
 app.listen(PORT, '0.0.0.0', () => {
