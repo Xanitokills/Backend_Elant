@@ -13,14 +13,12 @@ app.use(cors({
     methods: ['GET', 'POST', 'PUT', 'DELETE'],
     allowedHeaders: ['Content-Type', 'Authorization']
 }));
-app.use(cors());
 app.use(express.json());
 
-
-// Usar las rutas
-app.use('/api', authRoutes);
+// Usar las rutas (reordenadas)
+app.use('/api', movementRoutes); // Primero movementRoutes (sin autenticación)
+app.use('/api', authRoutes);    // Después authRoutes (con autenticación)
 app.use('/api', doorRoutes);
-app.use('/api', movementRoutes);
 app.use('/api', userRoutes);
 
 const PORT = process.env.PORT || 4000;

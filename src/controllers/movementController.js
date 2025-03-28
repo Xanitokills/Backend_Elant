@@ -13,7 +13,8 @@ const getMovements = async (req, res) => {
                 a.FECHA_ACCESO,
                 a.EXITO,
                 a.MOTIVO_FALLO,
-                p.NOMBRE AS puerta
+                p.NOMBRE AS puerta,
+                p.DESCRIPCION AS descripcion
             FROM MAE_ACCESO_PUERTA a
             JOIN MAE_USUARIO u ON a.ID_USUARIO = u.ID_USUARIO
             JOIN MAE_QR q ON a.ID_QR = q.ID_QR
