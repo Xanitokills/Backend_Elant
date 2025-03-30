@@ -1,0 +1,16 @@
+select * from MAE_TIPO_USUARIO
+
+select * from MAE_FASE
+select * from MAE_PUERTA
+select * from  MAE_FASE_PUERTA
+
+-- Usuario 1 en Fase1
+select * from MAE_USUARIO_FASE
+SELECT * FROM VW_USUARIOS_FASES_PUERTAS;
+select * from MAE_USUARIO
+
+--Conocer Usuario Tipo
+SELECT u.ID_USUARIO, u.CORREO, u.CONTRASENA_HASH, u.ID_TIPO_USUARIO, u.NOMBRES, u.APELLIDOS, t.DETALLE_USUARIO
+        FROM MAE_USUARIO u
+        LEFT JOIN MAE_TIPO_USUARIO t ON u.ID_TIPO_USUARIO = t.ID_TIPO_USUARIO
+        WHERE U.ESTADO = 1

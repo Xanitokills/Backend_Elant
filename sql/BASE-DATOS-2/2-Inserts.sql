@@ -1,0 +1,49 @@
+-- Insertar fases
+INSERT INTO MAE_FASE (NOMBRE, DESCRIPCION, ESTADO) VALUES ('Fase1', 'Primera fase de la torre', 1);
+INSERT INTO MAE_FASE (NOMBRE, DESCRIPCION, ESTADO) VALUES ('Fase2', 'Segunda fase de la torre', 1);
+INSERT INTO MAE_FASE (NOMBRE, DESCRIPCION, ESTADO) VALUES ('Fase3', 'Tercera fase de la torre', 1);
+
+-- Insertar puertas
+INSERT INTO MAE_PUERTA (NOMBRE, DESCRIPCION, ESTADO) VALUES ('Puerta A', 'Entrada principal Fase1', 1);
+INSERT INTO MAE_PUERTA (NOMBRE, DESCRIPCION, ESTADO) VALUES ('Puerta B', 'Entrada principal Fase2', 1);
+INSERT INTO MAE_PUERTA (NOMBRE, DESCRIPCION, ESTADO) VALUES ('Puerta C', 'Entrada principal Fase3', 1);
+
+-- Asignar puertas a fases
+INSERT INTO MAE_FASE_PUERTA (ID_FASE, ID_PUERTA, ESTADO) VALUES (1, 1, 1); -- Fase1 tiene acceso a Puerta A
+INSERT INTO MAE_FASE_PUERTA (ID_FASE, ID_PUERTA, ESTADO) VALUES (2, 2, 1); -- Fase2 tiene acceso a Puerta B
+INSERT INTO MAE_FASE_PUERTA (ID_FASE, ID_PUERTA, ESTADO) VALUES (3, 3, 1); -- Fase3 tiene acceso a Puerta C
+
+-- Insertar un usuario (ejemplo)
+INSERT INTO MAE_TIPO_USUARIO (DETALLE_USUARIO, ESTADO) VALUES ('Residente', 1);
+INSERT INTO MAE_SEXO (DESCRIPCION) VALUES ('Masculino');
+
+--Insertar Usuario
+INSERT INTO MAE_USUARIO (
+    NRO_DPTO, NOMBRES, APELLIDOS, DNI, CORREO, CELULAR, CONTACTO_EMERGENCIA, 
+    FECHA_NACIMIENTO, ID_TIPO_USUARIO, ID_SEXO, DETALLE, OBSERVACIONES, COMITE, 
+    USUARIO, CONTRASENA_HASH, CONTRASENA_SALT, ESTADO
+)
+VALUES (
+    101, -- NRO_DPTO
+    'Juan', -- NOMBRES
+    'Pérez', -- APELLIDOS
+    '12345678', -- DNI
+    'test@example.com', -- CORREO
+    '987654321', -- CELULAR
+    '912345678', -- CONTACTO_EMERGENCIA
+    '1990-01-01', -- FECHA_NACIMIENTO
+    1, -- ID_TIPO_USUARIO (de MAE_TIPO_USUARIO)
+    1, -- ID_SEXO (de MAE_SEXO)
+    'Residente principal', -- DETALLE
+    'Ninguna', -- OBSERVACIONES
+    0, -- COMITE (0 = No)
+    'juanperez', -- USUARIO
+    '$2b$10$tKtKXhg63LWfN1hiWNkxKubVXTep3Ct/FqcxzETmphnJldzu16UGm', -- CONTRASENA_HASH
+    '$2b$10$J22rsc5zqm3COkERoc4DuO', -- CONTRASENA_SALT
+    1 -- ESTADO (1 = Activo)
+);
+
+-- Asignar usuarios a fases
+INSERT INTO MAE_USUARIO_FASE (ID_USUARIO, ID_FASE, ESTADO) VALUES (1, 1, 1); 
+
+
