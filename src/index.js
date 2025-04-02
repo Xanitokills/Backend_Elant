@@ -4,6 +4,7 @@ const authRoutes = require('./routes/authRoutes');
 const doorRoutes = require('./routes/doorRoutes');
 const movementRoutes = require('./routes/movementRoutes');
 const userRoutes = require('./routes/userRoutes');
+require('dotenv').config();
 
 const app = express();
 
