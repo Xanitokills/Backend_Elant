@@ -363,9 +363,8 @@ const getAllMovements = async (req, res) => {
   }
 };
 
-// Endpoint para actualizar un usuario
 const updateUser = async (req, res) => {
-  const { id } = req.params;
+  const { id } = req.params; // ID del usuario a actualizar (de la URL)
   const {
     nro_dpto,
     nombres,
@@ -381,7 +380,7 @@ const updateUser = async (req, res) => {
     observaciones,
     comite,
     usuario,
-  } = req.body;
+  } = req.body; // Los datos que se desean actualizar
 
   // Validación de campos requeridos
   if (
@@ -439,7 +438,7 @@ const updateUser = async (req, res) => {
       return res.status(400).json({ message: 'El correo, DNI o usuario ya está registrado' });
     }
 
-    // Actualizar el usuario
+    // Realizar la actualización del usuario
     await pool.request()
       .input('id_usuario', id)
       .input('nro_dpto', nro_dpto || null)
@@ -482,6 +481,11 @@ const updateUser = async (req, res) => {
     res.status(500).json({ message: 'Error del servidor', error: error.message });
   }
 };
+
+module.exports = {
+  updateUser,
+};
+
 
 // Endpoint para eliminar un usuario (cambio lógico de estado)
 const deleteUser = async (req, res) => {
