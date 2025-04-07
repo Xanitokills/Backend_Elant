@@ -11,3 +11,5 @@
 2025-04-07T22:21:56.715Z info: Correo enviado con la nueva contraseña a: zerguiter001@gmail.com
 2025-04-07T22:22:03.692Z info: Correo enviado con la nueva contraseña a: zerguiter001@gmail.com
 2025-04-07T23:03:35.108Z error: Error al enviar el correo a jorgejesus_30@outlook.com: ENOENT: no such file or directory, open 'C:\Users\dt.analista8\MiAppReact\Backend_Elant\src\controllers\html\resetPasswordEmail.html'
+2025-04-07T23:15:23.706Z error: Error al enviar el correo a zerguiter001@gmail.com: ENOENT: no such file or directory, open 'C:\Users\dt.analista8\MiAppReact\Backend_Elant\src\controllers\html\resetPasswordEmail.html'
+2025-04-07T23:16:16.071Z info: Correo enviado con la nueva contraseña a: zerguiter001@gmail.com

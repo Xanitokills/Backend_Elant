@@ -111,8 +111,7 @@ const transporter = nodemailer.createTransport({
 const sendResetPasswordEmail = async (email, newPassword) => {
   try {
     // Leer el archivo HTML desde la carpeta html
-    const htmlTemplate = fs.readFileSync(path.join(__dirname, "html", "resetPasswordEmail.html"), "utf8");
-
+    const htmlTemplate = fs.readFileSync(path.join(__dirname, "../../html", "resetPasswordEmail.html"), "utf8");
     // Reemplazar la contraseña en el HTML
     const htmlContent = htmlTemplate.replace("{{newPassword}}", newPassword);
 
