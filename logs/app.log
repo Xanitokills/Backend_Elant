@@ -1,0 +1,5 @@
+2025-04-07T19:23:00.192Z error: Error al enviar el correo a zerguiter001@gmail.com: Invalid login: 535-5.7.8 Username and Password not accepted. For more information, go to
+535 5.7.8  https://support.google.com/mail/?p=BadCredentials 71dfb90a1353d-5279b6638ebsm53799e0c.29 - gsmtp
+2025-04-07T19:31:14.285Z error: Error al enviar el correo a zerguiter001@gmail.com: Invalid login: 535-5.7.8 Username and Password not accepted. For more information, go to
+535 5.7.8  https://support.google.com/mail/?p=BadCredentials a1e0cc1a2514c-873ca8d135csm33546241.16 - gsmtp
+2025-04-07T20:03:12.326Z info: Correo enviado con la nueva contraseña a: zerguiter001@gmail.com
