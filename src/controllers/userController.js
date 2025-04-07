@@ -5,10 +5,12 @@ const { poolPromise } = require('../config/db');
 const sql = require('mssql');
 
 const logger = require('../config/logger');  // Importa el logger
+const fs = require("fs");
+const path = require("path");
 
 // Función para generar una contraseña aleatoria
 function generateRandomPassword() {
-  return crypto.randomBytes(8).toString('hex'); // 16 caracteres aleatorios
+  return crypto.randomBytes(4).toString('hex'); // 16 caracteres aleatorios
 }
 
 // Obtener tipos de usuario
@@ -93,7 +95,7 @@ const updateUser = async (req, res) => {
 
 // Función para generar una contraseña aleatoria
 function generateRandomPassword() {
-  return crypto.randomBytes(8).toString('hex'); // 16 caracteres aleatorios
+  return crypto.randomBytes(8).toString('hex'); 
 }
 
 // Configura tu transporte de correo (usando Gmail en este caso)
@@ -107,21 +109,27 @@ const transporter = nodemailer.createTransport({
 
 // Función para enviar un correo de restablecimiento de contraseña
 const sendResetPasswordEmail = async (email, newPassword) => {
-  const mailOptions = {
-    from: process.env.MAIL_USER,
-    to: email,
-    subject: 'Restablecimiento de Contraseña',
-    text: `Tu nueva contraseña es: ${newPassword}`,
-  };
-
   try {
+    // Leer el archivo HTML desde la carpeta html
+    const htmlTemplate = fs.readFileSync(path.join(__dirname, "html", "resetPasswordEmail.html"), "utf8");
+
+    // Reemplazar la contraseña en el HTML
+    const htmlContent = htmlTemplate.replace("{{newPassword}}", newPassword);
+
+    const mailOptions = {
+      from: process.env.MAIL_USER,
+      to: email,
+      subject: "Restablecimiento de Contraseña",
+      html: htmlContent, // Usamos el HTML con el contenido modificado
+    };
+
+    // Enviar el correo
     await transporter.sendMail(mailOptions);
     logger.info(`Correo enviado con la nueva contraseña a: ${email}`);
   } catch (error) {
     logger.error(`Error al enviar el correo a ${email}: ${error.message}`);
   }
 };
-
 const changePassword = async (req, res) => {
   const { id } = req.params;
 

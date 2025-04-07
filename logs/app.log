@@ -3,3 +3,11 @@
 2025-04-07T19:31:14.285Z error: Error al enviar el correo a zerguiter001@gmail.com: Invalid login: 535-5.7.8 Username and Password not accepted. For more information, go to
 535 5.7.8  https://support.google.com/mail/?p=BadCredentials a1e0cc1a2514c-873ca8d135csm33546241.16 - gsmtp
 2025-04-07T20:03:12.326Z info: Correo enviado con la nueva contraseña a: zerguiter001@gmail.com
+2025-04-07T22:21:02.480Z info: Correo enviado con la nueva contraseña a: zerguiter001@gmail.com
+2025-04-07T22:21:12.556Z info: Correo enviado con la nueva contraseña a: zerguiter001@gmail.com
+2025-04-07T22:21:21.180Z info: Correo enviado con la nueva contraseña a: test@example.com
+2025-04-07T22:21:38.660Z info: Correo enviado con la nueva contraseña a: zerguiter001@gmail.com
+2025-04-07T22:21:50.426Z info: Correo enviado con la nueva contraseña a: zerguiter001@gmail.com
+2025-04-07T22:21:56.715Z info: Correo enviado con la nueva contraseña a: zerguiter001@gmail.com
+2025-04-07T22:22:03.692Z info: Correo enviado con la nueva contraseña a: zerguiter001@gmail.com
+2025-04-07T23:03:35.108Z error: Error al enviar el correo a jorgejesus_30@outlook.com: ENOENT: no such file or directory, open 'C:\Users\dt.analista8\MiAppReact\Backend_Elant\src\controllers\html\resetPasswordEmail.html'
