@@ -19,7 +19,7 @@ VALUES ('qr_code_123', 1, 1);
 
 -- INSERTAR TIPOS DE USUARIOS
 INSERT INTO MAE_TIPO_USUARIO (DETALLE_USUARIO, ESTADO)
-VALUES ('Admin', 1), ('Residente', 1);
+VALUES ('Sistemas', 1), ('Administrador', 1), ('Seguridad', 1), ('Propietario', 1), ('Inquilino', 1);
 
 -- INSERTAR GENERO
 INSERT INTO MAE_SEXO (DESCRIPCION)
