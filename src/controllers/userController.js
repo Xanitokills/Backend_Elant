@@ -204,4 +204,31 @@ const changePassword = async (req, res) => {
   }
 };
 
-module.exports = { getUserTypes, getSexes, updateUser, changePassword };
+const getSidebarByUserId = async (req, res) => {
+  const { id } = req.params;
+
+  try {
+    const pool = await poolPromise;
+
+    logger.info(`Solicitud de menú para el usuario ID: ${id}`);
+
+    const result = await pool
+      .request()
+      .input("ID_USUARIO", sql.Int, id)
+      .execute("SP_GET_MENUS_SUBMENUS_JSON");
+
+    const sidebarData = result.recordset;
+
+    logger.debug(`Sidebar devuelto para ID ${id}: ${JSON.stringify(sidebarData, null, 2)}`);
+
+    res.status(200).json(sidebarData);
+  } catch (error) {
+    logger.error(`Error al obtener el menú del usuario ID ${id}: ${error.message}`, {
+      stack: error.stack,
+    });
+
+    res.status(500).json({ message: "Error al obtener el menú del usuario" });
+  }
+};
+
+module.exports = { getUserTypes, getSexes, updateUser, changePassword,getSidebarByUserId };
