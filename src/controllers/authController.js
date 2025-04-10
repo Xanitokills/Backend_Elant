@@ -69,6 +69,11 @@ const login = async (req, res) => {
       role,
       userName: `${user.NOMBRES} ${user.APELLIDOS}`,
       primerInicio: user.PRIMER_INICIO === 1,
+      user: {
+        id: user.ID_USUARIO,
+        name: `${user.NOMBRES} ${user.APELLIDOS}`,
+        role: role,
+      },
     });
   } catch (error) {
     console.error("Error al iniciar sesión:", error);
