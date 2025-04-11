@@ -1,0 +1,6 @@
+-- Asignar rol usuario con ID 
+EXEC SP_INSERTAR_USUARIO_ROL @ID_USUARIO = 5, @ID_TIPO_USUARIO = 1;
+
+--Eliminar rol usuario con ID
+
+EXEC SP_ELIMINAR_USUARIO_ROL @ID_USUARIO = 5, @ID_TIPO_USUARIO = 1;

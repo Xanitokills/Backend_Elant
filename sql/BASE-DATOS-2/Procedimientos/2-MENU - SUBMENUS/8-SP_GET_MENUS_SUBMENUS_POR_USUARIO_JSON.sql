@@ -9,7 +9,7 @@ BEGIN
         m.URL,
         m.ORDEN,
         (
-            SELECT 
+            SELECT DISTINCT
                 sm.ID_SUBMENU,
                 sm.NOMBRE AS SUBMENU_NOMBRE,
                 sm.ICONO,
