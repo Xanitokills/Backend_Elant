@@ -250,6 +250,7 @@ const getRoles = async (req, res) => {
   }
 };
 
+
 module.exports = {
   getUserTypes,
   getSexes,

@@ -4,7 +4,6 @@ const {
   login,
   validate,
   register,
-  changePassword,
   getAllUsers,
   updateUser,
   deleteUser,
@@ -15,6 +14,7 @@ const {
   uploadImage,
   getLoginImages,
   deleteLoginImage,
+  changeAuthenticatedUserPassword, 
 } = require("../controllers/authController");
 const authMiddleware = require("../middleware/authMiddleware");
 const upload = require("../config/multerConfig");
@@ -24,7 +24,6 @@ console.log("Imported authController:", {
   login,
   validate,
   register,
-  changePassword,
   getAllUsers,
   updateUser,
   deleteUser,
@@ -45,9 +44,6 @@ router.get("/validate", validate);
 
 // Ruta para registrar usuarios
 router.post("/register", authMiddleware, register);
-
-// Ruta para cambiar contraseña
-router.post("/change-password", authMiddleware, changePassword);
 
 // Ruta para listar todos los usuarios
 router.get("/users", authMiddleware, getAllUsers);
@@ -76,5 +72,11 @@ router.post("/upload-login-images", upload, uploadImage);
 router.get("/get-login-images", getLoginImages);
 
 router.delete("/delete-login-image/:imageId", deleteLoginImage);
+
+// ✅ Cambiar contraseña del usuario autenticado
+router.put("/auth/change-password", authMiddleware, changeAuthenticatedUserPassword);
+
+
+
 
 module.exports = router;

@@ -1,2 +1,805 @@
-2025-04-10T17:32:30.209Z info: Iniciando la obtención de imágenes...
-2025-04-10T17:32:32.708Z info: Iniciando la obtención de imágenes...
+2025-04-11T18:54:48.976Z info: 🛡️ authMiddleware ejecutado
+2025-04-11T18:54:48.976Z info: 🔐 Token recibido:
+2025-04-11T18:54:48.977Z info: ✅ Token decodificado:
+2025-04-11T18:54:49.260Z info: ✅ Usuario autenticado correctamente:
+2025-04-11T18:58:14.117Z info: 🛡️ authMiddleware ejecutado
+2025-04-11T18:58:14.119Z info: 🔐 Token recibido:
+2025-04-11T18:58:14.119Z info: ✅ Token decodificado:
+2025-04-11T18:58:15.308Z info: ✅ Usuario autenticado correctamente:
+2025-04-11T18:58:15.309Z info: Solicitud de menú para el usuario ID: 12
+2025-04-11T18:58:15.603Z info: 🛡️ authMiddleware ejecutado
+2025-04-11T18:58:15.603Z info: 🔐 Token recibido:
+2025-04-11T18:58:15.604Z info: ✅ Token decodificado:
+2025-04-11T18:58:15.891Z info: ✅ Usuario autenticado correctamente:
+2025-04-11T18:58:15.893Z info: Solicitud de menú para el usuario ID: 12
+2025-04-11T18:58:22.814Z info: 🛡️ authMiddleware ejecutado
+2025-04-11T18:58:22.814Z info: 🔐 Token recibido:
+2025-04-11T18:58:22.815Z info: ✅ Token decodificado:
+2025-04-11T18:58:23.104Z info: ✅ Usuario autenticado correctamente:
+2025-04-11T19:00:43.148Z info: 🛡️ authMiddleware ejecutado
+2025-04-11T19:00:43.150Z info: 🔐 Token recibido:
+2025-04-11T19:00:43.151Z info: ✅ Token decodificado:
+2025-04-11T19:00:44.363Z info: ✅ Usuario autenticado correctamente:
+2025-04-11T19:00:44.364Z info: Solicitud de menú para el usuario ID: 12
+2025-04-11T19:00:44.660Z info: 🛡️ authMiddleware ejecutado
+2025-04-11T19:00:44.660Z info: 🔐 Token recibido:
+2025-04-11T19:00:44.661Z info: ✅ Token decodificado:
+2025-04-11T19:00:44.946Z info: ✅ Usuario autenticado correctamente:
+2025-04-11T19:00:44.947Z info: Solicitud de menú para el usuario ID: 12
+2025-04-11T19:00:48.473Z info: 🛡️ authMiddleware ejecutado
+2025-04-11T19:00:48.473Z info: 🔐 Token recibido:
+2025-04-11T19:00:48.475Z info: ✅ Token decodificado:
+2025-04-11T19:00:48.761Z info: ✅ Usuario autenticado correctamente:
+2025-04-11T19:03:09.040Z info: ✅ Server running on port 4000
+2025-04-11T19:03:15.417Z info: 🛡️ authMiddleware ejecutado
+2025-04-11T19:03:15.417Z info: 🔐 Token recibido:
+2025-04-11T19:03:15.420Z info: ✅ Token decodificado:
+2025-04-11T19:03:16.612Z info: ✅ Usuario autenticado correctamente:
+2025-04-11T19:07:34.379Z info: ✅ Server running on port 4000
+2025-04-11T19:07:50.797Z info: 🛡️ authMiddleware ejecutado
+2025-04-11T19:07:50.798Z info: 🔐 Token recibido:
+2025-04-11T19:07:50.799Z info: ✅ Token decodificado:
+2025-04-11T19:07:50.819Z info: 🛡️ authMiddleware ejecutado
+2025-04-11T19:07:50.820Z info: 🔐 Token recibido:
+2025-04-11T19:07:50.821Z info: ✅ Token decodificado:
+2025-04-11T19:07:52.177Z info: ✅ Usuario autenticado correctamente:
+2025-04-11T19:07:52.177Z info: Solicitud de menú para el usuario ID: 12
+2025-04-11T19:07:52.179Z info: ✅ Usuario autenticado correctamente:
+2025-04-11T19:07:52.470Z info: 🛡️ authMiddleware ejecutado
+2025-04-11T19:07:52.471Z info: 🔐 Token recibido:
+2025-04-11T19:07:52.472Z info: ✅ Token decodificado:
+2025-04-11T19:07:52.663Z info: 🛡️ authMiddleware ejecutado
+2025-04-11T19:07:52.663Z info: 🔐 Token recibido:
+2025-04-11T19:07:52.664Z info: ✅ Token decodificado:
+2025-04-11T19:07:52.755Z info: ✅ Usuario autenticado correctamente:
+2025-04-11T19:07:52.755Z info: Solicitud de menú para el usuario ID: 12
+2025-04-11T19:07:52.951Z info: ✅ Usuario autenticado correctamente:
+2025-04-11T19:07:53.046Z info: 🛡️ authMiddleware ejecutado
+2025-04-11T19:07:53.046Z info: 🔐 Token recibido:
+2025-04-11T19:07:53.047Z info: ✅ Token decodificado:
+2025-04-11T19:07:53.332Z info: ✅ Usuario autenticado correctamente:
+2025-04-11T19:07:53.332Z info: Solicitud de menú para el usuario ID: 12
+2025-04-11T19:07:53.620Z info: 🛡️ authMiddleware ejecutado
+2025-04-11T19:07:53.620Z info: 🔐 Token recibido:
+2025-04-11T19:07:53.621Z info: ✅ Token decodificado:
+2025-04-11T19:07:53.904Z info: ✅ Usuario autenticado correctamente:
+2025-04-11T19:07:53.904Z info: Solicitud de menú para el usuario ID: 12
+2025-04-11T19:08:01.186Z info: 🛡️ authMiddleware ejecutado
+2025-04-11T19:08:01.187Z info: 🔐 Token recibido:
+2025-04-11T19:08:01.188Z info: ✅ Token decodificado:
+2025-04-11T19:08:01.472Z info: ✅ Usuario autenticado correctamente:
+2025-04-11T19:09:39.390Z info: 🛡️ authMiddleware ejecutado
+2025-04-11T19:09:39.390Z info: 🔐 Token recibido:
+2025-04-11T19:09:39.391Z info: ✅ Token decodificado:
+2025-04-11T19:09:39.404Z info: 🛡️ authMiddleware ejecutado
+2025-04-11T19:09:39.405Z info: 🔐 Token recibido:
+2025-04-11T19:09:39.406Z info: ✅ Token decodificado:
+2025-04-11T19:09:40.685Z info: ✅ Usuario autenticado correctamente:
+2025-04-11T19:09:40.685Z info: Solicitud de menú para el usuario ID: 12
+2025-04-11T19:09:40.720Z info: ✅ Usuario autenticado correctamente:
+2025-04-11T19:09:40.982Z info: 🛡️ authMiddleware ejecutado
+2025-04-11T19:09:40.983Z info: 🔐 Token recibido:
+2025-04-11T19:09:40.984Z info: ✅ Token decodificado:
+2025-04-11T19:09:41.211Z info: 🛡️ authMiddleware ejecutado
+2025-04-11T19:09:41.212Z info: 🔐 Token recibido:
+2025-04-11T19:09:41.212Z info: ✅ Token decodificado:
+2025-04-11T19:09:41.270Z info: ✅ Usuario autenticado correctamente:
+2025-04-11T19:09:41.271Z info: Solicitud de menú para el usuario ID: 12
+2025-04-11T19:09:41.499Z info: ✅ Usuario autenticado correctamente:
+2025-04-11T19:10:45.299Z info: 🛡️ authMiddleware ejecutado
+2025-04-11T19:10:45.300Z info: 🔐 Token recibido:
+2025-04-11T19:10:45.301Z info: ✅ Token decodificado:
+2025-04-11T19:10:46.591Z info: ✅ Usuario autenticado correctamente:
+2025-04-11T19:17:39.210Z info: ✅ Server running on port 4000
+2025-04-11T19:18:44.716Z info: 🛡️ authMiddleware ejecutado
+2025-04-11T19:18:44.717Z info: 🔐 Token recibido:
+2025-04-11T19:18:44.721Z info: ✅ Token decodificado:
+2025-04-11T19:18:46.364Z info: ✅ Usuario autenticado correctamente:
+2025-04-11T19:20:19.722Z info: 🛡️ authMiddleware ejecutado
+2025-04-11T19:20:19.722Z info: 🔐 Token recibido:
+2025-04-11T19:20:19.723Z info: ✅ Token decodificado:
+2025-04-11T19:20:20.951Z info: ✅ Usuario autenticado correctamente:
+2025-04-11T19:20:20.952Z info: Solicitud de menú para el usuario ID: 12
+2025-04-11T19:20:21.247Z info: 🛡️ authMiddleware ejecutado
+2025-04-11T19:20:21.247Z info: 🔐 Token recibido:
+2025-04-11T19:20:21.248Z info: ✅ Token decodificado:
+2025-04-11T19:20:21.534Z info: ✅ Usuario autenticado correctamente:
+2025-04-11T19:20:21.535Z info: Solicitud de menú para el usuario ID: 12
+2025-04-11T19:20:38.816Z info: 🛡️ authMiddleware ejecutado
+2025-04-11T19:20:38.817Z info: 🔐 Token recibido:
+2025-04-11T19:20:38.819Z info: ✅ Token decodificado:
+2025-04-11T19:20:39.107Z info: ✅ Usuario autenticado correctamente:
+2025-04-11T19:22:49.808Z info: ✅ Server running on port 4000
+2025-04-11T19:24:39.023Z info: 🛡️ authMiddleware ejecutado
+2025-04-11T19:24:39.024Z info: 🔐 Token recibido:
+2025-04-11T19:24:39.028Z error: ❌ Error al decodificar token:
+2025-04-11T19:24:43.930Z info: Iniciando la obtención de imágenes...
+2025-04-11T19:24:46.447Z info: Iniciando la obtención de imágenes...
+2025-04-11T19:24:46.816Z info: 🛡️ authMiddleware ejecutado
+2025-04-11T19:24:46.816Z info: 🔐 Token recibido:
+2025-04-11T19:24:46.818Z info: ✅ Token decodificado:
+2025-04-11T19:24:47.109Z info: ✅ Usuario autenticado correctamente:
+2025-04-11T19:24:47.110Z info: Solicitud de menú para el usuario ID: 12
+2025-04-11T19:24:47.111Z info: 🛡️ authMiddleware ejecutado
+2025-04-11T19:24:47.111Z info: 🔐 Token recibido:
+2025-04-11T19:24:47.112Z info: ✅ Token decodificado:
+2025-04-11T19:24:47.417Z info: 🛡️ authMiddleware ejecutado
+2025-04-11T19:24:47.418Z info: 🔐 Token recibido:
+2025-04-11T19:24:47.419Z info: ✅ Token decodificado:
+2025-04-11T19:24:47.691Z info: ✅ Usuario autenticado correctamente:
+2025-04-11T19:24:47.978Z info: ✅ Usuario autenticado correctamente:
+2025-04-11T19:24:47.978Z info: Solicitud de menú para el usuario ID: 12
+2025-04-11T19:24:48.293Z info: 🛡️ authMiddleware ejecutado
+2025-04-11T19:24:48.294Z info: 🔐 Token recibido:
+2025-04-11T19:24:48.294Z info: ✅ Token decodificado:
+2025-04-11T19:24:48.591Z info: ✅ Usuario autenticado correctamente:
+2025-04-11T19:24:56.173Z info: 🛡️ authMiddleware ejecutado
+2025-04-11T19:24:56.174Z info: 🔐 Token recibido:
+2025-04-11T19:24:56.175Z info: ✅ Token decodificado:
+2025-04-11T19:24:56.176Z info: 🛡️ authMiddleware ejecutado
+2025-04-11T19:24:56.176Z info: 🔐 Token recibido:
+2025-04-11T19:24:56.179Z info: ✅ Token decodificado:
+2025-04-11T19:24:56.468Z info: ✅ Usuario autenticado correctamente:
+2025-04-11T19:24:56.468Z info: Solicitud de menú para el usuario ID: 12
+2025-04-11T19:24:56.469Z info: ✅ Usuario autenticado correctamente:
+2025-04-11T19:24:56.761Z info: 🛡️ authMiddleware ejecutado
+2025-04-11T19:24:56.762Z info: 🔐 Token recibido:
+2025-04-11T19:24:56.763Z info: ✅ Token decodificado:
+2025-04-11T19:24:56.770Z info: 🛡️ authMiddleware ejecutado
+2025-04-11T19:24:56.771Z info: 🔐 Token recibido:
+2025-04-11T19:24:56.772Z info: ✅ Token decodificado:
+2025-04-11T19:24:57.051Z info: ✅ Usuario autenticado correctamente:
+2025-04-11T19:24:57.052Z info: Solicitud de menú para el usuario ID: 12
+2025-04-11T19:24:57.065Z info: ✅ Usuario autenticado correctamente:
+2025-04-11T19:24:57.449Z info: 🛡️ authMiddleware ejecutado
+2025-04-11T19:24:57.449Z info: 🔐 Token recibido:
+2025-04-11T19:24:57.450Z info: ✅ Token decodificado:
+2025-04-11T19:24:57.743Z info: ✅ Usuario autenticado correctamente:
+2025-04-11T19:24:57.744Z info: Solicitud de menú para el usuario ID: 12
+2025-04-11T19:24:58.041Z info: 🛡️ authMiddleware ejecutado
+2025-04-11T19:24:58.041Z info: 🔐 Token recibido:
+2025-04-11T19:24:58.042Z info: ✅ Token decodificado:
+2025-04-11T19:24:58.342Z info: ✅ Usuario autenticado correctamente:
+2025-04-11T19:24:58.342Z info: Solicitud de menú para el usuario ID: 12
+2025-04-11T19:24:58.561Z info: Iniciando la obtención de imágenes...
+2025-04-11T19:24:59.949Z info: Iniciando la obtención de imágenes...
+2025-04-11T19:25:04.406Z info: 🛡️ authMiddleware ejecutado
+2025-04-11T19:25:04.407Z info: 🔐 Token recibido:
+2025-04-11T19:25:04.408Z info: ✅ Token decodificado:
+2025-04-11T19:25:04.410Z info: 🛡️ authMiddleware ejecutado
+2025-04-11T19:25:04.411Z info: 🔐 Token recibido:
+2025-04-11T19:25:04.412Z info: ✅ Token decodificado:
+2025-04-11T19:25:04.700Z info: ✅ Usuario autenticado correctamente:
+2025-04-11T19:25:04.700Z info: Solicitud de menú para el usuario ID: 12
+2025-04-11T19:25:04.707Z info: ✅ Usuario autenticado correctamente:
+2025-04-11T19:25:04.991Z info: 🛡️ authMiddleware ejecutado
+2025-04-11T19:25:04.992Z info: 🔐 Token recibido:
+2025-04-11T19:25:04.993Z info: ✅ Token decodificado:
+2025-04-11T19:25:05.002Z info: 🛡️ authMiddleware ejecutado
+2025-04-11T19:25:05.002Z info: 🔐 Token recibido:
+2025-04-11T19:25:05.003Z info: ✅ Token decodificado:
+2025-04-11T19:25:05.279Z info: ✅ Usuario autenticado correctamente:
+2025-04-11T19:25:05.279Z info: Solicitud de menú para el usuario ID: 12
+2025-04-11T19:25:05.296Z info: ✅ Usuario autenticado correctamente:
+2025-04-11T19:25:07.433Z info: 🛡️ authMiddleware ejecutado
+2025-04-11T19:25:07.433Z info: 🔐 Token recibido:
+2025-04-11T19:25:07.435Z info: ✅ Token decodificado:
+2025-04-11T19:25:07.729Z info: ✅ Usuario autenticado correctamente:
+2025-04-11T19:25:07.730Z info: Solicitud de menú para el usuario ID: 12
+2025-04-11T19:25:08.028Z info: 🛡️ authMiddleware ejecutado
+2025-04-11T19:25:08.028Z info: 🔐 Token recibido:
+2025-04-11T19:25:08.029Z info: ✅ Token decodificado:
+2025-04-11T19:25:08.324Z info: ✅ Usuario autenticado correctamente:
+2025-04-11T19:25:08.324Z info: Solicitud de menú para el usuario ID: 12
+2025-04-11T19:25:23.481Z info: 🛡️ authMiddleware ejecutado
+2025-04-11T19:25:23.481Z info: 🔐 Token recibido:
+2025-04-11T19:25:23.482Z info: ✅ Token decodificado:
+2025-04-11T19:25:23.775Z info: ✅ Usuario autenticado correctamente:
+2025-04-11T19:35:08.101Z info: 🛡️ authMiddleware ejecutado
+2025-04-11T19:35:08.101Z info: 🔐 Token recibido:
+2025-04-11T19:35:08.102Z info: ✅ Token decodificado:
+2025-04-11T19:35:09.370Z info: ✅ Usuario autenticado correctamente:
+2025-04-11T19:35:09.370Z info: Solicitud de menú para el usuario ID: 12
+2025-04-11T19:35:09.662Z info: 🛡️ authMiddleware ejecutado
+2025-04-11T19:35:09.663Z info: 🔐 Token recibido:
+2025-04-11T19:35:09.664Z info: ✅ Token decodificado:
+2025-04-11T19:35:09.952Z info: ✅ Usuario autenticado correctamente:
+2025-04-11T19:35:09.952Z info: Solicitud de menú para el usuario ID: 12
+2025-04-11T19:35:13.496Z info: 🛡️ authMiddleware ejecutado
+2025-04-11T19:35:13.496Z info: 🔐 Token recibido:
+2025-04-11T19:35:13.497Z info: ✅ Token decodificado:
+2025-04-11T19:35:13.785Z info: ✅ Usuario autenticado correctamente:
+2025-04-11T19:53:00.441Z info: ✅ Server running on port 4000
+2025-04-11T19:53:18.390Z info: Iniciando la obtención de imágenes...
+2025-04-11T19:53:21.097Z info: Iniciando la obtención de imágenes...
+2025-04-11T19:53:21.529Z info: 🛡️ authMiddleware ejecutado
+2025-04-11T19:53:21.529Z info: 🔐 Token recibido:
+2025-04-11T19:53:21.532Z info: ✅ Token decodificado:
+2025-04-11T19:53:21.793Z info: 🛡️ authMiddleware ejecutado
+2025-04-11T19:53:21.793Z info: 🔐 Token recibido:
+2025-04-11T19:53:21.795Z info: ✅ Token decodificado:
+2025-04-11T19:53:22.053Z info: ✅ Usuario autenticado correctamente:
+2025-04-11T19:53:22.053Z info: Solicitud de menú para el usuario ID: 12
+2025-04-11T19:53:22.337Z info: ✅ Usuario autenticado correctamente:
+2025-04-11T19:53:22.509Z info: 🛡️ authMiddleware ejecutado
+2025-04-11T19:53:22.510Z info: 🔐 Token recibido:
+2025-04-11T19:53:22.512Z info: ✅ Token decodificado:
+2025-04-11T19:53:22.798Z info: ✅ Usuario autenticado correctamente:
+2025-04-11T19:53:22.798Z info: Solicitud de menú para el usuario ID: 12
+2025-04-11T19:53:22.826Z info: 🛡️ authMiddleware ejecutado
+2025-04-11T19:53:22.827Z info: 🔐 Token recibido:
+2025-04-11T19:53:22.828Z info: ✅ Token decodificado:
+2025-04-11T19:53:23.113Z info: ✅ Usuario autenticado correctamente:
+2025-04-11T19:53:29.807Z info: 🛡️ authMiddleware ejecutado
+2025-04-11T19:53:29.807Z info: 🔐 Token recibido:
+2025-04-11T19:53:29.809Z info: ✅ Token decodificado:
+2025-04-11T19:53:30.094Z info: ✅ Usuario autenticado correctamente:
+2025-04-11T19:56:45.257Z info: ✅ Server running on port 4000
+2025-04-11T20:35:13.280Z info: 🛡️ authMiddleware ejecutado
+2025-04-11T20:35:13.281Z info: 🔐 Token recibido:
+2025-04-11T20:35:13.285Z info: ✅ Token decodificado:
+2025-04-11T20:35:13.289Z info: 🛡️ authMiddleware ejecutado
+2025-04-11T20:35:13.289Z info: 🔐 Token recibido:
+2025-04-11T20:35:13.291Z info: ✅ Token decodificado:
+2025-04-11T20:35:13.580Z info: ✅ Usuario autenticado correctamente:
+2025-04-11T20:35:13.867Z info: ✅ Usuario autenticado correctamente:
+2025-04-11T20:35:13.868Z info: Solicitud de menú para el usuario ID: 12
+2025-04-11T20:35:14.365Z info: 🛡️ authMiddleware ejecutado
+2025-04-11T20:35:14.367Z info: 🔐 Token recibido:
+2025-04-11T20:35:14.369Z info: ✅ Token decodificado:
+2025-04-11T20:35:14.508Z info: 🛡️ authMiddleware ejecutado
+2025-04-11T20:35:14.508Z info: 🔐 Token recibido:
+2025-04-11T20:35:14.510Z info: ✅ Token decodificado:
+2025-04-11T20:35:14.657Z info: ✅ Usuario autenticado correctamente:
+2025-04-11T20:35:14.798Z info: ✅ Usuario autenticado correctamente:
+2025-04-11T20:35:14.798Z info: Solicitud de menú para el usuario ID: 12
+2025-04-11T20:35:16.580Z info: Iniciando la obtención de imágenes...
+2025-04-11T20:35:18.194Z info: 🛡️ authMiddleware ejecutado
+2025-04-11T20:35:18.195Z info: 🔐 Token recibido:
+2025-04-11T20:35:18.196Z info: ✅ Token decodificado:
+2025-04-11T20:35:18.198Z info: 🛡️ authMiddleware ejecutado
+2025-04-11T20:35:18.198Z info: 🔐 Token recibido:
+2025-04-11T20:35:18.199Z info: ✅ Token decodificado:
+2025-04-11T20:35:18.202Z info: Iniciando la obtención de imágenes...
+2025-04-11T20:35:18.490Z info: ✅ Usuario autenticado correctamente:
+2025-04-11T20:35:18.491Z info: Solicitud de menú para el usuario ID: 12
+2025-04-11T20:35:18.493Z info: ✅ Usuario autenticado correctamente:
+2025-04-11T20:35:18.814Z info: 🛡️ authMiddleware ejecutado
+2025-04-11T20:35:18.814Z info: 🔐 Token recibido:
+2025-04-11T20:35:18.816Z info: ✅ Token decodificado:
+2025-04-11T20:35:19.098Z info: 🛡️ authMiddleware ejecutado
+2025-04-11T20:35:19.098Z info: 🔐 Token recibido:
+2025-04-11T20:35:19.099Z info: ✅ Token decodificado:
+2025-04-11T20:35:19.378Z info: ✅ Usuario autenticado correctamente:
+2025-04-11T20:35:19.378Z info: Solicitud de menú para el usuario ID: 12
+2025-04-11T20:35:19.460Z info: ✅ Usuario autenticado correctamente:
+2025-04-11T20:35:31.683Z info: 🛡️ authMiddleware ejecutado
+2025-04-11T20:35:31.683Z info: 🔐 Token recibido:
+2025-04-11T20:35:31.685Z info: ✅ Token decodificado:
+2025-04-11T20:35:31.973Z info: ✅ Usuario autenticado correctamente:
+2025-04-11T20:40:56.464Z info: 🛡️ authMiddleware ejecutado
+2025-04-11T20:40:56.465Z info: 🔐 Token recibido:
+2025-04-11T20:40:56.469Z info: ✅ Token decodificado:
+2025-04-11T20:40:57.794Z info: ✅ Usuario autenticado correctamente:
+2025-04-11T20:47:25.144Z info: 🛡️ authMiddleware ejecutado
+2025-04-11T20:47:25.145Z info: 🔐 Token recibido:
+2025-04-11T20:47:25.146Z info: ✅ Token decodificado:
+2025-04-11T20:47:26.473Z info: ✅ Usuario autenticado correctamente:
+2025-04-11T20:47:26.473Z info: Solicitud de menú para el usuario ID: 12
+2025-04-11T20:47:26.771Z info: 🛡️ authMiddleware ejecutado
+2025-04-11T20:47:26.771Z info: 🔐 Token recibido:
+2025-04-11T20:47:26.772Z info: ✅ Token decodificado:
+2025-04-11T20:47:27.063Z info: ✅ Usuario autenticado correctamente:
+2025-04-11T20:47:27.064Z info: Solicitud de menú para el usuario ID: 12
+2025-04-11T20:47:29.170Z info: Iniciando la obtención de imágenes...
+2025-04-11T20:47:30.602Z info: Iniciando la obtención de imágenes...
+2025-04-11T20:47:30.987Z info: 🛡️ authMiddleware ejecutado
+2025-04-11T20:47:30.987Z info: 🔐 Token recibido:
+2025-04-11T20:47:30.988Z info: ✅ Token decodificado:
+2025-04-11T20:47:30.989Z info: 🛡️ authMiddleware ejecutado
+2025-04-11T20:47:30.989Z info: 🔐 Token recibido:
+2025-04-11T20:47:30.990Z info: ✅ Token decodificado:
+2025-04-11T20:47:31.661Z info: ✅ Usuario autenticado correctamente:
+2025-04-11T20:47:31.662Z info: Solicitud de menú para el usuario ID: 12
+2025-04-11T20:47:31.947Z info: ✅ Usuario autenticado correctamente:
+2025-04-11T20:47:32.229Z info: 🛡️ authMiddleware ejecutado
+2025-04-11T20:47:32.230Z info: 🔐 Token recibido:
+2025-04-11T20:47:32.231Z info: ✅ Token decodificado:
+2025-04-11T20:47:32.425Z info: 🛡️ authMiddleware ejecutado
+2025-04-11T20:47:32.425Z info: 🔐 Token recibido:
+2025-04-11T20:47:32.427Z info: ✅ Token decodificado:
+2025-04-11T20:47:32.519Z info: ✅ Usuario autenticado correctamente:
+2025-04-11T20:47:32.519Z info: Solicitud de menú para el usuario ID: 12
+2025-04-11T20:47:32.713Z info: ✅ Usuario autenticado correctamente:
+2025-04-11T20:47:41.931Z info: 🛡️ authMiddleware ejecutado
+2025-04-11T20:47:41.933Z info: 🔐 Token recibido:
+2025-04-11T20:47:41.934Z info: ✅ Token decodificado:
+2025-04-11T20:47:42.223Z info: ✅ Usuario autenticado correctamente:
+2025-04-11T20:49:30.444Z info: 🛡️ authMiddleware ejecutado
+2025-04-11T20:49:30.444Z info: 🔐 Token recibido:
+2025-04-11T20:49:30.445Z info: ✅ Token decodificado:
+2025-04-11T20:49:31.846Z info: ✅ Usuario autenticado correctamente:
+2025-04-11T20:52:03.325Z info: ✅ Server running on port 4000
+2025-04-11T20:52:13.931Z info: 🛡️ authMiddleware ejecutado
+2025-04-11T20:52:13.932Z info: 🔐 Token recibido:
+2025-04-11T20:52:13.932Z info: ✅ Token decodificado:
+2025-04-11T20:52:15.307Z info: ✅ Usuario autenticado correctamente:
+2025-04-11T20:52:15.308Z info: Solicitud de menú para el usuario ID: 12
+2025-04-11T20:52:15.599Z info: 🛡️ authMiddleware ejecutado
+2025-04-11T20:52:15.600Z info: 🔐 Token recibido:
+2025-04-11T20:52:15.601Z info: ✅ Token decodificado:
+2025-04-11T20:52:15.886Z info: ✅ Usuario autenticado correctamente:
+2025-04-11T20:52:15.887Z info: Solicitud de menú para el usuario ID: 12
+2025-04-11T20:52:19.743Z info: 🛡️ authMiddleware ejecutado
+2025-04-11T20:52:19.743Z info: 🔐 Token recibido:
+2025-04-11T20:52:19.744Z info: ✅ Token decodificado:
+2025-04-11T20:52:20.028Z info: ✅ Usuario autenticado correctamente:
+2025-04-11T20:52:36.777Z info: 🛡️ authMiddleware ejecutado
+2025-04-11T20:52:36.778Z info: 🔐 Token recibido:
+2025-04-11T20:52:36.779Z info: ✅ Token decodificado:
+2025-04-11T20:52:37.064Z info: ✅ Usuario autenticado correctamente:
+2025-04-11T20:53:17.584Z info: ✅ Server running on port 4000
+2025-04-11T20:53:23.453Z info: 🛡️ authMiddleware ejecutado
+2025-04-11T20:53:23.453Z info: 🔐 Token recibido:
+2025-04-11T20:53:23.455Z info: ✅ Token decodificado:
+2025-04-11T20:53:24.673Z info: ✅ Usuario autenticado correctamente:
+2025-04-11T20:53:37.774Z info: 🛡️ authMiddleware ejecutado
+2025-04-11T20:53:37.774Z info: 🔐 Token recibido:
+2025-04-11T20:53:37.775Z info: ✅ Token decodificado:
+2025-04-11T20:53:38.064Z info: ✅ Usuario autenticado correctamente:
+2025-04-11T20:53:47.065Z info: 🛡️ authMiddleware ejecutado
+2025-04-11T20:53:47.066Z info: 🔐 Token recibido:
+2025-04-11T20:53:47.067Z info: ✅ Token decodificado:
+2025-04-11T20:53:47.354Z info: ✅ Usuario autenticado correctamente:
+2025-04-11T20:56:03.021Z info: ✅ Server running on port 4000
+2025-04-11T20:56:07.155Z info: 🛡️ authMiddleware ejecutado
+2025-04-11T20:56:07.155Z info: 🔐 Token recibido:
+2025-04-11T20:56:07.158Z info: ✅ Token decodificado:
+2025-04-11T20:56:08.361Z info: ✅ Usuario autenticado correctamente:
+2025-04-11T20:56:11.387Z info: 🛡️ authMiddleware ejecutado
+2025-04-11T20:56:11.387Z info: 🔐 Token recibido:
+2025-04-11T20:56:11.388Z info: ✅ Token decodificado:
+2025-04-11T20:56:11.676Z info: ✅ Usuario autenticado correctamente:
+2025-04-11T20:56:27.033Z info: ✅ Server running on port 4000
+2025-04-11T20:56:30.311Z info: 🛡️ authMiddleware ejecutado
+2025-04-11T20:56:30.312Z info: 🔐 Token recibido:
+2025-04-11T20:56:30.314Z info: ✅ Token decodificado:
+2025-04-11T20:56:31.504Z info: ✅ Usuario autenticado correctamente:
+2025-04-11T20:56:45.180Z info: ✅ Server running on port 4000
+2025-04-11T20:57:17.324Z info: 🛡️ authMiddleware ejecutado
+2025-04-11T20:57:17.325Z info: 🔐 Token recibido:
+2025-04-11T20:57:17.327Z info: ✅ Token decodificado:
+2025-04-11T20:57:18.596Z info: ✅ Usuario autenticado correctamente:
+2025-04-11T21:05:08.015Z info: ✅ Server running on port 4000
+2025-04-11T21:05:16.082Z info: 🛡️ authMiddleware ejecutado
+2025-04-11T21:05:16.083Z info: 🔐 Token recibido:
+2025-04-11T21:05:16.084Z info: ✅ Token decodificado:
+2025-04-11T21:05:16.096Z info: 🛡️ authMiddleware ejecutado
+2025-04-11T21:05:16.097Z info: 🔐 Token recibido:
+2025-04-11T21:05:16.098Z info: ✅ Token decodificado:
+2025-04-11T21:05:17.316Z info: ✅ Usuario autenticado correctamente:
+2025-04-11T21:05:17.318Z info: ✅ Usuario autenticado correctamente:
+2025-04-11T21:05:17.318Z info: Solicitud de menú para el usuario ID: 12
+2025-04-11T21:05:17.612Z info: 🛡️ authMiddleware ejecutado
+2025-04-11T21:05:17.612Z info: 🔐 Token recibido:
+2025-04-11T21:05:17.613Z info: ✅ Token decodificado:
+2025-04-11T21:05:17.800Z info: 🛡️ authMiddleware ejecutado
+2025-04-11T21:05:17.801Z info: 🔐 Token recibido:
+2025-04-11T21:05:17.801Z info: ✅ Token decodificado:
+2025-04-11T21:05:17.899Z info: ✅ Usuario autenticado correctamente:
+2025-04-11T21:05:17.900Z info: Solicitud de menú para el usuario ID: 12
+2025-04-11T21:05:18.109Z info: ✅ Usuario autenticado correctamente:
+2025-04-11T21:05:46.217Z info: 🛡️ authMiddleware ejecutado
+2025-04-11T21:05:46.226Z info: 🔐 Token recibido:
+2025-04-11T21:05:46.227Z info: ✅ Token decodificado:
+2025-04-11T21:05:46.521Z info: ✅ Usuario autenticado correctamente:
+2025-04-11T21:05:49.483Z info: 🛡️ authMiddleware ejecutado
+2025-04-11T21:05:49.488Z info: 🔐 Token recibido:
+2025-04-11T21:05:49.494Z info: ✅ Token decodificado:
+2025-04-11T21:05:49.791Z info: ✅ Usuario autenticado correctamente:
+2025-04-11T21:06:36.291Z info: 🛡️ authMiddleware ejecutado
+2025-04-11T21:06:36.298Z info: 🔐 Token recibido:
+2025-04-11T21:06:36.299Z info: ✅ Token decodificado:
+2025-04-11T21:06:37.575Z info: ✅ Usuario autenticado correctamente:
+2025-04-11T21:11:17.601Z info: ✅ Server running on port 4000
+2025-04-11T21:11:23.577Z info: 🛡️ authMiddleware ejecutado
+2025-04-11T21:11:23.578Z info: 🔐 Token recibido:
+2025-04-11T21:11:23.580Z info: ✅ Token decodificado:
+2025-04-11T21:11:24.796Z info: ✅ Usuario autenticado correctamente:
+2025-04-11T21:11:28.865Z info: 🛡️ authMiddleware ejecutado
+2025-04-11T21:11:28.869Z info: 🔐 Token recibido:
+2025-04-11T21:11:28.871Z info: ✅ Token decodificado:
+2025-04-11T21:11:29.161Z info: ✅ Usuario autenticado correctamente:
+2025-04-11T21:16:23.060Z info: ✅ Server running on port 4000
+2025-04-11T21:16:27.094Z info: 🛡️ authMiddleware ejecutado
+2025-04-11T21:16:27.094Z info: 🔐 Token recibido:
+2025-04-11T21:16:27.095Z info: ✅ Token decodificado:
+2025-04-11T21:16:28.349Z info: ✅ Usuario autenticado correctamente:
+2025-04-11T21:16:28.349Z info: Solicitud de menú para el usuario ID: 12
+2025-04-11T21:16:28.658Z info: 🛡️ authMiddleware ejecutado
+2025-04-11T21:16:28.660Z info: 🔐 Token recibido:
+2025-04-11T21:16:28.661Z info: ✅ Token decodificado:
+2025-04-11T21:16:28.969Z info: ✅ Usuario autenticado correctamente:
+2025-04-11T21:16:28.975Z info: Solicitud de menú para el usuario ID: 12
+2025-04-11T21:16:32.671Z info: 🛡️ authMiddleware ejecutado
+2025-04-11T21:16:32.672Z info: 🔐 Token recibido:
+2025-04-11T21:16:32.673Z info: ✅ Token decodificado:
+2025-04-11T21:16:32.975Z info: ✅ Usuario autenticado correctamente:
+2025-04-11T21:16:36.449Z info: 🛡️ authMiddleware ejecutado
+2025-04-11T21:16:36.449Z info: 🔐 Token recibido:
+2025-04-11T21:16:36.450Z info: ✅ Token decodificado:
+2025-04-11T21:16:36.760Z info: ✅ Usuario autenticado correctamente:
+2025-04-11T21:16:41.597Z info: 🛡️ authMiddleware ejecutado
+2025-04-11T21:16:41.598Z info: 🔐 Token recibido:
+2025-04-11T21:16:41.599Z info: ✅ Token decodificado:
+2025-04-11T21:16:41.902Z info: ✅ Usuario autenticado correctamente:
+2025-04-11T21:22:48.559Z info: ✅ Server running on port 4000
+2025-04-11T21:22:52.462Z info: 🛡️ authMiddleware ejecutado
+2025-04-11T21:22:52.463Z info: 🔐 Token recibido:
+2025-04-11T21:22:52.464Z info: ✅ Token decodificado:
+2025-04-11T21:22:53.699Z info: ✅ Usuario autenticado correctamente:
+2025-04-11T21:22:53.700Z info: Solicitud de menú para el usuario ID: 12
+2025-04-11T21:22:53.994Z info: 🛡️ authMiddleware ejecutado
+2025-04-11T21:22:53.995Z info: 🔐 Token recibido:
+2025-04-11T21:22:53.996Z info: ✅ Token decodificado:
+2025-04-11T21:22:54.284Z info: ✅ Usuario autenticado correctamente:
+2025-04-11T21:22:54.285Z info: Solicitud de menú para el usuario ID: 12
+2025-04-11T21:22:56.713Z info: 🛡️ authMiddleware ejecutado
+2025-04-11T21:22:56.713Z info: 🔐 Token recibido:
+2025-04-11T21:22:56.714Z info: ✅ Token decodificado:
+2025-04-11T21:22:57.002Z info: ✅ Usuario autenticado correctamente:
+2025-04-11T21:23:05.148Z info: 🛡️ authMiddleware ejecutado
+2025-04-11T21:23:05.149Z info: 🔐 Token recibido:
+2025-04-11T21:23:05.151Z info: ✅ Token decodificado:
+2025-04-11T21:23:05.440Z info: ✅ Usuario autenticado correctamente:
+2025-04-11T21:26:25.627Z info: 🛡️ authMiddleware ejecutado
+2025-04-11T21:26:25.628Z info: 🔐 Token recibido:
+2025-04-11T21:26:25.629Z info: ✅ Token decodificado:
+2025-04-11T21:26:25.644Z info: 🛡️ authMiddleware ejecutado
+2025-04-11T21:26:25.645Z info: 🔐 Token recibido:
+2025-04-11T21:26:25.646Z info: ✅ Token decodificado:
+2025-04-11T21:26:28.096Z info: ✅ Server running on port 4000
+2025-04-11T21:26:28.130Z info: 🛡️ authMiddleware ejecutado
+2025-04-11T21:26:28.130Z info: 🔐 Token recibido:
+2025-04-11T21:26:28.133Z info: ✅ Token decodificado:
+2025-04-11T21:26:28.136Z info: 🛡️ authMiddleware ejecutado
+2025-04-11T21:26:28.136Z info: 🔐 Token recibido:
+2025-04-11T21:26:28.138Z info: ✅ Token decodificado:
+2025-04-11T21:26:29.898Z info: Iniciando la obtención de imágenes...
+2025-04-11T21:26:30.236Z info: ✅ Usuario autenticado correctamente:
+2025-04-11T21:26:30.240Z info: ✅ Usuario autenticado correctamente:
+2025-04-11T21:26:30.241Z info: Solicitud de menú para el usuario ID: 12
+2025-04-11T21:26:30.725Z info: 🛡️ authMiddleware ejecutado
+2025-04-11T21:26:30.741Z info: 🔐 Token recibido:
+2025-04-11T21:26:30.742Z info: ✅ Token decodificado:
+2025-04-11T21:26:31.019Z info: 🛡️ authMiddleware ejecutado
+2025-04-11T21:26:31.019Z info: 🔐 Token recibido:
+2025-04-11T21:26:31.021Z info: ✅ Token decodificado:
+2025-04-11T21:26:31.082Z info: ✅ Usuario autenticado correctamente:
+2025-04-11T21:26:31.307Z info: ✅ Usuario autenticado correctamente:
+2025-04-11T21:26:31.308Z info: Solicitud de menú para el usuario ID: 12
+2025-04-11T21:26:31.649Z info: Iniciando la obtención de imágenes...
+2025-04-11T21:26:33.036Z info: 🛡️ authMiddleware ejecutado
+2025-04-11T21:26:33.041Z info: 🔐 Token recibido:
+2025-04-11T21:26:33.042Z info: ✅ Token decodificado:
+2025-04-11T21:26:33.050Z info: 🛡️ authMiddleware ejecutado
+2025-04-11T21:26:33.051Z info: 🔐 Token recibido:
+2025-04-11T21:26:33.052Z info: ✅ Token decodificado:
+2025-04-11T21:26:33.335Z info: ✅ Usuario autenticado correctamente:
+2025-04-11T21:26:33.335Z info: Solicitud de menú para el usuario ID: 12
+2025-04-11T21:26:33.348Z info: ✅ Usuario autenticado correctamente:
+2025-04-11T21:26:33.630Z info: 🛡️ authMiddleware ejecutado
+2025-04-11T21:26:33.630Z info: 🔐 Token recibido:
+2025-04-11T21:26:33.631Z info: ✅ Token decodificado:
+2025-04-11T21:26:33.646Z info: 🛡️ authMiddleware ejecutado
+2025-04-11T21:26:33.647Z info: 🔐 Token recibido:
+2025-04-11T21:26:33.648Z info: ✅ Token decodificado:
+2025-04-11T21:26:33.921Z info: ✅ Usuario autenticado correctamente:
+2025-04-11T21:26:33.922Z info: Solicitud de menú para el usuario ID: 12
+2025-04-11T21:26:33.934Z info: ✅ Usuario autenticado correctamente:
+2025-04-11T21:26:34.589Z info: 🛡️ authMiddleware ejecutado
+2025-04-11T21:26:34.589Z info: 🔐 Token recibido:
+2025-04-11T21:26:34.591Z info: ✅ Token decodificado:
+2025-04-11T21:26:34.878Z info: ✅ Usuario autenticado correctamente:
+2025-04-11T21:26:34.878Z info: Solicitud de menú para el usuario ID: 12
+2025-04-11T21:26:35.169Z info: 🛡️ authMiddleware ejecutado
+2025-04-11T21:26:35.170Z info: 🔐 Token recibido:
+2025-04-11T21:26:35.171Z info: ✅ Token decodificado:
+2025-04-11T21:26:35.458Z info: ✅ Usuario autenticado correctamente:
+2025-04-11T21:26:35.459Z info: Solicitud de menú para el usuario ID: 12
+2025-04-11T21:26:40.817Z info: 🛡️ authMiddleware ejecutado
+2025-04-11T21:26:40.818Z info: 🔐 Token recibido:
+2025-04-11T21:26:40.820Z info: ✅ Token decodificado:
+2025-04-11T21:26:41.108Z info: ✅ Usuario autenticado correctamente:
+2025-04-11T21:26:44.268Z info: 🛡️ authMiddleware ejecutado
+2025-04-11T21:26:44.268Z info: 🔐 Token recibido:
+2025-04-11T21:26:44.270Z info: ✅ Token decodificado:
+2025-04-11T21:26:44.558Z info: ✅ Usuario autenticado correctamente:
+2025-04-11T21:29:02.893Z info: ✅ Server running on port 4000
+2025-04-11T21:29:13.738Z info: 🛡️ authMiddleware ejecutado
+2025-04-11T21:29:13.738Z info: 🔐 Token recibido:
+2025-04-11T21:29:13.740Z info: ✅ Token decodificado:
+2025-04-11T21:29:14.196Z info: Iniciando la obtención de imágenes...
+2025-04-11T21:29:15.041Z info: ✅ Usuario autenticado correctamente:
+2025-04-11T21:29:15.049Z info: Solicitud de menú para el usuario ID: 12
+2025-04-11T21:29:15.403Z info: 🛡️ authMiddleware ejecutado
+2025-04-11T21:29:15.409Z info: 🔐 Token recibido:
+2025-04-11T21:29:15.416Z info: ✅ Token decodificado:
+2025-04-11T21:29:15.706Z info: ✅ Usuario autenticado correctamente:
+2025-04-11T21:29:15.709Z info: Solicitud de menú para el usuario ID: 12
+2025-04-11T21:29:16.467Z info: Iniciando la obtención de imágenes...
+2025-04-11T21:29:17.234Z info: 🛡️ authMiddleware ejecutado
+2025-04-11T21:29:17.235Z info: 🔐 Token recibido:
+2025-04-11T21:29:17.236Z info: ✅ Token decodificado:
+2025-04-11T21:29:17.307Z info: 🛡️ authMiddleware ejecutado
+2025-04-11T21:29:17.309Z info: 🔐 Token recibido:
+2025-04-11T21:29:17.310Z info: ✅ Token decodificado:
+2025-04-11T21:29:17.523Z info: ✅ Usuario autenticado correctamente:
+2025-04-11T21:29:17.524Z info: Solicitud de menú para el usuario ID: 12
+2025-04-11T21:29:17.597Z info: ✅ Usuario autenticado correctamente:
+2025-04-11T21:29:17.817Z info: 🛡️ authMiddleware ejecutado
+2025-04-11T21:29:17.818Z info: 🔐 Token recibido:
+2025-04-11T21:29:17.826Z info: ✅ Token decodificado:
+2025-04-11T21:29:18.082Z info: 🛡️ authMiddleware ejecutado
+2025-04-11T21:29:18.087Z info: 🔐 Token recibido:
+2025-04-11T21:29:18.089Z info: ✅ Token decodificado:
+2025-04-11T21:29:18.113Z info: ✅ Usuario autenticado correctamente:
+2025-04-11T21:29:18.114Z info: Solicitud de menú para el usuario ID: 12
+2025-04-11T21:29:18.381Z info: ✅ Usuario autenticado correctamente:
+2025-04-11T21:29:19.057Z info: 🛡️ authMiddleware ejecutado
+2025-04-11T21:29:19.058Z info: 🔐 Token recibido:
+2025-04-11T21:29:19.060Z info: ✅ Token decodificado:
+2025-04-11T21:29:19.352Z info: ✅ Usuario autenticado correctamente:
+2025-04-11T21:29:19.353Z info: Solicitud de menú para el usuario ID: 12
+2025-04-11T21:29:19.647Z info: 🛡️ authMiddleware ejecutado
+2025-04-11T21:29:19.647Z info: 🔐 Token recibido:
+2025-04-11T21:29:19.649Z info: ✅ Token decodificado:
+2025-04-11T21:29:19.935Z info: ✅ Usuario autenticado correctamente:
+2025-04-11T21:29:19.937Z info: Solicitud de menú para el usuario ID: 12
+2025-04-11T21:29:24.891Z info: 🛡️ authMiddleware ejecutado
+2025-04-11T21:29:24.892Z info: 🔐 Token recibido:
+2025-04-11T21:29:24.893Z info: ✅ Token decodificado:
+2025-04-11T21:29:25.181Z info: ✅ Usuario autenticado correctamente:
+2025-04-11T21:29:33.387Z info: 🛡️ authMiddleware ejecutado
+2025-04-11T21:29:33.388Z info: 🔐 Token recibido:
+2025-04-11T21:29:33.389Z info: ✅ Token decodificado:
+2025-04-11T21:29:33.677Z info: ✅ Usuario autenticado correctamente:
+2025-04-11T21:29:33.677Z info: Solicitud de menú para el usuario ID: 12
+2025-04-11T21:29:33.970Z info: 🛡️ authMiddleware ejecutado
+2025-04-11T21:29:33.973Z info: 🔐 Token recibido:
+2025-04-11T21:29:33.974Z info: ✅ Token decodificado:
+2025-04-11T21:29:34.261Z info: ✅ Usuario autenticado correctamente:
+2025-04-11T21:29:34.262Z info: Solicitud de menú para el usuario ID: 12
+2025-04-11T21:29:34.363Z info: Iniciando la obtención de imágenes...
+2025-04-11T21:29:35.757Z info: Iniciando la obtención de imágenes...
+2025-04-11T21:30:30.429Z info: 🛡️ authMiddleware ejecutado
+2025-04-11T21:30:30.429Z info: 🔐 Token recibido:
+2025-04-11T21:30:30.431Z info: ✅ Token decodificado:
+2025-04-11T21:30:30.432Z info: 🛡️ authMiddleware ejecutado
+2025-04-11T21:30:30.432Z info: 🔐 Token recibido:
+2025-04-11T21:30:30.433Z info: ✅ Token decodificado:
+2025-04-11T21:30:30.718Z info: ✅ Usuario autenticado correctamente:
+2025-04-11T21:30:30.722Z info: Solicitud de menú para el usuario ID: 12
+2025-04-11T21:30:31.006Z info: ✅ Usuario autenticado correctamente:
+2025-04-11T21:30:31.300Z info: 🛡️ authMiddleware ejecutado
+2025-04-11T21:30:31.305Z info: 🔐 Token recibido:
+2025-04-11T21:30:31.306Z info: ✅ Token decodificado:
+2025-04-11T21:30:31.618Z info: ✅ Usuario autenticado correctamente:
+2025-04-11T21:30:31.618Z info: Solicitud de menú para el usuario ID: 12
+2025-04-11T21:30:31.774Z info: 🛡️ authMiddleware ejecutado
+2025-04-11T21:30:31.774Z info: 🔐 Token recibido:
+2025-04-11T21:30:31.776Z info: ✅ Token decodificado:
+2025-04-11T21:30:32.064Z info: ✅ Usuario autenticado correctamente:
+2025-04-11T21:30:32.254Z info: 🛡️ authMiddleware ejecutado
+2025-04-11T21:30:32.255Z info: 🔐 Token recibido:
+2025-04-11T21:30:32.259Z info: ✅ Token decodificado:
+2025-04-11T21:30:32.544Z info: ✅ Usuario autenticado correctamente:
+2025-04-11T21:30:32.545Z info: Solicitud de menú para el usuario ID: 12
+2025-04-11T21:30:32.848Z info: 🛡️ authMiddleware ejecutado
+2025-04-11T21:30:32.849Z info: 🔐 Token recibido:
+2025-04-11T21:30:32.850Z info: ✅ Token decodificado:
+2025-04-11T21:30:33.140Z info: ✅ Usuario autenticado correctamente:
+2025-04-11T21:30:33.141Z info: Solicitud de menú para el usuario ID: 12
+2025-04-11T21:31:29.409Z info: 🛡️ authMiddleware ejecutado
+2025-04-11T21:31:29.409Z info: 🔐 Token recibido:
+2025-04-11T21:31:29.411Z info: ✅ Token decodificado:
+2025-04-11T21:31:30.591Z info: ✅ Usuario autenticado correctamente:
+2025-04-11T21:35:24.787Z info: Iniciando la obtención de imágenes...
+2025-04-11T21:35:27.238Z info: Iniciando la obtención de imágenes...
+2025-04-11T21:35:28.610Z info: 🛡️ authMiddleware ejecutado
+2025-04-11T21:35:28.611Z info: 🔐 Token recibido:
+2025-04-11T21:35:28.612Z info: ✅ Token decodificado:
+2025-04-11T21:35:28.613Z info: 🛡️ authMiddleware ejecutado
+2025-04-11T21:35:28.613Z info: 🔐 Token recibido:
+2025-04-11T21:35:28.614Z info: ✅ Token decodificado:
+2025-04-11T21:35:28.898Z info: ✅ Usuario autenticado correctamente:
+2025-04-11T21:35:29.004Z info: ✅ Usuario autenticado correctamente:
+2025-04-11T21:35:29.004Z info: Solicitud de menú para el usuario ID: 12
+2025-04-11T21:35:29.297Z info: 🛡️ authMiddleware ejecutado
+2025-04-11T21:35:29.298Z info: 🔐 Token recibido:
+2025-04-11T21:35:29.299Z info: ✅ Token decodificado:
+2025-04-11T21:35:29.383Z info: 🛡️ authMiddleware ejecutado
+2025-04-11T21:35:29.384Z info: 🔐 Token recibido:
+2025-04-11T21:35:29.385Z info: ✅ Token decodificado:
+2025-04-11T21:35:29.585Z info: ✅ Usuario autenticado correctamente:
+2025-04-11T21:35:29.586Z info: Solicitud de menú para el usuario ID: 12
+2025-04-11T21:35:29.671Z info: ✅ Usuario autenticado correctamente:
+2025-04-11T21:35:29.879Z info: 🛡️ authMiddleware ejecutado
+2025-04-11T21:35:29.881Z info: 🔐 Token recibido:
+2025-04-11T21:35:29.882Z info: ✅ Token decodificado:
+2025-04-11T21:35:30.169Z info: ✅ Usuario autenticado correctamente:
+2025-04-11T21:35:30.173Z info: Solicitud de menú para el usuario ID: 12
+2025-04-11T21:35:30.468Z info: 🛡️ authMiddleware ejecutado
+2025-04-11T21:35:30.469Z info: 🔐 Token recibido:
+2025-04-11T21:35:30.470Z info: ✅ Token decodificado:
+2025-04-11T21:35:30.759Z info: ✅ Usuario autenticado correctamente:
+2025-04-11T21:35:30.759Z info: Solicitud de menú para el usuario ID: 12
+2025-04-11T21:35:31.371Z info: Iniciando la obtención de imágenes...
+2025-04-11T21:35:32.760Z info: Iniciando la obtención de imágenes...
+2025-04-11T21:35:37.242Z info: 🛡️ authMiddleware ejecutado
+2025-04-11T21:35:37.242Z info: 🔐 Token recibido:
+2025-04-11T21:35:37.243Z info: ✅ Token decodificado:
+2025-04-11T21:35:37.245Z info: 🛡️ authMiddleware ejecutado
+2025-04-11T21:35:37.245Z info: 🔐 Token recibido:
+2025-04-11T21:35:37.247Z info: ✅ Token decodificado:
+2025-04-11T21:35:37.531Z info: ✅ Usuario autenticado correctamente:
+2025-04-11T21:35:37.534Z info: ✅ Usuario autenticado correctamente:
+2025-04-11T21:35:37.534Z info: Solicitud de menú para el usuario ID: 5
+2025-04-11T21:35:37.835Z info: 🛡️ authMiddleware ejecutado
+2025-04-11T21:35:37.836Z info: 🔐 Token recibido:
+2025-04-11T21:35:37.837Z info: ✅ Token decodificado:
+2025-04-11T21:35:38.014Z info: 🛡️ authMiddleware ejecutado
+2025-04-11T21:35:38.015Z info: 🔐 Token recibido:
+2025-04-11T21:35:38.016Z info: ✅ Token decodificado:
+2025-04-11T21:35:38.124Z info: ✅ Usuario autenticado correctamente:
+2025-04-11T21:35:38.130Z info: Solicitud de menú para el usuario ID: 5
+2025-04-11T21:35:38.302Z info: ✅ Usuario autenticado correctamente:
+2025-04-11T21:35:38.740Z info: 🛡️ authMiddleware ejecutado
+2025-04-11T21:35:38.740Z info: 🔐 Token recibido:
+2025-04-11T21:35:38.741Z info: ✅ Token decodificado:
+2025-04-11T21:35:39.029Z info: ✅ Usuario autenticado correctamente:
+2025-04-11T21:35:39.030Z info: Solicitud de menú para el usuario ID: 5
+2025-04-11T21:35:39.322Z info: 🛡️ authMiddleware ejecutado
+2025-04-11T21:35:39.323Z info: 🔐 Token recibido:
+2025-04-11T21:35:39.324Z info: ✅ Token decodificado:
+2025-04-11T21:35:39.611Z info: ✅ Usuario autenticado correctamente:
+2025-04-11T21:35:39.612Z info: Solicitud de menú para el usuario ID: 5
+2025-04-11T21:35:52.795Z info: 🛡️ authMiddleware ejecutado
+2025-04-11T21:35:52.795Z info: 🔐 Token recibido:
+2025-04-11T21:35:52.796Z info: ✅ Token decodificado:
+2025-04-11T21:35:53.085Z info: ✅ Usuario autenticado correctamente:
+2025-04-11T21:35:58.359Z info: 🛡️ authMiddleware ejecutado
+2025-04-11T21:35:58.359Z info: 🔐 Token recibido:
+2025-04-11T21:35:58.360Z info: ✅ Token decodificado:
+2025-04-11T21:35:58.647Z info: ✅ Usuario autenticado correctamente:
+2025-04-11T21:35:58.648Z info: Solicitud de menú para el usuario ID: 5
+2025-04-11T21:35:58.939Z info: 🛡️ authMiddleware ejecutado
+2025-04-11T21:35:58.940Z info: 🔐 Token recibido:
+2025-04-11T21:35:58.941Z info: ✅ Token decodificado:
+2025-04-11T21:35:59.228Z info: ✅ Usuario autenticado correctamente:
+2025-04-11T21:35:59.228Z info: Solicitud de menú para el usuario ID: 5
+2025-04-11T21:36:00.937Z info: 🛡️ authMiddleware ejecutado
+2025-04-11T21:36:00.938Z info: 🔐 Token recibido:
+2025-04-11T21:36:00.939Z info: ✅ Token decodificado:
+2025-04-11T21:36:01.226Z info: ✅ Usuario autenticado correctamente:
+2025-04-11T21:36:02.606Z info: 🛡️ authMiddleware ejecutado
+2025-04-11T21:36:02.611Z info: 🔐 Token recibido:
+2025-04-11T21:36:02.613Z info: ✅ Token decodificado:
+2025-04-11T21:36:02.899Z info: ✅ Usuario autenticado correctamente:
+2025-04-11T21:36:02.900Z info: Solicitud de menú para el usuario ID: 5
+2025-04-11T21:36:03.194Z info: 🛡️ authMiddleware ejecutado
+2025-04-11T21:36:03.195Z info: 🔐 Token recibido:
+2025-04-11T21:36:03.196Z info: ✅ Token decodificado:
+2025-04-11T21:36:03.482Z info: ✅ Usuario autenticado correctamente:
+2025-04-11T21:36:03.484Z info: Solicitud de menú para el usuario ID: 5
+2025-04-11T21:36:05.258Z info: 🛡️ authMiddleware ejecutado
+2025-04-11T21:36:05.258Z info: 🔐 Token recibido:
+2025-04-11T21:36:05.260Z info: ✅ Token decodificado:
+2025-04-11T21:36:05.547Z info: ✅ Usuario autenticado correctamente:
+2025-04-11T21:36:05.547Z info: Solicitud de menú para el usuario ID: 5
+2025-04-11T21:36:05.839Z info: 🛡️ authMiddleware ejecutado
+2025-04-11T21:36:05.842Z info: 🔐 Token recibido:
+2025-04-11T21:36:05.844Z info: ✅ Token decodificado:
+2025-04-11T21:36:06.130Z info: ✅ Usuario autenticado correctamente:
+2025-04-11T21:36:06.134Z info: Solicitud de menú para el usuario ID: 5
+2025-04-11T21:36:08.290Z info: Iniciando la obtención de imágenes...
+2025-04-11T21:36:09.080Z info: Iniciando la obtención de imágenes...
+2025-04-11T21:36:12.331Z info: 🛡️ authMiddleware ejecutado
+2025-04-11T21:36:12.339Z info: 🔐 Token recibido:
+2025-04-11T21:36:12.341Z info: ✅ Token decodificado:
+2025-04-11T21:36:12.612Z info: 🛡️ authMiddleware ejecutado
+2025-04-11T21:36:12.613Z info: 🔐 Token recibido:
+2025-04-11T21:36:12.615Z info: ✅ Token decodificado:
+2025-04-11T21:36:12.628Z info: ✅ Usuario autenticado correctamente:
+2025-04-11T21:36:12.628Z info: Solicitud de menú para el usuario ID: 4
+2025-04-11T21:36:12.902Z info: ✅ Usuario autenticado correctamente:
+2025-04-11T21:36:12.920Z info: 🛡️ authMiddleware ejecutado
+2025-04-11T21:36:12.921Z info: 🔐 Token recibido:
+2025-04-11T21:36:12.923Z info: ✅ Token decodificado:
+2025-04-11T21:36:13.208Z info: 🛡️ authMiddleware ejecutado
+2025-04-11T21:36:13.214Z info: 🔐 Token recibido:
+2025-04-11T21:36:13.215Z info: ✅ Token decodificado:
+2025-04-11T21:36:13.217Z info: ✅ Usuario autenticado correctamente:
+2025-04-11T21:36:13.218Z info: Solicitud de menú para el usuario ID: 4
+2025-04-11T21:36:13.503Z info: ✅ Usuario autenticado correctamente:
+2025-04-11T21:36:14.268Z info: 🛡️ authMiddleware ejecutado
+2025-04-11T21:36:14.269Z info: 🔐 Token recibido:
+2025-04-11T21:36:14.270Z info: ✅ Token decodificado:
+2025-04-11T21:36:14.557Z info: ✅ Usuario autenticado correctamente:
+2025-04-11T21:36:14.558Z info: Solicitud de menú para el usuario ID: 4
+2025-04-11T21:36:14.856Z info: 🛡️ authMiddleware ejecutado
+2025-04-11T21:36:14.856Z info: 🔐 Token recibido:
+2025-04-11T21:36:14.857Z info: ✅ Token decodificado:
+2025-04-11T21:36:15.144Z info: ✅ Usuario autenticado correctamente:
+2025-04-11T21:36:15.151Z info: Solicitud de menú para el usuario ID: 4
+2025-04-11T21:36:17.686Z info: 🛡️ authMiddleware ejecutado
+2025-04-11T21:36:17.686Z info: 🔐 Token recibido:
+2025-04-11T21:36:17.687Z info: ✅ Token decodificado:
+2025-04-11T21:36:17.974Z info: ✅ Usuario autenticado correctamente:
+2025-04-11T21:36:17.974Z info: Solicitud de menú para el usuario ID: 4
+2025-04-11T21:36:18.269Z info: 🛡️ authMiddleware ejecutado
+2025-04-11T21:36:18.270Z info: 🔐 Token recibido:
+2025-04-11T21:36:18.271Z info: ✅ Token decodificado:
+2025-04-11T21:36:18.558Z info: ✅ Usuario autenticado correctamente:
+2025-04-11T21:36:18.558Z info: Solicitud de menú para el usuario ID: 4
+2025-04-11T21:36:40.333Z info: 🛡️ authMiddleware ejecutado
+2025-04-11T21:36:40.334Z info: 🔐 Token recibido:
+2025-04-11T21:36:40.335Z info: ✅ Token decodificado:
+2025-04-11T21:36:40.623Z info: ✅ Usuario autenticado correctamente:
+2025-04-11T21:36:51.021Z info: Correo enviado con la nueva contraseña a: zerguiter001@gmail.com
+2025-04-11T21:37:04.225Z info: 🛡️ authMiddleware ejecutado
+2025-04-11T21:37:04.229Z info: 🔐 Token recibido:
+2025-04-11T21:37:04.231Z info: ✅ Token decodificado:
+2025-04-11T21:37:04.517Z info: ✅ Usuario autenticado correctamente:
+2025-04-11T21:37:04.518Z info: Solicitud de menú para el usuario ID: 4
+2025-04-11T21:37:04.811Z info: 🛡️ authMiddleware ejecutado
+2025-04-11T21:37:04.812Z info: 🔐 Token recibido:
+2025-04-11T21:37:04.813Z info: ✅ Token decodificado:
+2025-04-11T21:37:05.100Z info: ✅ Usuario autenticado correctamente:
+2025-04-11T21:37:05.100Z info: Solicitud de menú para el usuario ID: 4
+2025-04-11T21:37:05.324Z info: Iniciando la obtención de imágenes...
+2025-04-11T21:37:06.224Z info: Iniciando la obtención de imágenes...
+2025-04-11T21:37:21.758Z info: 🛡️ authMiddleware ejecutado
+2025-04-11T21:37:21.758Z info: 🔐 Token recibido:
+2025-04-11T21:37:21.760Z info: ✅ Token decodificado:
+2025-04-11T21:37:22.047Z info: ✅ Usuario autenticado correctamente:
+2025-04-11T21:37:22.047Z info: Solicitud de menú para el usuario ID: 5
+2025-04-11T21:37:22.090Z info: 🛡️ authMiddleware ejecutado
+2025-04-11T21:37:22.090Z info: 🔐 Token recibido:
+2025-04-11T21:37:22.091Z info: ✅ Token decodificado:
+2025-04-11T21:37:22.345Z info: 🛡️ authMiddleware ejecutado
+2025-04-11T21:37:22.346Z info: 🔐 Token recibido:
+2025-04-11T21:37:22.347Z info: ✅ Token decodificado:
+2025-04-11T21:37:22.377Z info: ✅ Usuario autenticado correctamente:
+2025-04-11T21:37:22.634Z info: ✅ Usuario autenticado correctamente:
+2025-04-11T21:37:22.635Z info: Solicitud de menú para el usuario ID: 5
+2025-04-11T21:37:22.677Z info: 🛡️ authMiddleware ejecutado
+2025-04-11T21:37:22.679Z info: 🔐 Token recibido:
+2025-04-11T21:37:22.680Z info: ✅ Token decodificado:
+2025-04-11T21:37:22.969Z info: ✅ Usuario autenticado correctamente:
+2025-04-11T21:37:23.966Z info: 🛡️ authMiddleware ejecutado
+2025-04-11T21:37:23.967Z info: 🔐 Token recibido:
+2025-04-11T21:37:23.969Z info: ✅ Token decodificado:
+2025-04-11T21:37:24.257Z info: ✅ Usuario autenticado correctamente:
+2025-04-11T21:37:24.258Z info: Solicitud de menú para el usuario ID: 5
+2025-04-11T21:37:24.554Z info: 🛡️ authMiddleware ejecutado
+2025-04-11T21:37:24.554Z info: 🔐 Token recibido:
+2025-04-11T21:37:24.555Z info: ✅ Token decodificado:
+2025-04-11T21:37:24.844Z info: ✅ Usuario autenticado correctamente:
+2025-04-11T21:37:24.844Z info: Solicitud de menú para el usuario ID: 5
+2025-04-11T21:37:40.618Z info: 🛡️ authMiddleware ejecutado
+2025-04-11T21:37:40.619Z info: 🔐 Token recibido:
+2025-04-11T21:37:40.622Z info: ✅ Token decodificado:
+2025-04-11T21:37:40.910Z info: ✅ Usuario autenticado correctamente:
+2025-04-11T21:37:45.268Z info: 🛡️ authMiddleware ejecutado
+2025-04-11T21:37:45.269Z info: 🔐 Token recibido:
+2025-04-11T21:37:45.271Z info: ✅ Token decodificado:
+2025-04-11T21:37:45.558Z info: ✅ Usuario autenticado correctamente:
+2025-04-11T21:37:45.559Z info: Solicitud de menú para el usuario ID: 5
+2025-04-11T21:37:45.854Z info: 🛡️ authMiddleware ejecutado
+2025-04-11T21:37:45.855Z info: 🔐 Token recibido:
+2025-04-11T21:37:45.857Z info: ✅ Token decodificado:
+2025-04-11T21:37:45.959Z info: Iniciando la obtención de imágenes...
+2025-04-11T21:37:46.146Z info: ✅ Usuario autenticado correctamente:
+2025-04-11T21:37:46.147Z info: Solicitud de menú para el usuario ID: 5
+2025-04-11T21:37:46.759Z info: Iniciando la obtención de imágenes...

@@ -1,5 +1,8 @@
 const express = require("express");
 const router = express.Router();
+const authMiddleware = require("../middleware/authMiddleware");
+const logger = require("../config/logger");
+
 const {
   getUserTypes,
   getSexes,
@@ -7,22 +10,39 @@ const {
   changePassword,
   getSidebarByUserId,
   getRoles,
-} = require("../controllers/userController"); // Asegúrate de que `updateUser` esté importado correctamente
-const authMiddleware = require("../middleware/authMiddleware");
+} = require("../controllers/userController");
 
-// Rutas para obtener tipos de usuario y sexos
-router.get("/user-types", getUserTypes);
-router.get("/sexes", getSexes);
-
-// Ruta para actualizar un usuario
-router.put("/users/:id", updateUser);
-
-// Ruta para cambiar la contraseña
+//
+// 🔐 Rutas específicas primero (para evitar conflictos con /users/:id)
+//
+// ✅ Cambiar contraseña con ID (usado por admin u otro rol)
 router.put("/users/change-password/:id", changePassword);
 
-// Ruta para obtener los menús con submenús por usuario
-router.get("/sidebar/:id", authMiddleware, getSidebarByUserId);
+//
+// 📋 Rutas de información
+//
 
-router.get("/get-roles", getRoles); 
+// ✅ Obtener lista de tipos de usuario
+router.get("/user-types", getUserTypes);
+
+// ✅ Obtener lista de sexos
+router.get("/sexes", getSexes);
+
+// ✅ Obtener roles
+router.get("/get-roles", getRoles);
+
+//
+// 🧑‍💼 Gestión de usuarios
+//
+
+// ✅ Actualizar usuario por ID
+router.put("/users/:id", updateUser); // Esta debe ir después de las rutas más específicas
+
+//
+// 📊 Sidebar personalizado por usuario
+//
+
+// ✅ Obtener menú lateral según el usuario autenticado
+router.get("/sidebar/:id", authMiddleware, getSidebarByUserId);
 
 module.exports = router;

@@ -4,6 +4,8 @@ const jwt = require("jsonwebtoken");
 const express = require("express");
 const upload = require("../config/multerConfig"); // Importa la configuración de Multer
 const logger = require("../config/logger");
+const sql = require("mssql"); // <-- ESTA ES LA LÍNEA FALTANTE
+
 
 // Función para validar el formato del correo
 const validateEmail = (email) => {
@@ -247,87 +249,7 @@ const register = async (req, res) => {
   }
 };
 
-// Endpoint para cambiar la contraseña
-const changePassword = async (req, res) => {
-  const { currentPassword, newPassword } = req.body;
 
-  // Validación de entrada
-  if (!currentPassword || !newPassword) {
-    return res
-      .status(400)
-      .json({ message: "Contraseña actual y nueva son requeridas" });
-  }
-
-  if (newPassword.length < 8) {
-    return res.status(400).json({
-      message: "La nueva contraseña debe tener al menos 8 caracteres",
-    });
-  }
-
-  // Obtener el ID del usuario desde el token
-  const authHeader = req.headers.authorization;
-  if (!authHeader || !authHeader.startsWith("Bearer ")) {
-    return res
-      .status(401)
-      .json({ message: "Token no proporcionado o formato inválido" });
-  }
-
-  const token = authHeader.split(" ")[1];
-  let decoded;
-  try {
-    decoded = jwt.verify(token, process.env.JWT_SECRET);
-  } catch (error) {
-    return res.status(401).json({ message: "Token inválido o expirado" });
-  }
-
-  const userId = decoded.id;
-
-  try {
-    const pool = await poolPromise;
-
-    // Obtener el usuario
-    const result = await pool.request().input("id_usuario", userId).query(`
-        SELECT CONTRASENA_HASH
-        FROM MAE_USUARIO
-        WHERE ID_USUARIO = @id_usuario AND ESTADO = 1
-      `);
-
-    const user = result.recordset[0];
-    if (!user) {
-      return res.status(404).json({ message: "Usuario no encontrado" });
-    }
-
-    // Verificar la contraseña actual
-    const isMatch = await bcrypt.compare(currentPassword, user.CONTRASENA_HASH);
-    if (!isMatch) {
-      return res.status(401).json({ message: "Contraseña actual incorrecta" });
-    }
-
-    // Generar nuevo hash y salt para la nueva contraseña
-    const salt = await bcrypt.genSalt(10);
-    const hash = await bcrypt.hash(newPassword, salt);
-
-    // Actualizar la contraseña y el flag PRIMER_INICIO
-    await pool
-      .request()
-      .input("id_usuario", userId)
-      .input("contrasena_hash", hash)
-      .input("contrasena_salt", salt).query(`
-        UPDATE MAE_USUARIO
-        SET CONTRASENA_HASH = @contrasena_hash,
-            CONTRASENA_SALT = @contrasena_salt,
-            PRIMER_INICIO = 0
-        WHERE ID_USUARIO = @id_usuario
-      `);
-
-    res.status(200).json({ message: "Contraseña cambiada exitosamente" });
-  } catch (error) {
-    console.error("Error al cambiar la contraseña:", error);
-    res
-      .status(500)
-      .json({ message: "Error del servidor", error: error.message });
-  }
-};
 
 // Endpoint para listar todos los usuarios
 const getAllUsers = async (req, res) => {
@@ -814,12 +736,64 @@ const deleteLoginImage = async (req, res) => {
   }
 };
 
+const changeAuthenticatedUserPassword = async (req, res) => {
+  const userId = req.user?.id;
+  const { currentPassword, newPassword } = req.body;
+
+  if (!currentPassword || !newPassword) {
+    return res.status(400).json({
+      message: "Todos los campos requeridos deben estar completos",
+    });
+  }
+
+  try {
+    const pool = await poolPromise;
+
+    const result = await pool
+      .request()
+      .input("ID_USUARIO", sql.Int, userId)
+      .query(`SELECT CONTRASENA_HASH FROM MAE_USUARIO WHERE ID_USUARIO = @ID_USUARIO AND ESTADO = 1`);
+
+    if (result.recordset.length === 0) {
+      return res.status(404).json({ message: "Usuario no encontrado" });
+    }
+
+    const { CONTRASENA_HASH } = result.recordset[0];
+    const isValid = await bcrypt.compare(currentPassword, CONTRASENA_HASH);
+
+    if (!isValid) {
+      return res.status(401).json({ message: "Contraseña actual incorrecta" });
+    }
+
+    const salt = await bcrypt.genSalt(10);
+    const newHashedPassword = await bcrypt.hash(newPassword, salt);
+
+    await pool
+      .request()
+      .input("ID_USUARIO", sql.Int, userId)
+      .input("CONTRASENA_HASH", sql.VarChar(255), newHashedPassword)
+      .input("CONTRASENA_SALT", sql.VarChar(50), salt)
+      .query(`
+        UPDATE MAE_USUARIO
+        SET CONTRASENA_HASH = @CONTRASENA_HASH,
+            CONTRASENA_SALT = @CONTRASENA_SALT,
+            PRIMER_INICIO = 0
+        WHERE ID_USUARIO = @ID_USUARIO
+      `);
+
+    return res.status(200).json({ message: "Contraseña actualizada con éxito" });
+  } catch (error) {
+    console.error("Error al cambiar la contraseña:", error);
+    return res.status(500).json({ message: "Error del servidor" });
+  }
+};
+
+
 // Export the new functions
 module.exports = {
   login,
   validate,
   register,
-  changePassword,
   getAllUsers,
   getAllMovements,
   updateUser,
@@ -830,4 +804,5 @@ module.exports = {
   uploadImage,
   getLoginImages,
   deleteLoginImage,
+  changeAuthenticatedUserPassword,
 };
