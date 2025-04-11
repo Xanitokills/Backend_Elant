@@ -16,6 +16,13 @@ BEGIN
     END
 END;
 GO
-
--- Insertar un submenú
---EXEC SP_INSERTAR_SUBMENU 1, 'Usuarios', 'user', '/gestion/usuarios', 1, 1;
+/*
+-- Insertar un submenu
+EXEC SP_INSERTAR_SUBMENU 
+    @ID_MENU = 1, 
+    @NOMBRE = 'Usuarios', 
+    @ICONO = 'user', 
+    @URL = '/gestion/usuarios', 
+    @ORDEN = 1, 
+    @ESTADO = 1;
+*/

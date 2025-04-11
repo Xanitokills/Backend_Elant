@@ -6,6 +6,7 @@ const {
   updateUser,
   changePassword,
   getSidebarByUserId,
+  getRoles,
 } = require("../controllers/userController"); // Asegúrate de que `updateUser` esté importado correctamente
 const authMiddleware = require("../middleware/authMiddleware");
 
@@ -21,5 +22,7 @@ router.put("/users/change-password/:id", changePassword);
 
 // Ruta para obtener los menús con submenús por usuario
 router.get("/sidebar/:id", authMiddleware, getSidebarByUserId);
+
+router.get("/get-roles", getRoles); 
 
 module.exports = router;

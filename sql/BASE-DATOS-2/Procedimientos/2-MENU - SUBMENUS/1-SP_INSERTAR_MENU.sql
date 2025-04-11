@@ -15,6 +15,12 @@ BEGIN
     END
 END;
 GO
-
--- Insertar un menú
---EXEC SP_INSERTAR_MENU 'Gestión', 'settings', '/gestion', 1, 1;
+/*
+-- Insertar un menu
+EXEC SP_INSERTAR_MENU 
+    @NOMBRE = 'GestiÃ³n', 
+    @ICONO = 'settings', 
+    @URL = '/gestion', 
+    @ORDEN = 1, 
+    @ESTADO = 1;
+*/

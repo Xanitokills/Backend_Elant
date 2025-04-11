@@ -219,16 +219,42 @@ const getSidebarByUserId = async (req, res) => {
 
     const sidebarData = result.recordset;
 
-    logger.debug(`Sidebar devuelto para ID ${id}: ${JSON.stringify(sidebarData, null, 2)}`);
+    logger.debug(
+      `Sidebar devuelto para ID ${id}: ${JSON.stringify(sidebarData, null, 2)}`
+    );
 
     res.status(200).json(sidebarData);
   } catch (error) {
-    logger.error(`Error al obtener el menú del usuario ID ${id}: ${error.message}`, {
-      stack: error.stack,
-    });
+    logger.error(
+      `Error al obtener el menú del usuario ID ${id}: ${error.message}`,
+      {
+        stack: error.stack,
+      }
+    );
 
     res.status(500).json({ message: "Error al obtener el menú del usuario" });
   }
 };
 
-module.exports = { getUserTypes, getSexes, updateUser, changePassword,getSidebarByUserId };
+const getRoles = async (req, res) => {
+  try {
+    const pool = await poolPromise;
+    const result = await pool.request().query(`
+      SELECT ID_TIPO_USUARIO, DETALLE_USUARIO
+      FROM MAE_TIPO_USUARIO
+    `);
+    res.status(200).json(result.recordset);
+  } catch (error) {
+    console.error("❌ Error al obtener roles:", error);
+    res.status(500).json({ message: "Error al obtener los roles" });
+  }
+};
+
+module.exports = {
+  getUserTypes,
+  getSexes,
+  updateUser,
+  changePassword,
+  getSidebarByUserId,
+  getRoles,
+};
