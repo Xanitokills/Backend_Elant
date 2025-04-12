@@ -38,6 +38,22 @@ const getSexes = async (req, res) => {
   }
 };
 
+// Obtener roles activos
+const getRoles = async (req, res) => {
+  try {
+    const pool = await poolPromise;
+    const result = await pool.request().query(`
+      SELECT ID_TIPO_USUARIO, DETALLE_USUARIO
+      FROM MAE_TIPO_USUARIO
+      WHERE ESTADO = 1
+    `);
+    res.status(200).json(result.recordset);
+  } catch (error) {
+    console.error("Error al obtener los roles:", error);
+    res.status(500).json({ message: "Error al obtener los roles" });
+  }
+};
+
 const updateUser = async (req, res) => {
   const { id } = req.params;
   const {
@@ -233,20 +249,6 @@ const getSidebarByUserId = async (req, res) => {
     );
 
     res.status(500).json({ message: "Error al obtener el menú del usuario" });
-  }
-};
-
-const getRoles = async (req, res) => {
-  try {
-    const pool = await poolPromise;
-    const result = await pool.request().query(`
-      SELECT ID_TIPO_USUARIO, DETALLE_USUARIO
-      FROM MAE_TIPO_USUARIO
-    `);
-    res.status(200).json(result.recordset);
-  } catch (error) {
-    console.error("❌ Error al obtener roles:", error);
-    res.status(500).json({ message: "Error al obtener los roles" });
   }
 };
 

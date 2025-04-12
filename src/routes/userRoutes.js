@@ -12,9 +12,8 @@ const {
   getSidebarByUserId,
   asignarRolComite,
   quitarRolComite,
-} = require("../controllers/userController");
+} = require("../controllers/userController"); // Asegúrate de que `updateUser` esté importado correctamente
 const authMiddleware = require("../middleware/authMiddleware");
-
 router.get("/user-types", getUserTypes);
 router.get("/sexes", getSexes);
 router.get("/roles", getRoles);
@@ -26,6 +25,12 @@ router.get("/get-roles", getRoles);
 router.put("/users/:id", updateUser); // Esta debe ir después de las rutas más específicas
 router.get("/sidebar/:id", authMiddleware, getSidebarByUserId);
 router.post("/users/:id/asignar-comite", asignarRolComite);
+router.delete("/users/:id/quitar-comite", quitarRolComite);
+
+// RUTA para asignar rol comité a usuario (SP_INSERTAR_USUARIO_ROL)
+router.post("/users/:id/asignar-comite", asignarRolComite);
+
+// RUTA para quitar rol comité a usuario (SP_ELIMINAR_USUARIO_ROL)
 router.delete("/users/:id/quitar-comite", quitarRolComite);
 
 module.exports = router;
