@@ -44,5 +44,4 @@ router.put("/users/:id", updateUser); // Esta debe ir después de las rutas más
 
 // ✅ Obtener menú lateral según el usuario autenticado
 router.get("/sidebar/:id", authMiddleware, getSidebarByUserId);
-
 module.exports = router;

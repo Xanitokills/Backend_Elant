@@ -4,15 +4,16 @@ const authRoutes = require("./routes/authRoutes");
 const doorRoutes = require("./routes/doorRoutes");
 const movementRoutes = require("./routes/movementRoutes");
 const userRoutes = require("./routes/userRoutes");
+const reservationRoutes = require("./routes/reservationRoutes");
 const logger = require("./config/logger");
-require("dotenv").config(); // Cargar variables de entorno
+require("dotenv").config();
 
 const app = express();
 
-// ✅ Middleware: primero se debe analizar el body JSON
+// Middleware: primero se debe analizar el body JSON
 app.use(express.json());
 
-// ✅ Configuración de CORS (usa variable de entorno para mayor flexibilidad)
+// Configuración de CORS
 const corsOptions = {
   origin: process.env.FRONTEND_URL || "http://localhost:5173",
   methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
@@ -20,15 +21,34 @@ const corsOptions = {
   credentials: true,
 };
 app.use(cors(corsOptions));
-app.options("*", cors(corsOptions)); // Soporte para preflight (CORS + PUT/DELETE)
+app.options("*", cors(corsOptions));
 
-// ✅ Rutas organizadas por módulo
-app.use("/api", movementRoutes);  // Público (sin auth)
-app.use("/api", authRoutes);      // Autenticación (login, register, token)
-app.use("/api", doorRoutes);      // Gestión de puertas
-app.use("/api", userRoutes);      // Usuarios, cambios de clave, menú, etc.
+// Rutas organizadas por módulo
+logger.info("Cargando rutas...");
+app.use("/api", movementRoutes); // Público (sin auth)
+logger.info("Rutas de movementRoutes cargadas.");
+app.use("/api", authRoutes); // Autenticación (login, register, token)
+logger.info("Rutas de authRoutes cargadas.");
+app.use("/api", doorRoutes); // Gestión de puertas
+logger.info("Rutas de doorRoutes cargadas.");
+app.use("/api", userRoutes); // Usuarios, cambios de clave, menú, etc.
+logger.info("Rutas de userRoutes cargadas.");
+app.use("/api/reservations", reservationRoutes); // Reservas (áreas, slots, reservas de usuario)
+logger.info("Rutas de reservationRoutes cargadas.");
 
-// ✅ Iniciar el servidor
+// Middleware para depurar todas las solicitudes
+app.use((req, res, next) => {
+  logger.info(`Solicitud recibida: ${req.method} ${req.url}`);
+  next();
+});
+
+// Middleware de manejo de errores
+app.use((err, req, res, next) => {
+  logger.error(`Error: ${err.message}, Stack: ${err.stack}`);
+  res.status(500).json({ message: "Error del servidor", error: err.message });
+});
+
+// Iniciar el servidor
 const PORT = process.env.PORT || 4000;
 app.listen(PORT, "0.0.0.0", () => {
   logger.info(`✅ Server running on port ${PORT}`);
