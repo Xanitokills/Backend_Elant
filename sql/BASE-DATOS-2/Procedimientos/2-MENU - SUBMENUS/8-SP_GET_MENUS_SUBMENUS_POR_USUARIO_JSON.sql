@@ -2,19 +2,23 @@ CREATE OR ALTER PROCEDURE SP_GET_MENUS_SUBMENUS_JSON
     @ID_USUARIO INT
 AS
 BEGIN
+    SET NOCOUNT ON;
+
     SELECT 
         m.ID_MENU,
         m.NOMBRE AS MENU_NOMBRE,
-        m.ICONO,
-        m.URL,
-        m.ORDEN,
+        m.ICONO AS MENU_ICONO,
+        m.URL AS MENU_URL,
+        m.ORDEN AS MENU_ORDEN,
+        m.ESTADO AS MENU_ESTADO, -- Campo adicional
         (
             SELECT DISTINCT
                 sm.ID_SUBMENU,
                 sm.NOMBRE AS SUBMENU_NOMBRE,
-                sm.ICONO,
-                sm.URL,
-                sm.ORDEN
+                sm.ICONO AS SUBMENU_ICONO,
+                sm.URL AS SUBMENU_URL,
+                sm.ORDEN AS SUBMENU_ORDEN,
+                sm.ESTADO AS SUBMENU_ESTADO -- Campo adicional
             FROM MAE_SUBMENU sm
             JOIN MAE_ROL_SUBMENU rs ON rs.ID_SUBMENU = sm.ID_SUBMENU
             WHERE sm.ID_MENU = m.ID_MENU
@@ -24,6 +28,7 @@ BEGIN
                   UNION
                   SELECT ID_TIPO_USUARIO FROM MAE_USUARIO_ROL WHERE ID_USUARIO = @ID_USUARIO
               )
+            ORDER BY sm.ORDEN ASC
             FOR JSON PATH
         ) AS SUBMENUS
     FROM MAE_MENU m
@@ -34,6 +39,8 @@ BEGIN
         SELECT ID_TIPO_USUARIO FROM MAE_USUARIO_ROL WHERE ID_USUARIO = @ID_USUARIO
     )
     AND m.ESTADO = 1
-    GROUP BY m.ID_MENU, m.NOMBRE, m.ICONO, m.URL, m.ORDEN;
+    GROUP BY m.ID_MENU, m.NOMBRE, m.ICONO, m.URL, m.ORDEN, m.ESTADO
+    ORDER BY m.ORDEN ASC
+    FOR JSON PATH;
 END;
 GO

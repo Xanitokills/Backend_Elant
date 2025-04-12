@@ -223,6 +223,12 @@ const changePassword = async (req, res) => {
 const getSidebarByUserId = async (req, res) => {
   const { id } = req.params;
 
+  // Validar que id sea un número entero
+  if (!id || isNaN(id)) {
+    logger.error(`ID de usuario inválido: ${id}`);
+    return res.status(400).json({ message: "ID de usuario inválido" });
+  }
+
   try {
     const pool = await poolPromise;
 
@@ -230,10 +236,15 @@ const getSidebarByUserId = async (req, res) => {
 
     const result = await pool
       .request()
-      .input("ID_USUARIO", sql.Int, id)
+      .input("ID_USUARIO", sql.Int, parseInt(id))
       .execute("SP_GET_MENUS_SUBMENUS_JSON");
 
     const sidebarData = result.recordset;
+
+    if (!sidebarData || sidebarData.length === 0) {
+      logger.warn(`No se encontraron menús para el usuario ID: ${id}`);
+      return res.status(200).json([]);
+    }
 
     logger.debug(
       `Sidebar devuelto para ID ${id}: ${JSON.stringify(sidebarData, null, 2)}`
@@ -247,7 +258,6 @@ const getSidebarByUserId = async (req, res) => {
         stack: error.stack,
       }
     );
-
     res.status(500).json({ message: "Error al obtener el menú del usuario" });
   }
 };
