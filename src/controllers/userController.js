@@ -250,6 +250,43 @@ const getRoles = async (req, res) => {
   }
 };
 
+// Asignar rol Comité a usuario
+const asignarRolComite = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const pool = await poolPromise;
+
+    await pool
+      .request()
+      .input("ID_USUARIO", sql.Int, id)
+      .input("ID_TIPO_USUARIO", sql.Int, 6) // ID del rol Comité
+      .execute("SP_INSERTAR_USUARIO_ROL");
+
+    res.status(200).json({ message: "Rol Comité asignado exitosamente" });
+  } catch (error) {
+    console.error("Error al asignar rol Comité:", error);
+    res.status(500).json({ message: "Error al asignar rol Comité" });
+  }
+};
+
+// Quitar rol Comité a usuario
+const quitarRolComite = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const pool = await poolPromise;
+
+    await pool
+      .request()
+      .input("ID_USUARIO", sql.Int, id)
+      .input("ID_TIPO_USUARIO", sql.Int, 6) // ID del rol Comité
+      .execute("SP_ELIMINAR_USUARIO_ROL");
+
+    res.status(200).json({ message: "Rol Comité eliminado exitosamente" });
+  } catch (error) {
+    console.error("Error al eliminar rol Comité:", error);
+    res.status(500).json({ message: "Error al eliminar rol Comité" });
+  }
+};
 
 module.exports = {
   getUserTypes,
@@ -258,4 +295,9 @@ module.exports = {
   changePassword,
   getSidebarByUserId,
   getRoles,
+  updateUser,
+  changePassword,
+  getSidebarByUserId,
+  asignarRolComite,
+  quitarRolComite
 };
