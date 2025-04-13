@@ -2,27 +2,27 @@ ALTER PROCEDURE SP_INSERTAR_SUBMENU
     @ID_MENU INT,
     @NOMBRE VARCHAR(50),
     @ICONO VARCHAR(50),
-    @URL VARCHAR(100),
-    @ORDEN INT,
-    @ESTADO BIT
+    @URL VARCHAR(100)
 AS
 BEGIN
     IF NOT EXISTS (
-        SELECT 1 FROM MAE_SUBMENU WHERE NOMBRE = @NOMBRE
+        SELECT 1 FROM MAE_SUBMENU WHERE NOMBRE = @NOMBRE AND ID_MENU = @ID_MENU
     )
     BEGIN
+        DECLARE @ORDEN INT;
+        SELECT @ORDEN = ISNULL(MAX(ORDEN), 0) + 1 FROM MAE_SUBMENU WHERE ID_MENU = @ID_MENU;
+
         INSERT INTO MAE_SUBMENU (ID_MENU, NOMBRE, ICONO, URL, ORDEN, ESTADO)
-        VALUES (@ID_MENU, @NOMBRE, @ICONO, @URL, @ORDEN, @ESTADO);
+        VALUES (@ID_MENU, @NOMBRE, @ICONO, @URL, @ORDEN, 1); -- Estado activo por defecto
     END
 END;
 GO
+
 /*
 -- Insertar un submenu
 EXEC SP_INSERTAR_SUBMENU 
     @ID_MENU = 1, 
     @NOMBRE = 'Usuarios', 
     @ICONO = 'user', 
-    @URL = '/gestion/usuarios', 
-    @ORDEN = 1, 
-    @ESTADO = 1;
+    @URL = '/gestion/usuarios'
 */

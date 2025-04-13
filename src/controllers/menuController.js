@@ -37,7 +37,7 @@ const createMenu = async (req, res) => {
       .input("NOMBRE", sql.VarChar(50), nombre)
       .input("ICONO", sql.VarChar(50), icono)
       .input("URL", sql.VarChar(100), url || null)
-      .execute("SP_CREAR_MENU");
+      .execute("SP_INSERTAR_MENU");
     res.status(201).json({ message: "Menú creado correctamente" });
   } catch (err) {
     console.error("Error in createMenu:", err);
@@ -74,7 +74,7 @@ const createSubmenu = async (req, res) => {
       .input("NOMBRE", sql.VarChar(50), nombre)
       .input("ICONO", sql.VarChar(50), icono)
       .input("URL", sql.VarChar(100), url)
-      .execute("SP_CREAR_SUBMENU");
+      .execute("SP_INSERTAR_SUBMENU");
     res.status(201).json({ message: "Submenú creado correctamente" });
   } catch (err) {
     console.error("Error in createSubmenu:", err);

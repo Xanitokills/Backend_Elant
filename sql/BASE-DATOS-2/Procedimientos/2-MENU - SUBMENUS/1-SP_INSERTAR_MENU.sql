@@ -1,26 +1,26 @@
 ALTER PROCEDURE SP_INSERTAR_MENU
     @NOMBRE VARCHAR(50),
     @ICONO VARCHAR(50),
-    @URL VARCHAR(100),
-    @ORDEN INT,
-    @ESTADO BIT
+    @URL VARCHAR(100)
 AS
 BEGIN
     IF NOT EXISTS (
         SELECT 1 FROM MAE_MENU WHERE NOMBRE = @NOMBRE
     )
     BEGIN
+        DECLARE @ORDEN INT;
+        SELECT @ORDEN = ISNULL(MAX(ORDEN), 0) + 1 FROM MAE_MENU;
+
         INSERT INTO MAE_MENU (NOMBRE, ICONO, URL, ORDEN, ESTADO)
-        VALUES (@NOMBRE, @ICONO, @URL, @ORDEN, @ESTADO);
+        VALUES (@NOMBRE, @ICONO, @URL, @ORDEN, 1); -- Estado activo por defecto
     END
 END;
 GO
+
 /*
 -- Insertar un menu
 EXEC SP_INSERTAR_MENU 
     @NOMBRE = 'Gestión', 
     @ICONO = 'settings', 
-    @URL = '/gestion', 
-    @ORDEN = 1, 
-    @ESTADO = 1;
+    @URL = '/gestion'
 */
