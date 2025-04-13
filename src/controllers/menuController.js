@@ -1,57 +1,106 @@
 // src/controllers/menuController.js
 const { poolPromise } = require("../config/db");
 
-// Obtener todos los menús y submenús
+// Get all menus and submenus
 const getMenusAndSubmenus = async (req, res) => {
   try {
     const pool = await poolPromise;
     const result = await pool.request().execute("SP_OBTENER_MENUS_Y_SUBMENUS");
-    res.status(200).json(result.recordset);
+
+    // Transform the result to match the frontend's expected format
+    const menus = result.recordset.map((row) => ({
+      ID_MENU: row.ID_MENU,
+      MENU_NOMBRE: row.MENU_NOMBRE,
+      MENU_ICONO: row.MENU_ICONO,
+      MENU_URL: row.MENU_URL,
+      MENU_ORDEN: row.MENU_ORDEN,
+      ID_SUBMENU: row.ID_SUBMENU || null,
+      SUBMENU_NOMBRE: row.SUBMENU_NOMBRE || null,
+      SUBMENU_ICONO: row.SUBMENU_ICONO || null,
+      SUBMENU_URL: row.SUBMENU_URL || null,
+      SUBMENU_ORDEN: row.SUBMENU_ORDEN || null,
+    }));
+
+    res.status(200).json(menus);
   } catch (error) {
-    console.error("Error al obtener menús y submenús:", error);
-    res.status(500).json({ message: "Error al obtener datos", error });
+    console.error("Error fetching menus and submenus:", error);
+    res.status(500).json({ message: "Error al obtener menús y submenús" });
   }
 };
 
-// Insertar menú
-const insertMenu = async (req, res) => {
+// Create a new menu
+const createMenu = async (req, res) => {
   const { nombre, icono, url } = req.body;
+
+  // Basic validation
+  if (!nombre) {
+    return res.status(400).json({ message: "El nombre del menú es obligatorio" });
+  }
+  if (!icono) {
+    return res.status(400).json({ message: "El ícono del menú es obligatorio" });
+  }
+
   try {
     const pool = await poolPromise;
-    const maxResult = await pool
+
+    // Get the next order number
+    const orderResult = await pool
       .request()
-      .query("SELECT ISNULL(MAX(ORDEN), 0) + 1 AS nuevoOrden FROM MAE_MENU");
-    const orden = maxResult.recordset[0].nuevoOrden;
+      .query("SELECT ISNULL(MAX(ORDEN), 0) + 1 AS newOrder FROM MAE_MENU");
+    const newOrder = orderResult.recordset[0].newOrder;
 
     await pool
       .request()
       .input("NOMBRE", nombre)
       .input("ICONO", icono)
-      .input("URL", url)
-      .input("ORDEN", orden)
+      .input("URL", url || null)
+      .input("ORDEN", newOrder)
       .input("ESTADO", 1)
       .execute("SP_INSERTAR_MENU");
 
-    res.status(200).json({ message: "Menú insertado correctamente" });
+    res.status(201).json({ message: "Menú creado correctamente" });
   } catch (error) {
-    console.error("Error al insertar menú:", error);
-    res.status(500).json({ message: "Error al insertar menú", error });
+    console.error("Error creating menu:", error);
+    res.status(500).json({ message: "Error al crear el menú" });
   }
 };
 
-// Insertar submenú
-const insertSubmenu = async (req, res) => {
-  const { idMenu, nombre, icono, url } = req.body;
+// Create a new submenu
+const createSubmenu = async (req, res) => {
+  const { nombre, icono, url, idMenu } = req.body;
+
+  // Basic validation
+  if (!idMenu) {
+    return res.status(400).json({ message: "El ID del menú es obligatorio" });
+  }
+  if (!nombre) {
+    return res.status(400).json({ message: "El nombre del submenú es obligatorio" });
+  }
+  if (!icono) {
+    return res.status(400).json({ message: "El ícono del submenú es obligatorio" });
+  }
+  if (!url) {
+    return res.status(400).json({ message: "La URL del submenú es obligatoria" });
+  }
+
   try {
     const pool = await poolPromise;
-    const maxResult = await pool
+
+    // Verify that the menu exists
+    const menuExists = await pool
       .request()
       .input("ID_MENU", idMenu)
-      .query(
-        "SELECT ISNULL(MAX(ORDEN), 0) + 1 AS nuevoOrden FROM MAE_SUBMENU WHERE ID_MENU = @ID_MENU"
-      );
+      .query("SELECT 1 FROM MAE_MENU WHERE ID_MENU = @ID_MENU AND ESTADO = 1");
+    if (menuExists.recordset.length === 0) {
+      return res.status(404).json({ message: "El menú especificado no existe" });
+    }
 
-    const orden = maxResult.recordset[0].nuevoOrden;
+    // Get the next order number for the submenu
+    const orderResult = await pool
+      .request()
+      .input("ID_MENU", idMenu)
+      .query("SELECT ISNULL(MAX(ORDEN), 0) + 1 AS newOrder FROM MAE_SUBMENU WHERE ID_MENU = @ID_MENU");
+    const newOrder = orderResult.recordset[0].newOrder;
 
     await pool
       .request()
@@ -59,74 +108,80 @@ const insertSubmenu = async (req, res) => {
       .input("NOMBRE", nombre)
       .input("ICONO", icono)
       .input("URL", url)
-      .input("ORDEN", orden)
+      .input("ORDEN", newOrder)
       .input("ESTADO", 1)
       .execute("SP_INSERTAR_SUBMENU");
 
-    res.status(200).json({ message: "Submenú insertado correctamente" });
+    res.status(201).json({ message: "Submenú creado correctamente" });
   } catch (error) {
-    console.error("Error al insertar submenú:", error);
-    res.status(500).json({ message: "Error al insertar submenú", error });
+    console.error("Error creating submenu:", error);
+    res.status(500).json({ message: "Error al crear el submenú" });
   }
 };
 
-// Cambiar orden del submenú
-const changeSubmenuOrder = async (req, res) => {
-  const { id, direction } = req.params;
+// Update submenu order
+const updateSubmenuOrder = async (req, res) => {
+  const { id } = req.params;
+  const { newOrder } = req.body;
+
+  if (!newOrder || newOrder <= 0) {
+    return res.status(400).json({ message: "El nuevo orden debe ser un número positivo" });
+  }
+
   try {
     const pool = await poolPromise;
-    const submenus = await pool
+    await pool
       .request()
-      .query("SELECT * FROM MAE_SUBMENU WHERE ESTADO = 1 ORDER BY ORDEN");
-    const index = submenus.recordset.findIndex(
-      (s) => s.ID_SUBMENU === parseInt(id)
-    );
-
-    if (index === -1)
-      return res.status(404).json({ message: "Submenú no encontrado" });
-
-    const current = submenus.recordset[index];
-    const target =
-      direction === "up"
-        ? submenus.recordset[index - 1]
-        : submenus.recordset[index + 1];
-
-    if (!target)
-      return res
-        .status(400)
-        .json({ message: "No se puede mover en esa dirección" });
-
-    // Intercambiar ordenes
-    await pool.request().query(`UPDATE MAE_SUBMENU SET ORDEN = CASE
-                WHEN ID_SUBMENU = ${current.ID_SUBMENU} THEN ${target.ORDEN}
-                WHEN ID_SUBMENU = ${target.ID_SUBMENU} THEN ${current.ORDEN}
-              END
-              WHERE ID_SUBMENU IN (${current.ID_SUBMENU}, ${target.ID_SUBMENU})`);
+      .input("ID_SUBMENU", id)
+      .input("NEW_ORDEN", newOrder)
+      .execute("SP_ACTUALIZAR_ORDEN_SUBMENU");
 
     res.status(200).json({ message: "Orden actualizado correctamente" });
   } catch (error) {
-    console.error("Error al cambiar orden:", error);
-    res.status(500).json({ message: "Error al cambiar orden", error });
+    console.error("Error updating submenu order:", error);
+    res.status(500).json({ message: "Error al actualizar el orden" });
   }
 };
 
-// Cambiar orden hacia arriba
-const moveSubmenuUp = async (req, res) => {
-  req.params.direction = "up";
-  return changeSubmenuOrder(req, res);
-};
+// Update menu name
+const updateMenuName = async (req, res) => {
+  const { id } = req.params;
+  const { nombre } = req.body;
 
-// Cambiar orden hacia abajo
-const moveSubmenuDown = async (req, res) => {
-  req.params.direction = "down";
-  return changeSubmenuOrder(req, res);
+  if (!nombre) {
+    return res.status(400).json({ message: "El nombre del menú es obligatorio" });
+  }
+
+  try {
+    const pool = await poolPromise;
+
+    // Verify that the menu exists
+    const menuExists = await pool
+      .request()
+      .input("ID_MENU", id)
+      .query("SELECT 1 FROM MAE_MENU WHERE ID_MENU = @ID_MENU AND ESTADO = 1");
+    if (menuExists.recordset.length === 0) {
+      return res.status(404).json({ message: "El menú especificado no existe" });
+    }
+
+    // Update the menu name
+    await pool
+      .request()
+      .input("ID_MENU", id)
+      .input("NOMBRE", nombre)
+      .query("UPDATE MAE_MENU SET NOMBRE = @NOMBRE WHERE ID_MENU = @ID_MENU");
+
+    res.status(200).json({ message: "Nombre del menú actualizado correctamente" });
+  } catch (error) {
+    console.error("Error updating menu name:", error);
+    res.status(500).json({ message: "Error al actualizar el nombre del menú" });
+  }
 };
 
 module.exports = {
   getMenusAndSubmenus,
-  insertMenu,
-  insertSubmenu,
-  changeSubmenuOrder, // si la usas en otras partes
-  moveSubmenuUp,
-  moveSubmenuDown,
+  createMenu,
+  createSubmenu,
+  updateSubmenuOrder,
+  updateMenuName,
 };
