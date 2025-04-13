@@ -133,12 +133,98 @@ const deleteSubmenu = async (req, res) => {
   }
 };
 
+const getTiposUsuario = async (req, res) => {
+    try {
+      const pool = await poolPromise;
+      const result = await pool.request().query("SELECT ID_TIPO_USUARIO, DETALLE_USUARIO, ESTADO FROM MAE_TIPO_USUARIO");
+      const tiposUsuario = result.recordset.map((row) => ({
+        ID_TIPO_USUARIO: row.ID_TIPO_USUARIO,
+        DETALLE_USUARIO: row.DETALLE_USUARIO,
+        ESTADO: row.ESTADO,
+      }));
+      res.json(tiposUsuario);
+    } catch (err) {
+      console.error("Error in getTiposUsuario:", err);
+      res.status(500).json({ message: "Error al obtener tipos de usuario", error: err.message });
+    }
+  };
+  
+  const assignMenuToRole = async (req, res) => {
+    const { idTipoUsuario, idMenu } = req.body;
+    try {
+      const pool = await poolPromise;
+      await pool
+        .request()
+        .input("ID_TIPO_USUARIO", sql.Int, idTipoUsuario)
+        .input("ID_MENU", sql.Int, idMenu)
+        .execute("SP_INSERTAR_ROL_MENU");
+      res.json({ message: "Menú asignado correctamente" });
+    } catch (err) {
+      console.error("Error in assignMenuToRole:", err);
+      res.status(500).json({ message: "Error al asignar menú", error: err.message });
+    }
+  };
+  
+  const removeMenuFromRole = async (req, res) => {
+    const { idTipoUsuario, idMenu } = req.body;
+    try {
+      const pool = await poolPromise;
+      await pool
+        .request()
+        .input("ID_TIPO_USUARIO", sql.Int, idTipoUsuario)
+        .input("ID_MENU", sql.Int, idMenu)
+        .execute("SP_ELIMINAR_ROL_MENU");
+      res.json({ message: "Asignación de menú eliminada correctamente" });
+    } catch (err) {
+      console.error("Error in removeMenuFromRole:", err);
+      res.status(500).json({ message: "Error al eliminar asignación de menú", error: err.message });
+    }
+  };
+  
+  const assignSubmenuToRole = async (req, res) => {
+    const { idTipoUsuario, idSubmenu } = req.body;
+    try {
+      const pool = await poolPromise;
+      await pool
+        .request()
+        .input("ID_TIPO_USUARIO", sql.Int, idTipoUsuario)
+        .input("ID_SUBMENU", sql.Int, idSubmenu)
+        .execute("SP_INSERTAR_ROL_SUBMENU");
+      res.json({ message: "Submenú asignado correctamente" });
+    } catch (err) {
+      console.error("Error in assignSubmenuToRole:", err);
+      res.status(500).json({ message: "Error al asignar submenú", error: err.message });
+    }
+  };
+  
+  const removeSubmenuFromRole = async (req, res) => {
+    const { idTipoUsuario, idSubmenu } = req.body;
+    try {
+      const pool = await poolPromise;
+      await pool
+        .request()
+        .input("ID_TIPO_USUARIO", sql.Int, idTipoUsuario)
+        .input("ID_SUBMENU", sql.Int, idSubmenu)
+        .execute("SP_ELIMINAR_ROL_SUBMENU");
+      res.json({ message: "Asignación de submenú eliminada correctamente" });
+    } catch (err) {
+      console.error("Error in removeSubmenuFromRole:", err);
+      res.status(500).json({ message: "Error al eliminar asignación de submenú", error: err.message });
+    }
+  };
+  
+
 module.exports = {
-  getMenusAndSubmenus,
-  createMenu,
-  updateMenu,
-  createSubmenu,
-  updateSubmenu,
-  updateSubmenuOrder,
-  deleteSubmenu,
+    getMenusAndSubmenus,
+    createMenu,
+    updateMenu,
+    createSubmenu,
+    updateSubmenu,
+    updateSubmenuOrder,
+    deleteSubmenu,
+    getTiposUsuario,
+    assignMenuToRole,
+    removeMenuFromRole,
+    assignSubmenuToRole,
+    removeSubmenuFromRole,
 };
