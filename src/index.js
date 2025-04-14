@@ -5,6 +5,7 @@ const doorRoutes = require("./routes/doorRoutes");
 const movementRoutes = require("./routes/movementRoutes");
 const userRoutes = require("./routes/userRoutes");
 const reservationRoutes = require("./routes/reservationRoutes");
+const visitRoutes = require("./routes/visitRoutes");
 const logger = require("./config/logger");
 const menuRoutes = require("./routes/menuRoutes");
 require("dotenv").config();
@@ -36,6 +37,8 @@ app.use("/api", userRoutes); // Usuarios, cambios de clave, menú, etc.
 logger.info("Rutas de userRoutes cargadas.");
 app.use("/api", menuRoutes); // Gestión de menús y submenús ✅
 logger.info("Rutas de menuRoutes cargadas.");
+app.use("/api", visitRoutes); 
+logger.info("Rutas de visitRoutes cargadas.");
 app.use("/api/reservations", reservationRoutes); // Reservas (áreas, slots, reservas de usuario)
 logger.info("Rutas de reservationRoutes cargadas.");
 

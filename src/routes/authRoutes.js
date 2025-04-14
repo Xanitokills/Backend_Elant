@@ -8,13 +8,10 @@ const {
   updateUser,
   deleteUser,
   getAllMovements,
-  registerVisit,
-  getAllVisits,
-  getDniInfo,
   uploadImage,
   getLoginImages,
   deleteLoginImage,
-  changeAuthenticatedUserPassword, 
+  changeAuthenticatedUserPassword,
 } = require("../controllers/authController");
 const authMiddleware = require("../middleware/authMiddleware");
 const upload = require("../config/multerConfig");
@@ -28,9 +25,6 @@ console.log("Imported authController:", {
   updateUser,
   deleteUser,
   getAllMovements,
-  registerVisit,
-  getAllVisits,
-  getDniInfo,
   uploadImage,
   getLoginImages,
   deleteLoginImage,
@@ -57,15 +51,6 @@ router.delete("/users/:id", authMiddleware, deleteUser);
 // Ruta para listar todos los movimientos
 router.get("/movements", authMiddleware, getAllMovements);
 
-// Ruta para registrar una visita
-router.post("/visits", authMiddleware, registerVisit);
-
-// Ruta para listar todas las visitas
-router.get("/visits", authMiddleware, getAllVisits);
-
-// Ruta para buscar información de DNI
-router.get("/dni", authMiddleware, getDniInfo);
-
 //Ruta para obtener Imagenes de Login
 router.post("/upload-login-images", upload, uploadImage);
 
@@ -74,10 +59,10 @@ router.get("/get-login-images", getLoginImages);
 router.delete("/delete-login-image/:imageId", deleteLoginImage);
 
 // ✅ Cambiar contraseña del usuario autenticado
-router.put("/auth/change-password", authMiddleware, changeAuthenticatedUserPassword);
-
-
-
-
+router.put(
+  "/auth/change-password",
+  authMiddleware,
+  changeAuthenticatedUserPassword
+);
 
 module.exports = router;
