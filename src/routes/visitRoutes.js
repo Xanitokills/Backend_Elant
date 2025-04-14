@@ -10,6 +10,8 @@ const {
   registerScheduledVisit,
   getScheduledVisits,
   acceptScheduledVisit,
+  getOwnerDepartments,
+  cancelScheduledVisit,
 } = require("../controllers/visitController");
 const authMiddleware = require("../middleware/authMiddleware");
 
@@ -28,6 +30,13 @@ router.get("/owners", authMiddleware, getOwnersByDpto);
 // Ruta para terminar una visita
 router.put("/visits/:id_visita/end", authMiddleware, endVisit);
 
+// visitRoutes.js
+router.put(
+  "/scheduled-visits/:id_visita_programada/cancel",
+  authMiddleware,
+  cancelScheduledVisit
+);
+
 // Ruta para registrar una visita programada
 router.post("/scheduled-visits", authMiddleware, registerScheduledVisit);
 
@@ -35,6 +44,12 @@ router.post("/scheduled-visits", authMiddleware, registerScheduledVisit);
 router.get("/scheduled-visits", authMiddleware, getScheduledVisits);
 
 // Ruta para aceptar una visita programada
-router.post("/scheduled-visits/:id_visita_programada/accept", authMiddleware, acceptScheduledVisit);
+router.post(
+  "/scheduled-visits/:id_visita_programada/accept",
+  authMiddleware,
+  acceptScheduledVisit
+);
+
+router.get("/users/:id/departments", authMiddleware, getOwnerDepartments);
 
 module.exports = router;

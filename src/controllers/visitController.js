@@ -226,119 +226,96 @@ const endVisit = async (req, res) => {
   }
 };
 
-// Endpoint para registrar una visita programada
 const registerScheduledVisit = async (req, res) => {
   const {
     nro_dpto,
-    nombre_visitante,
     dni_visitante,
+    nombre_visitante,
     fecha_llegada,
     hora_llegada,
     motivo,
     id_usuario_propietario,
   } = req.body;
 
-  // Validación de campos requeridos
-  if (
-    !nro_dpto ||
-    !nombre_visitante ||
-    !dni_visitante ||
-    !fecha_llegada ||
-    !motivo ||
-    !id_usuario_propietario
-  ) {
-    return res
-      .status(400)
-      .json({ message: "Todos los campos requeridos deben estar completos" });
-  }
-
-  // Validación del DNI (8 a 12 caracteres alfanuméricos)
-  if (!/^[a-zA-Z0-9]{8,12}$/.test(dni_visitante)) {
-    return res
-      .status(400)
-      .json({
-        message: "El DNI debe tener entre 8 y 12 caracteres alfanuméricos",
-      });
-  }
-
-  // Validar que fecha_llegada no sea una fecha pasada
-  const today = new Date().toISOString().split("T")[0];
-  const fechaLlegadaDate = new Date(fecha_llegada);
-  const todayDate = new Date(today);
-  if (fechaLlegadaDate < todayDate) {
-    return res
-      .status(400)
-      .json({ message: "La fecha de llegada no puede ser una fecha pasada" });
-  }
-
   try {
     const pool = await poolPromise;
-
-    // Insertar la visita programada
     const result = await pool
       .request()
-      .input("nro_dpto", nro_dpto)
-      .input("nombre_visitante", nombre_visitante)
-      .input("dni_visitante", dni_visitante)
-      .input("fecha_llegada", fecha_llegada)
-      .input("hora_llegada", hora_llegada || null)
-      .input("motivo", motivo)
-      .input("id_usuario_propietario", id_usuario_propietario)
-      .input("estado", 1).query(`
-          INSERT INTO MAE_VISITA_PROGRAMADA (
-            NRO_DPTO, NOMBRE_VISITANTE, DNI_VISITANTE, FECHA_LLEGADA, HORA_LLEGADA, 
-            MOTIVO, ID_USUARIO_PROPIETARIO, ESTADO
-          )
-          OUTPUT INSERTED.ID_VISITA_PROGRAMADA
-          VALUES (
-            @nro_dpto, @nombre_visitante, @dni_visitante, @fecha_llegada, @hora_llegada, 
-            @motivo, @id_usuario_propietario, @estado
-          )
-        `);
+      .input("nro_dpto", sql.Int, nro_dpto)
+      .input("dni_visitante", sql.VarChar(12), dni_visitante)
+      .input("nombre_visitante", sql.VarChar(100), nombre_visitante)
+      .input("fecha_llegada", sql.Date, fecha_llegada)
+      .input("hora_llegada", sql.VarChar(5), hora_llegada || null)
+      .input("motivo", sql.VarChar(100), motivo)
+      .input("id_usuario_propietario", sql.Int, id_usuario_propietario).query(`
+        DECLARE @InsertedID TABLE (ID_VISITA_PROGRAMADA INT);
+        INSERT INTO MAE_VISITA_PROGRAMADA (
+          NRO_DPTO,
+          DNI_VISITANTE,
+          NOMBRE_VISITANTE,
+          FECHA_LLEGADA,
+          HORA_LLEGADA,
+          MOTIVO,
+          ID_USUARIO_PROPIETARIO,
+          ESTADO
+        )
+        OUTPUT INSERTED.ID_VISITA_PROGRAMADA INTO @InsertedID
+        VALUES (
+          @nro_dpto,
+          @dni_visitante,
+          @nombre_visitante,
+          @fecha_llegada,
+          @hora_llegada,
+          @motivo,
+          @id_usuario_propietario,
+          1
+        );
+        SELECT ID_VISITA_PROGRAMADA FROM @InsertedID;
+      `);
 
+    const insertedId = result.recordset[0].ID_VISITA_PROGRAMADA;
     res.status(201).json({
-      message: "Visita programada registrada exitosamente",
-      id_visita_programada: result.recordset[0].ID_VISITA_PROGRAMADA,
+      message: "Visita programada registrada correctamente",
+      id: insertedId,
     });
   } catch (error) {
     console.error("Error al registrar visita programada:", error);
-    res
-      .status(500)
-      .json({ message: "Error del servidor", error: error.message });
+    res.status(400).json({
+      message: "Error al registrar la visita programada",
+      error: error.message,
+    });
   }
 };
-
+// visitController.js
 const getScheduledVisits = async (req, res) => {
   try {
+    const userId = req.user ? req.user.userId || req.user.id : null;
+    if (!userId) {
+      return res.status(401).json({ message: "Usuario no autenticado" });
+    }
     const pool = await poolPromise;
-    const result = await pool.request().query(`
-      SELECT 
-        VP.ID_VISITA_PROGRAMADA,
-        VP.NRO_DPTO,
-        VP.NOMBRE_VISITANTE,
-        VP.DNI_VISITANTE,
-        VP.FECHA_LLEGADA,
-        CAST(VP.HORA_LLEGADA AS VARCHAR(8)) AS HORA_LLEGADA, -- Convertir a VARCHAR para evitar problemas
-        VP.MOTIVO,
-        VP.ID_USUARIO_PROPIETARIO,
-        CONCAT(U.NOMBRES, ' ', U.APELLIDOS) AS NOMBRE_PROPIETARIO,
-        VP.ESTADO
-      FROM MAE_VISITA_PROGRAMADA VP
-      LEFT JOIN MAE_USUARIO U ON VP.ID_USUARIO_PROPIETARIO = U.ID_USUARIO
-      WHERE VP.ESTADO = 1
-      ORDER BY VP.FECHA_LLEGADA ASC
-    `);
-
-    const scheduledVisits = result.recordset.map((visit) => ({
-      ...visit,
-      HORA_LLEGADA: visit.HORA_LLEGADA ? visit.HORA_LLEGADA : null, // Asegurar null si no hay valor
-    }));
-    res.status(200).json(scheduledVisits);
+    const result = await pool
+      .request()
+      .input("id_usuario", sql.Int, userId)
+      .query(`
+        SELECT
+          ID_VISITA_PROGRAMADA,
+          NRO_DPTO,
+          DNI_VISITANTE,
+          NOMBRE_VISITANTE,
+          FECHA_LLEGADA,
+          HORA_LLEGADA,
+          MOTIVO,
+          ID_USUARIO_PROPIETARIO,
+          ESTADO
+        FROM MAE_VISITA_PROGRAMADA
+        WHERE ID_USUARIO_PROPIETARIO = @id_usuario
+      `);
+    console.log("SQL result:", result.recordset);
+    res.status(200).json(result.recordset);
   } catch (error) {
     console.error("Error al obtener visitas programadas:", error);
-    res
-      .status(500)
-      .json({ message: "Error del servidor", error: error.message });
+    res.status(500).json({ message: "Error del servidor", error: error.message });
   }
 };
 // Endpoint para registrar una visita programada como visita activa
@@ -451,6 +428,61 @@ const acceptScheduledVisit = async (req, res) => {
   }
 };
 
+// visitController.js
+const getOwnerDepartments = async (req, res) => {
+  const { id } = req.params;
+  try {
+    const pool = await poolPromise;
+    const result = await pool.request().input("id_usuario", sql.Int, id).query(`
+      SELECT NRO_DPTO
+      FROM MAE_USUARIO
+      WHERE ID_USUARIO = @id_usuario AND NRO_DPTO IS NOT NULL AND ESTADO = 1
+      UNION
+      SELECT NRO_DPTO
+      FROM MAE_USUARIO_DEPARTAMENTO
+      WHERE ID_USUARIO = @id_usuario AND ESTADO = 1
+      ORDER BY NRO_DPTO
+    `);
+    const departments = result.recordset.map((row) => ({
+      NRO_DPTO: row.NRO_DPTO,
+    }));
+    if (departments.length === 0) {
+      return res
+        .status(404)
+        .json({ message: "No se encontraron departamentos para este usuario" });
+    }
+    res.status(200).json(departments);
+  } catch (error) {
+    console.error("Error al obtener departamentos:", error);
+    res
+      .status(500)
+      .json({ message: "Error del servidor", error: error.message });
+  }
+};
+
+// visitController.js
+const cancelScheduledVisit = async (req, res) => {
+  const { id_visita_programada } = req.params;
+  try {
+    const pool = await poolPromise;
+    const result = await pool
+      .request()
+      .input("id_visita_programada", sql.Int, id_visita_programada)
+      .query(`
+        UPDATE MAE_VISITA_PROGRAMADA
+        SET ESTADO = 0
+        WHERE ID_VISITA_PROGRAMADA = @id_visita_programada AND ESTADO = 1
+      `);
+    if (result.rowsAffected[0] === 0) {
+      return res.status(404).json({ message: "Visita no encontrada o ya procesada" });
+    }
+    res.status(200).json({ message: "Visita cancelada correctamente" });
+  } catch (error) {
+    console.error("Error al cancelar visita programada:", error);
+    res.status(500).json({ message: "Error del servidor", error: error.message });
+  }
+};
+
 module.exports = {
   registerVisit,
   getAllVisits,
@@ -460,4 +492,6 @@ module.exports = {
   registerScheduledVisit,
   getScheduledVisits,
   acceptScheduledVisit,
+  getOwnerDepartments,
+  cancelScheduledVisit,
 };
