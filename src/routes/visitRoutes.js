@@ -12,6 +12,7 @@ const {
   acceptScheduledVisit,
   getOwnerDepartments,
   cancelScheduledVisit,
+  getAllScheduledVisits,
 } = require("../controllers/visitController");
 const authMiddleware = require("../middleware/authMiddleware");
 
@@ -51,5 +52,7 @@ router.post(
 );
 
 router.get("/users/:id/departments", authMiddleware, getOwnerDepartments);
+
+router.get("/all-scheduled-visits", authMiddleware, getAllScheduledVisits);
 
 module.exports = router;

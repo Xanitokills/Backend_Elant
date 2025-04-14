@@ -299,19 +299,21 @@ const getScheduledVisits = async (req, res) => {
       .input("id_usuario", sql.Int, userId)
       .query(`
         SELECT
-          ID_VISITA_PROGRAMADA,
-          NRO_DPTO,
-          DNI_VISITANTE,
-          NOMBRE_VISITANTE,
-          FECHA_LLEGADA,
-          HORA_LLEGADA,
-          MOTIVO,
-          ID_USUARIO_PROPIETARIO,
-          ESTADO
-        FROM MAE_VISITA_PROGRAMADA
-        WHERE ID_USUARIO_PROPIETARIO = @id_usuario
+          vp.ID_VISITA_PROGRAMADA,
+          vp.NRO_DPTO,
+          vp.DNI_VISITANTE,
+          vp.NOMBRE_VISITANTE,
+          CONVERT(VARCHAR(10), vp.FECHA_LLEGADA, 120) AS FECHA_LLEGADA,
+          CONVERT(VARCHAR(5), vp.HORA_LLEGADA, 108) AS HORA_LLEGADA,
+          vp.MOTIVO,
+          vp.ID_USUARIO_PROPIETARIO,
+          COALESCE(CONCAT(u.NOMBRES, ' ', u.APELLIDOS), 'Desconocido') AS NOMBRE_PROPIETARIO,
+          vp.ESTADO
+        FROM MAE_VISITA_PROGRAMADA vp
+        LEFT JOIN MAE_USUARIO u ON vp.ID_USUARIO_PROPIETARIO = u.ID_USUARIO
+        WHERE vp.ID_USUARIO_PROPIETARIO = @id_usuario
       `);
-    console.log("SQL result:", result.recordset);
+    console.log("SQL result:", JSON.stringify(result.recordset, null, 2));
     res.status(200).json(result.recordset);
   } catch (error) {
     console.error("Error al obtener visitas programadas:", error);
@@ -483,6 +485,38 @@ const cancelScheduledVisit = async (req, res) => {
   }
 };
 
+// Endpoint para listar todas las visitas programadas (sin filtro por propietario)
+const getAllScheduledVisits = async (req, res) => {
+  try {
+    const userId = req.user ? req.user.userId || req.user.id : null;
+    if (!userId) {
+      return res.status(401).json({ message: "Usuario no autenticado" });
+    }
+    const pool = await poolPromise;
+    const result = await pool.request().query(`
+      SELECT
+        vp.ID_VISITA_PROGRAMADA,
+        vp.NRO_DPTO,
+        vp.DNI_VISITANTE,
+        vp.NOMBRE_VISITANTE,
+        CONVERT(VARCHAR(10), vp.FECHA_LLEGADA, 120) AS FECHA_LLEGADA,
+        CONVERT(VARCHAR(5), vp.HORA_LLEGADA, 108) AS HORA_LLEGADA,
+        vp.MOTIVO,
+        vp.ID_USUARIO_PROPIETARIO,
+        COALESCE(CONCAT(u.NOMBRES, ' ', u.APELLIDOS), 'Desconocido') AS NOMBRE_PROPIETARIO,
+        vp.ESTADO
+      FROM MAE_VISITA_PROGRAMADA vp
+      LEFT JOIN MAE_USUARIO u ON vp.ID_USUARIO_PROPIETARIO = u.ID_USUARIO
+      WHERE vp.ESTADO = 1
+    `);
+    console.log("SQL result (getAllScheduledVisits):", JSON.stringify(result.recordset, null, 2));
+    res.status(200).json(result.recordset);
+  } catch (error) {
+    console.error("Error al obtener todas las visitas programadas:", error);
+    res.status(500).json({ message: "Error del servidor", error: error.message });
+  }
+};
+
 module.exports = {
   registerVisit,
   getAllVisits,
@@ -494,4 +528,5 @@ module.exports = {
   acceptScheduledVisit,
   getOwnerDepartments,
   cancelScheduledVisit,
+  getAllScheduledVisits,
 };
