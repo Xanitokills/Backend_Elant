@@ -13,7 +13,7 @@ const registerVisit = async (req, res) => {
     fecha_ingreso,
     motivo,
     id_usuario_registro,
-    id_usuario_propietario, // Nuevo campo
+    id_usuario_propietario,
     estado,
   } = req.body;
 
@@ -50,7 +50,7 @@ const registerVisit = async (req, res) => {
       .input("fecha_ingreso", fecha_ingreso)
       .input("motivo", motivo)
       .input("id_usuario_registro", id_usuario_registro)
-      .input("id_usuario_propietario", id_usuario_propietario) // Nuevo
+      .input("id_usuario_propietario", id_usuario_propietario)
       .input("estado", estado || 1).query(`
           INSERT INTO MAE_VISITA (
             NRO_DPTO, NOMBRE_VISITANTE, DNI_VISITANTE, FECHA_INGRESO, MOTIVO, 
@@ -90,7 +90,6 @@ const getAllVisits = async (req, res) => {
           V.ESTADO
         FROM MAE_VISITA V
         LEFT JOIN MAE_USUARIO U ON V.ID_USUARIO_PROPIETARIO = U.ID_USUARIO
-        WHERE V.ESTADO = 1
         ORDER BY V.FECHA_INGRESO DESC
       `);
 
@@ -103,7 +102,6 @@ const getAllVisits = async (req, res) => {
       .json({ message: "Error del servidor", error: error.message });
   }
 };
-
 // Endpoint para buscar información de DNI
 const getDniInfo = async (req, res) => {
   const { dni } = req.query;
@@ -179,10 +177,60 @@ const getOwnersByDpto = async (req, res) => {
   }
 };
 
+// Endpoint para terminar una visita
+const endVisit = async (req, res) => {
+  const { id_visita } = req.params;
+
+  if (!id_visita || isNaN(id_visita)) {
+    return res
+      .status(400)
+      .json({ message: "El ID de la visita es requerido y debe ser un número válido" });
+  }
+
+  try {
+    const pool = await poolPromise;
+
+    // Verificar si la visita existe y está activa
+    const visitCheck = await pool
+      .request()
+      .input("id_visita", sql.Int, id_visita)
+      .query(`
+        SELECT ESTADO, FECHA_SALIDA 
+        FROM MAE_VISITA 
+        WHERE ID_VISITA = @id_visita
+      `);
+
+    if (visitCheck.recordset.length === 0) {
+      return res.status(404).json({ message: "Visita no encontrada" });
+    }
+
+    if (visitCheck.recordset[0].ESTADO === 0 || visitCheck.recordset[0].FECHA_SALIDA) {
+      return res.status(400).json({ message: "La visita ya está terminada" });
+    }
+
+    // Actualizar la visita
+    await pool
+      .request()
+      .input("id_visita", sql.Int, id_visita)
+      .query(`
+        UPDATE MAE_VISITA
+        SET ESTADO = 0, FECHA_SALIDA = GETDATE()
+        WHERE ID_VISITA = @id_visita
+      `);
+
+    res.status(200).json({ message: "Visita terminada exitosamente" });
+  } catch (error) {
+    console.error("Error al terminar la visita:", error);
+    res
+      .status(500)
+      .json({ message: "Error del servidor", error: error.message });
+  }
+};
 // Actualiza las exportaciones
 module.exports = {
   registerVisit,
   getAllVisits,
   getDniInfo,
-  getOwnersByDpto, // Nuevo endpoint
+  getOwnersByDpto,
+  endVisit, // Nuevo endpoint
 };
