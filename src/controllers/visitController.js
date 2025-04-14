@@ -294,9 +294,7 @@ const getScheduledVisits = async (req, res) => {
       return res.status(401).json({ message: "Usuario no autenticado" });
     }
     const pool = await poolPromise;
-    const result = await pool
-      .request()
-      .input("id_usuario", sql.Int, userId)
+    const result = await pool.request().input("id_usuario", sql.Int, userId)
       .query(`
         SELECT
           vp.ID_VISITA_PROGRAMADA,
@@ -317,7 +315,9 @@ const getScheduledVisits = async (req, res) => {
     res.status(200).json(result.recordset);
   } catch (error) {
     console.error("Error al obtener visitas programadas:", error);
-    res.status(500).json({ message: "Error del servidor", error: error.message });
+    res
+      .status(500)
+      .json({ message: "Error del servidor", error: error.message });
   }
 };
 // Endpoint para registrar una visita programada como visita activa
@@ -462,29 +462,68 @@ const getOwnerDepartments = async (req, res) => {
   }
 };
 
-// visitController.js
 const cancelScheduledVisit = async (req, res) => {
   const { id_visita_programada } = req.params;
+  console.log(`Attempting to cancel visit ${id_visita_programada}`);
   try {
     const pool = await poolPromise;
-    const result = await pool
-      .request()
-      .input("id_visita_programada", sql.Int, id_visita_programada)
-      .query(`
-        UPDATE MAE_VISITA_PROGRAMADA
-        SET ESTADO = 0
-        WHERE ID_VISITA_PROGRAMADA = @id_visita_programada AND ESTADO = 1
-      `);
-    if (result.rowsAffected[0] === 0) {
-      return res.status(404).json({ message: "Visita no encontrada o ya procesada" });
+    const transaction = new sql.Transaction(pool);
+    await transaction.begin();
+
+    try {
+      console.log(`Updating visit ${id_visita_programada} with atomic UPDATE`);
+      const result = await transaction
+        .request()
+        .input("id_visita_programada", sql.Int, id_visita_programada)
+        .query(`
+          UPDATE MAE_VISITA_PROGRAMADA
+          SET ESTADO = 0
+          OUTPUT DELETED.ESTADO AS PreviousEstado
+          WHERE ID_VISITA_PROGRAMADA = @id_visita_programada AND ESTADO = 1
+        `);
+      console.log(`Update result: rowsAffected=${result.rowsAffected[0]}, previousEstado=${result.recordset[0]?.PreviousEstado}`);
+
+      if (result.rowsAffected[0] === 0) {
+        console.log(`No rows affected for visit ${id_visita_programada}, checking current state`);
+        const checkVisit = await transaction
+          .request()
+          .input("id_visita_programada", sql.Int, id_visita_programada)
+          .query(`
+            SELECT ESTADO
+            FROM MAE_VISITA_PROGRAMADA
+            WHERE ID_VISITA_PROGRAMADA = @id_visita_programada
+          `);
+        console.log(`Current state: ${JSON.stringify(checkVisit.recordset, null, 2)}`);
+
+        await transaction.rollback();
+
+        if (checkVisit.recordset.length === 0) {
+          console.log(`Visit ${id_visita_programada} not found`);
+          return res.status(404).json({ message: "Visita no encontrada" });
+        }
+
+        if (checkVisit.recordset[0].ESTADO === 0) {
+          console.log(`Visit ${id_visita_programada} already processed or canceled`);
+          return res.status(400).json({ message: "La visita ya está procesada o cancelada" });
+        }
+
+        console.log(`Visit ${id_visita_programada} has invalid state`);
+        return res.status(400).json({ message: "No se pudo cancelar la visita: estado no válido" });
+      }
+
+      await transaction.commit();
+      console.log(`Visit ${id_visita_programada} canceled successfully`);
+      res.status(200).json({ message: "Visita cancelada correctamente" });
+    } catch (error) {
+      await transaction.rollback();
+      console.error(`Error during transaction for visit ${id_visita_programada}:`, error);
+      throw error;
     }
-    res.status(200).json({ message: "Visita cancelada correctamente" });
   } catch (error) {
     console.error("Error al cancelar visita programada:", error);
     res.status(500).json({ message: "Error del servidor", error: error.message });
   }
 };
-
 // Endpoint para listar todas las visitas programadas (sin filtro por propietario)
 const getAllScheduledVisits = async (req, res) => {
   try {
@@ -509,11 +548,16 @@ const getAllScheduledVisits = async (req, res) => {
       LEFT JOIN MAE_USUARIO u ON vp.ID_USUARIO_PROPIETARIO = u.ID_USUARIO
       WHERE vp.ESTADO = 1
     `);
-    console.log("SQL result (getAllScheduledVisits):", JSON.stringify(result.recordset, null, 2));
+    console.log(
+      "SQL result (getAllScheduledVisits):",
+      JSON.stringify(result.recordset, null, 2)
+    );
     res.status(200).json(result.recordset);
   } catch (error) {
     console.error("Error al obtener todas las visitas programadas:", error);
-    res.status(500).json({ message: "Error del servidor", error: error.message });
+    res
+      .status(500)
+      .json({ message: "Error del servidor", error: error.message });
   }
 };
 
