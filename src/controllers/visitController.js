@@ -13,6 +13,7 @@ const registerVisit = async (req, res) => {
     fecha_ingreso,
     motivo,
     id_usuario_registro,
+    id_usuario_propietario, // Nuevo campo
     estado,
   } = req.body;
 
@@ -22,7 +23,8 @@ const registerVisit = async (req, res) => {
     !dni_visitante ||
     !fecha_ingreso ||
     !motivo ||
-    !id_usuario_registro
+    !id_usuario_registro ||
+    !id_usuario_propietario
   ) {
     return res
       .status(400)
@@ -48,12 +50,15 @@ const registerVisit = async (req, res) => {
       .input("fecha_ingreso", fecha_ingreso)
       .input("motivo", motivo)
       .input("id_usuario_registro", id_usuario_registro)
+      .input("id_usuario_propietario", id_usuario_propietario) // Nuevo
       .input("estado", estado || 1).query(`
           INSERT INTO MAE_VISITA (
-            NRO_DPTO, NOMBRE_VISITANTE, DNI_VISITANTE, FECHA_INGRESO, MOTIVO, ID_USUARIO_REGISTRO, ESTADO
+            NRO_DPTO, NOMBRE_VISITANTE, DNI_VISITANTE, FECHA_INGRESO, MOTIVO, 
+            ID_USUARIO_REGISTRO, ID_USUARIO_PROPIETARIO, ESTADO
           )
           VALUES (
-            @nro_dpto, @nombre_visitante, @dni_visitante, @fecha_ingreso, @motivo, @id_usuario_registro, @estado
+            @nro_dpto, @nombre_visitante, @dni_visitante, @fecha_ingreso, @motivo, 
+            @id_usuario_registro, @id_usuario_propietario, @estado
           )
         `);
 
@@ -72,18 +77,21 @@ const getAllVisits = async (req, res) => {
     const pool = await poolPromise;
     const result = await pool.request().query(`
         SELECT 
-          ID_VISITA,
-          NRO_DPTO,
-          NOMBRE_VISITANTE,
-          DNI_VISITANTE,
-          FECHA_INGRESO,
-          FECHA_SALIDA,
-          MOTIVO,
-          ID_USUARIO_REGISTRO,
-          ESTADO
-        FROM MAE_VISITA
-        WHERE ESTADO = 1
-        ORDER BY FECHA_INGRESO DESC
+          V.ID_VISITA,
+          V.NRO_DPTO,
+          V.NOMBRE_VISITANTE,
+          V.DNI_VISITANTE,
+          V.FECHA_INGRESO,
+          V.FECHA_SALIDA,
+          V.MOTIVO,
+          V.ID_USUARIO_REGISTRO,
+          V.ID_USUARIO_PROPIETARIO,
+          CONCAT(U.NOMBRES, ' ', U.APELLIDOS) AS NOMBRE_PROPIETARIO,
+          V.ESTADO
+        FROM MAE_VISITA V
+        LEFT JOIN MAE_USUARIO U ON V.ID_USUARIO_PROPIETARIO = U.ID_USUARIO
+        WHERE V.ESTADO = 1
+        ORDER BY V.FECHA_INGRESO DESC
       `);
 
     const visits = result.recordset;
@@ -138,9 +146,43 @@ const getDniInfo = async (req, res) => {
   }
 };
 
-// Export the new functions
+// Endpoint para obtener propietarios por número de departamento
+const getOwnersByDpto = async (req, res) => {
+  const { nro_dpto } = req.query;
+
+  if (!nro_dpto || isNaN(nro_dpto)) {
+    return res
+      .status(400)
+      .json({ message: "El número de departamento es requerido y debe ser un número válido" });
+  }
+
+  try {
+    const pool = await poolPromise;
+    const result = await pool
+      .request()
+      .input("nro_dpto", sql.Int, nro_dpto)
+      .query(`
+        SELECT 
+          ID_USUARIO,
+          CONCAT(NOMBRES, ' ', APELLIDOS) AS NOMBRE_COMPLETO
+        FROM MAE_USUARIO
+        WHERE NRO_DPTO = @nro_dpto AND ESTADO = 1
+      `);
+
+    const owners = result.recordset;
+    res.status(200).json(owners);
+  } catch (error) {
+    console.error("Error al obtener propietarios:", error);
+    res
+      .status(500)
+      .json({ message: "Error del servidor", error: error.message });
+  }
+};
+
+// Actualiza las exportaciones
 module.exports = {
-  registerVisit, // New
-  getAllVisits, // New
+  registerVisit,
+  getAllVisits,
   getDniInfo,
+  getOwnersByDpto, // Nuevo endpoint
 };

@@ -5,6 +5,7 @@ const {
   registerVisit,
   getAllVisits,
   getDniInfo,
+  getOwnersByDpto,
 } = require("../controllers/visitController");
 const authMiddleware = require("../middleware/authMiddleware");
 
@@ -16,5 +17,8 @@ router.get("/visits", authMiddleware, getAllVisits);
 
 // Ruta para buscar información de DNI
 router.get("/dni", authMiddleware, getDniInfo);
+
+// Ruta para obtener propietarios por número de departamento
+router.get("/owners", authMiddleware, getOwnersByDpto);
 
 module.exports = router;
