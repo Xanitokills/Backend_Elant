@@ -23,16 +23,40 @@ const generateToken = (userId, role) => {
   });
 };
 
+// Función para obtener permisos del usuario
+const getUserPermissions = async (userId) => {
+  try {
+    const pool = await poolPromise;
+    const result = await pool.request()
+      .input("userId", sql.Int, userId)
+      .query(`
+        SELECT DISTINCT m.NOMBRE AS permiso
+        FROM MAE_ROL_MENU rm
+        JOIN MAE_MENU m ON rm.MENU_ID = m.ID
+        JOIN MAE_USUARIO u ON u.ID_TIPO_USUARIO = rm.ID_TIPO_USUARIO
+        WHERE u.ID_USUARIO = @userId AND m.ESTADO = 1
+        UNION
+        SELECT DISTINCT s.NOMBRE AS permiso
+        FROM MAE_ROL_SUBMENU rs
+        JOIN MAE_SUBMENU s ON rs.SUBMENU_ID = s.ID
+        JOIN MAE_USUARIO u ON u.ID_TIPO_USUARIO = rs.ID_TIPO_USUARIO
+        WHERE u.ID_USUARIO = @userId AND s.ESTADO = 1
+      `);
+    const permissions = result.recordset.map((p) => p.permiso);
+    logger.info(`Permisos para usuario ${userId}: ${permissions}`);
+    return permissions;
+  } catch (error) {
+    logger.error("Error al obtener permisos:", error);
+    return [];
+  }
+};
+
 // Endpoint de login
 const login = async (req, res) => {
-  console.log("Cuerpo de la solicitud:", req.body);
   const { email, password } = req.body;
 
-  // Validación de entrada
   if (!email || !password) {
-    return res
-      .status(400)
-      .json({ message: "Correo y contraseña son requeridos" });
+    return res.status(400).json({ message: "Correo y contraseña son requeridos" });
   }
 
   if (!validateEmail(email)) {
@@ -41,7 +65,9 @@ const login = async (req, res) => {
 
   try {
     const pool = await poolPromise;
-    const result = await pool.request().input("correo", email).query(`
+    const result = await pool.request()
+      .input("correo", email)
+      .query(`
         SELECT u.ID_USUARIO, u.CORREO, u.CONTRASENA_HASH, u.ID_TIPO_USUARIO, u.NOMBRES, u.APELLIDOS, t.DETALLE_USUARIO, u.PRIMER_INICIO
         FROM MAE_USUARIO u
         LEFT JOIN MAE_TIPO_USUARIO t ON u.ID_TIPO_USUARIO = t.ID_TIPO_USUARIO
@@ -50,22 +76,19 @@ const login = async (req, res) => {
 
     const user = result.recordset[0];
 
-    // Verificar si el usuario existe
     if (!user) {
       return res.status(401).json({ message: "Credenciales inválidas" });
     }
 
-    // Comparar la contraseña
     const isMatch = await bcrypt.compare(password, user.CONTRASENA_HASH);
     if (!isMatch) {
       return res.status(401).json({ message: "Credenciales inválidas" });
     }
 
-    // Generar el token JWT
     const role = user.DETALLE_USUARIO || "Usuario";
     const token = generateToken(user.ID_USUARIO, role);
+    const permissions = await getUserPermissions(user.ID_USUARIO);
 
-    // Respuesta exitosa
     res.status(200).json({
       token,
       role,
@@ -76,40 +99,61 @@ const login = async (req, res) => {
         name: `${user.NOMBRES} ${user.APELLIDOS}`,
         role: role,
       },
+      permissions,
     });
   } catch (error) {
-    console.error("Error al iniciar sesión:", error);
-    res
-      .status(500)
-      .json({ message: "Error del servidor", error: error.message });
+    logger.error("Error al iniciar sesión:", error);
+    res.status(500).json({ message: "Error del servidor", error: error.message });
   }
 };
 
 // Endpoint de validación de token
-const validate = (req, res) => {
+const validate = async (req, res) => {
   const authHeader = req.headers.authorization;
 
-  // Verificar si el header de autorización existe y tiene el formato correcto
   if (!authHeader || !authHeader.startsWith("Bearer ")) {
-    return res
-      .status(401)
-      .json({ message: "Token no proporcionado o formato inválido" });
+    return res.status(401).json({ message: "Token no proporcionado o formato inválido" });
   }
 
   const token = authHeader.split(" ")[1];
 
-  // Verificar si JWT_SECRET está definido
   if (!process.env.JWT_SECRET) {
-    return res
-      .status(500)
-      .json({ message: "Error del servidor: JWT_SECRET no está definido" });
+    return res.status(500).json({ message: "Error del servidor: JWT_SECRET no está definido" });
   }
 
   try {
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    res.status(200).json({ message: "Sesión válida", user: decoded });
+    const userId = decoded.id;
+
+    const pool = await poolPromise;
+    const result = await pool.request()
+      .input("id", sql.Int, userId)
+      .query(`
+        SELECT u.ID_USUARIO, u.NOMBRES, u.APELLIDOS, t.DETALLE_USUARIO
+        FROM MAE_USUARIO u
+        LEFT JOIN MAE_TIPO_USUARIO t ON u.ID_TIPO_USUARIO = t.ID_TIPO_USUARIO
+        WHERE u.ID_USUARIO = @id AND u.ESTADO = 1
+      `);
+
+    const user = result.recordset[0];
+    if (!user) {
+      return res.status(401).json({ message: "Usuario no encontrado" });
+    }
+
+    const permissions = await getUserPermissions(userId);
+
+    res.status(200).json({
+      message: "Sesión válida",
+      user: {
+        id: user.ID_USUARIO,
+        name: `${user.NOMBRES} ${user.APELLIDOS}`,
+      },
+      userName: `${user.NOMBRES} ${user.APELLIDOS}`,
+      role: user.DETALLE_USUARIO || "Usuario",
+      permissions,
+    });
   } catch (error) {
-    console.error("Error al validar el token:", error);
+    logger.error("Error al validar el token:", error);
     if (error.name === "TokenExpiredError") {
       return res.status(401).json({ message: "Token expirado" });
     }
@@ -119,6 +163,7 @@ const validate = (req, res) => {
     res.status(401).json({ message: "Error al validar el token" });
   }
 };
+
 
 // Endpoint de registro
 const register = async (req, res) => {

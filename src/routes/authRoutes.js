@@ -14,55 +14,19 @@ const {
   changeAuthenticatedUserPassword,
 } = require("../controllers/authController");
 const authMiddleware = require("../middleware/authMiddleware");
+const { checkPermission } = require("../middleware/permissions");
 const upload = require("../config/multerConfig");
 
-// Debug the import
-console.log("Imported authController:", {
-  login,
-  validate,
-  register,
-  getAllUsers,
-  updateUser,
-  deleteUser,
-  getAllMovements,
-  uploadImage,
-  getLoginImages,
-  deleteLoginImage,
-});
-
-// Ruta para iniciar sesión
 router.post("/login", login);
-
-// Ruta para validar la sesión
 router.get("/validate", validate);
-
-// Ruta para registrar usuarios
-router.post("/register", authMiddleware, register);
-
-// Ruta para listar todos los usuarios
-router.get("/users", authMiddleware, getAllUsers);
-
-// Ruta para actualizar un usuario
-router.put("/users/:id", authMiddleware, updateUser);
-
-// Ruta para eliminar un usuario
-router.delete("/users/:id", authMiddleware, deleteUser);
-
-// Ruta para listar todos los movimientos
-router.get("/movements", authMiddleware, getAllMovements);
-
-//Ruta para obtener Imagenes de Login
-router.post("/upload-login-images", upload, uploadImage);
-
-router.get("/get-login-images", getLoginImages);
-
-router.delete("/delete-login-image/:imageId", deleteLoginImage);
-
-// ✅ Cambiar contraseña del usuario autenticado
-router.put(
-  "/auth/change-password",
-  authMiddleware,
-  changeAuthenticatedUserPassword
-);
+router.post("/register", authMiddleware, checkPermission("Usuarios"), register);
+router.get("/users", authMiddleware, checkPermission("Usuarios"), getAllUsers);
+router.put("/users/:id", authMiddleware, checkPermission("Usuarios"), updateUser);
+router.delete("/users/:id", authMiddleware, checkPermission("Usuarios"), deleteUser);
+router.get("/movements", authMiddleware, checkPermission("Movimientos"), getAllMovements);
+router.get("/get-login-images", authMiddleware, checkPermission("ConfigLogin"), getLoginImages);
+router.post("/upload-login-images", authMiddleware, checkPermission("ConfigLogin"), upload.single("image"), uploadImage);
+router.delete("/delete-login-image/:imageId", authMiddleware, checkPermission("ConfigLogin"), deleteLoginImage);
+router.put("/auth/change-password", authMiddleware, changeAuthenticatedUserPassword);
 
 module.exports = router;
