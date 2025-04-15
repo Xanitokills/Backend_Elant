@@ -23,7 +23,6 @@ const generateToken = (userId, role) => {
   });
 };
 
-// Función para obtener permisos del usuario
 const getUserPermissions = async (userId) => {
   try {
     const pool = await poolPromise;
@@ -32,13 +31,13 @@ const getUserPermissions = async (userId) => {
       .query(`
         SELECT DISTINCT m.NOMBRE AS permiso
         FROM MAE_ROL_MENU rm
-        JOIN MAE_MENU m ON rm.MENU_ID = m.ID
+        JOIN MAE_MENU m ON rm.ID_MENU = m.ID_MENU
         JOIN MAE_USUARIO u ON u.ID_TIPO_USUARIO = rm.ID_TIPO_USUARIO
         WHERE u.ID_USUARIO = @userId AND m.ESTADO = 1
         UNION
         SELECT DISTINCT s.NOMBRE AS permiso
         FROM MAE_ROL_SUBMENU rs
-        JOIN MAE_SUBMENU s ON rs.SUBMENU_ID = s.ID
+        JOIN MAE_SUBMENU s ON rs.ID_SUBMENU = s.ID_SUBMENU
         JOIN MAE_USUARIO u ON u.ID_TIPO_USUARIO = rs.ID_TIPO_USUARIO
         WHERE u.ID_USUARIO = @userId AND s.ESTADO = 1
       `);

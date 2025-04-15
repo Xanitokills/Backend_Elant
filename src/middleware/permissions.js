@@ -22,16 +22,19 @@ const checkPermission = (requiredPermission) => {
         .query(`
           SELECT DISTINCT m.NOMBRE AS permiso
           FROM MAE_ROL_MENU rm
-          JOIN MAE_MENU m ON rm.MENU_ID = m.ID
-          WHERE rm.ID_USUARIO = @userId
+          JOIN MAE_MENU m ON rm.ID_MENU = m.ID_MENU
+          JOIN MAE_USUARIO u ON u.ID_TIPO_USUARIO = rm.ID_TIPO_USUARIO
+          WHERE u.ID_USUARIO = @userId AND m.ESTADO = 1
           UNION
           SELECT DISTINCT s.NOMBRE AS permiso
           FROM MAE_ROL_SUBMENU rs
-          JOIN MAE_SUBMENU s ON rs.SUBMENU_ID = s.ID
-          WHERE rs.ID_USUARIO = @userId
+          JOIN MAE_SUBMENU s ON rs.ID_SUBMENU = s.ID_SUBMENU
+          JOIN MAE_USUARIO u ON u.ID_TIPO_USUARIO = rs.ID_TIPO_USUARIO
+          WHERE u.ID_USUARIO = @userId AND s.ESTADO = 1
         `);
 
       const permissions = result.recordset.map((p) => p.permiso);
+      logger.info(`Permisos verificados para usuario ${userId}: ${permissions}`);
 
       if (!permissions.includes(requiredPermission)) {
         logger.warn(`Usuario ${userId} no tiene permiso: ${requiredPermission}`);
