@@ -365,11 +365,25 @@ const acceptScheduledVisit = async (req, res) => {
     }
 
     // Validar que FECHA_LLEGADA sea exactamente la fecha actual
-    const today = new Date().toISOString().split("T")[0];
-    const fechaLlegadaFormatted = new Date(scheduledVisit.FECHA_LLEGADA)
-      .toISOString()
-      .split("T")[0];
-    if (fechaLlegadaFormatted !== today) {
+    const today = new Date();
+    const utcOffset = -5 * 60; // UTC-5 en minutos
+    const todayAdjusted = new Date(today.getTime() + utcOffset * 60 * 1000);
+    const todayFormatted = todayAdjusted.toISOString().split("T")[0].trim();
+    const fechaLlegadaFormatted = scheduledVisit.FECHA_LLEGADA.toISOString()
+      .split("T")[0]
+      .trim();
+
+    console.log("Backend - today (original):", today.toISOString());
+    console.log("Backend - todayAdjusted:", todayAdjusted.toISOString());
+    console.log("Backend - todayFormatted:", todayFormatted);
+    console.log("Backend - FECHA_LLEGADA raw:", scheduledVisit.FECHA_LLEGADA);
+    console.log("Backend - fechaLlegadaFormatted:", fechaLlegadaFormatted);
+    console.log(
+      "Backend - Comparación:",
+      fechaLlegadaFormatted === todayFormatted
+    );
+
+    if (fechaLlegadaFormatted !== todayFormatted) {
       return res.status(400).json({
         message:
           "La visita solo puede ser aceptada el día de la fecha de llegada programada",
@@ -429,7 +443,6 @@ const acceptScheduledVisit = async (req, res) => {
       .json({ message: "Error del servidor", error: error.message });
   }
 };
-
 // visitController.js
 const getOwnerDepartments = async (req, res) => {
   const { id } = req.params;
@@ -474,26 +487,30 @@ const cancelScheduledVisit = async (req, res) => {
       console.log(`Updating visit ${id_visita_programada} with atomic UPDATE`);
       const result = await transaction
         .request()
-        .input("id_visita_programada", sql.Int, id_visita_programada)
-        .query(`
+        .input("id_visita_programada", sql.Int, id_visita_programada).query(`
           UPDATE MAE_VISITA_PROGRAMADA
           SET ESTADO = 0
           OUTPUT DELETED.ESTADO AS PreviousEstado
           WHERE ID_VISITA_PROGRAMADA = @id_visita_programada AND ESTADO = 1
         `);
-      console.log(`Update result: rowsAffected=${result.rowsAffected[0]}, previousEstado=${result.recordset[0]?.PreviousEstado}`);
+      console.log(
+        `Update result: rowsAffected=${result.rowsAffected[0]}, previousEstado=${result.recordset[0]?.PreviousEstado}`
+      );
 
       if (result.rowsAffected[0] === 0) {
-        console.log(`No rows affected for visit ${id_visita_programada}, checking current state`);
+        console.log(
+          `No rows affected for visit ${id_visita_programada}, checking current state`
+        );
         const checkVisit = await transaction
           .request()
-          .input("id_visita_programada", sql.Int, id_visita_programada)
-          .query(`
+          .input("id_visita_programada", sql.Int, id_visita_programada).query(`
             SELECT ESTADO
             FROM MAE_VISITA_PROGRAMADA
             WHERE ID_VISITA_PROGRAMADA = @id_visita_programada
           `);
-        console.log(`Current state: ${JSON.stringify(checkVisit.recordset, null, 2)}`);
+        console.log(
+          `Current state: ${JSON.stringify(checkVisit.recordset, null, 2)}`
+        );
 
         await transaction.rollback();
 
@@ -503,12 +520,18 @@ const cancelScheduledVisit = async (req, res) => {
         }
 
         if (checkVisit.recordset[0].ESTADO === 0) {
-          console.log(`Visit ${id_visita_programada} already processed or canceled`);
-          return res.status(400).json({ message: "La visita ya está procesada o cancelada" });
+          console.log(
+            `Visit ${id_visita_programada} already processed or canceled`
+          );
+          return res
+            .status(400)
+            .json({ message: "La visita ya está procesada o cancelada" });
         }
 
         console.log(`Visit ${id_visita_programada} has invalid state`);
-        return res.status(400).json({ message: "No se pudo cancelar la visita: estado no válido" });
+        return res
+          .status(400)
+          .json({ message: "No se pudo cancelar la visita: estado no válido" });
       }
 
       await transaction.commit();
@@ -516,12 +539,17 @@ const cancelScheduledVisit = async (req, res) => {
       res.status(200).json({ message: "Visita cancelada correctamente" });
     } catch (error) {
       await transaction.rollback();
-      console.error(`Error during transaction for visit ${id_visita_programada}:`, error);
+      console.error(
+        `Error during transaction for visit ${id_visita_programada}:`,
+        error
+      );
       throw error;
     }
   } catch (error) {
     console.error("Error al cancelar visita programada:", error);
-    res.status(500).json({ message: "Error del servidor", error: error.message });
+    res
+      .status(500)
+      .json({ message: "Error del servidor", error: error.message });
   }
 };
 // Endpoint para listar todas las visitas programadas (sin filtro por propietario)
