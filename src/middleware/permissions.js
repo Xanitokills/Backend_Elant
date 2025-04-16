@@ -1,22 +1,36 @@
 const { poolPromise } = require("../config/db");
-const jwt = require("jsonwebtoken");
 const logger = require("../config/logger");
 const sql = require("mssql");
 
 const checkPermission = (requiredPermission) => {
   return async (req, res, next) => {
-    const token = req.header("Authorization")?.replace("Bearer ", "");
+    const userId = req.user?.id;
 
-    if (!token) {
-      logger.warn("No se proporcionó token");
-      return res.status(401).json({ message: "No token provided" });
+    if (!userId) {
+      logger.warn("No se proporcionó userId");
+      return res.status(401).json({ message: "Usuario no autenticado" });
     }
 
     try {
-      const decoded = jwt.verify(token, process.env.JWT_SECRET);
-      const userId = decoded.id;
-
       const pool = await poolPromise;
+      // Verificar el usuario
+      const userResult = await pool.request()
+        .input("userId", sql.Int, userId)
+        .query(`
+          SELECT ID_USUARIO, NOMBRES, CORREO, ID_TIPO_USUARIO
+          FROM MAE_USUARIO
+          WHERE ID_USUARIO = @userId AND ESTADO = 1
+        `);
+
+      if (userResult.recordset.length === 0) {
+        logger.warn(`Usuario no encontrado para ID: ${userId}`);
+        return res.status(401).json({ message: "Usuario no encontrado" });
+      }
+
+      const user = userResult.recordset[0];
+      logger.info(`Usuario verificado: ID=${user.ID_USUARIO}, Correo=${user.CORREO}, Tipo=${user.ID_TIPO_USUARIO}`);
+
+      // Obtener permisos
       const result = await pool.request()
         .input("userId", sql.Int, userId)
         .query(`
@@ -44,7 +58,7 @@ const checkPermission = (requiredPermission) => {
       next();
     } catch (error) {
       logger.error("Error verificando permisos:", error);
-      res.status(401).json({ message: "Token inválido" });
+      res.status(500).json({ message: "Error al verificar permisos" });
     }
   };
 };
