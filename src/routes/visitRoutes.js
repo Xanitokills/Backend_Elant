@@ -1,6 +1,6 @@
 const express = require("express");
 const router = express.Router();
-
+const { checkPermission } = require("../middleware/permissions");
 const {
   registerVisit,
   getAllVisits,
@@ -16,43 +16,16 @@ const {
 } = require("../controllers/visitController");
 const authMiddleware = require("../middleware/authMiddleware");
 
-// Ruta para registrar una visita
-router.post("/visits", authMiddleware, registerVisit);
-
-// Ruta para listar todas las visitas
-router.get("/visits", authMiddleware, getAllVisits);
-
-// Ruta para buscar información de DNI
-router.get("/dni", authMiddleware, getDniInfo);
-
-// Ruta para obtener propietarios por número de departamento
-router.get("/owners", authMiddleware, getOwnersByDpto);
-
-// Ruta para terminar una visita
-router.put("/visits/:id_visita/end", authMiddleware, endVisit);
-
-// visitRoutes.js
-router.put(
-  "/scheduled-visits/:id_visita_programada/cancel",
-  authMiddleware,
-  cancelScheduledVisit
-);
-
-// Ruta para registrar una visita programada
-router.post("/scheduled-visits", authMiddleware, registerScheduledVisit);
-
-// Ruta para listar visitas programadas
-router.get("/scheduled-visits", authMiddleware, getScheduledVisits);
-
-// Ruta para aceptar una visita programada
-router.post(
-  "/scheduled-visits/:id_visita_programada/accept",
-  authMiddleware,
-  acceptScheduledVisit
-);
-
-router.get("/users/:id/departments", authMiddleware, getOwnerDepartments);
-
-router.get("/all-scheduled-visits", authMiddleware, getAllScheduledVisits);
+router.post("/visits", authMiddleware, checkPermission("Gestión Visitas"), registerVisit);
+router.get("/visits", authMiddleware, checkPermission("Gestión Visitas"), getAllVisits);
+router.get("/dni", authMiddleware, checkPermission("Gestión Visitas"), getDniInfo);
+router.get("/owners", authMiddleware, checkPermission("Gestión Visitas"), getOwnersByDpto);
+router.put("/visits/:id_visita/end", authMiddleware, checkPermission("Gestión Visitas"), endVisit);
+router.post("/scheduled-visits", authMiddleware, checkPermission("Visitas Programadas"), registerScheduledVisit);
+router.get("/scheduled-visits", authMiddleware, checkPermission("Visitas Programadas"), getScheduledVisits);
+router.post("/scheduled-visits/:id_visita_programada/accept", authMiddleware, checkPermission("Visitas Programadas"), acceptScheduledVisit);
+router.put("/scheduled-visits/:id_visita_programada/cancel", authMiddleware, checkPermission("Visitas Programadas"), cancelScheduledVisit);
+router.get("/all-scheduled-visits", authMiddleware, checkPermission("Visitas Programadas"), getAllScheduledVisits);
+router.get("/users/:id/departments", authMiddleware, getOwnerDepartments); // Sin checkPermission si es para el propio usuario
 
 module.exports = router;
