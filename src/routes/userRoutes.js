@@ -15,13 +15,16 @@ const {
   quitarRolComite,
 } = require("../controllers/userController");
 
+// Rutas protegidas con ID_MENU=1 (Usuarios)
+router.put("/users/:id", authMiddleware, checkPermission({ menuId: 1 }), updateUser);
+router.put("/users/change-password/:id", authMiddleware, checkPermission({ menuId: 1 }), changePassword);
+router.post("/users/:id/asignar-comite", authMiddleware, checkPermission({ menuId: 1 }), asignarRolComite);
+router.delete("/users/:id/quitar-comite", authMiddleware, checkPermission({ menuId: 1 }), quitarRolComite);
+
+// Rutas sin permisos específicos
 router.get("/user-types", getUserTypes);
 router.get("/sexes", getSexes);
 router.get("/get-roles", getRoles);
 router.get("/sidebar/:id", authMiddleware, getSidebarByUserId);
-router.put("/users/:id", authMiddleware, checkPermission("Usuarios"), updateUser);
-router.put("/users/change-password/:id", authMiddleware, checkPermission("Usuarios"), changePassword);
-router.post("/users/:id/asignar-comite", authMiddleware, checkPermission("Usuarios"), asignarRolComite);
-router.delete("/users/:id/quitar-comite", authMiddleware, checkPermission("Usuarios"), quitarRolComite);
 
 module.exports = router;

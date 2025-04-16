@@ -10,10 +10,13 @@ const {
 const authMiddleware = require("../middleware/authMiddleware");
 const { checkPermission } = require("../middleware/permissions");
 
+// Rutas protegidas con ID_SUBMENU=8 (Reservas)
+router.get("/slots", authMiddleware, checkPermission({ submenuId: 8 }), getSlots);
+router.get("/slots/occupied", authMiddleware, checkPermission({ submenuId: 8 }), getOccupiedSlots);
+router.post("/", authMiddleware, checkPermission({ submenuId: 8 }), createReservation);
+router.get("/user/:userId", authMiddleware, checkPermission({ submenuId: 8 }), getUserReservations);
+
+// Ruta sin permisos específicos
 router.get("/areas", getAreas);
-router.get("/slots", authMiddleware, checkPermission("Reservas"), getSlots);
-router.get("/slots/occupied", authMiddleware, checkPermission("Reservas"), getOccupiedSlots);
-router.post("/", authMiddleware, checkPermission("Reservas"), createReservation);
-router.get("/user/:userId", authMiddleware, checkPermission("Reservas"), getUserReservations);
 
 module.exports = router;

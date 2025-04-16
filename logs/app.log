@@ -8882,3 +8882,361 @@
 2025-04-12T06:38:29.381Z info: 🔐 Token recibido:
 2025-04-12T06:38:29.382Z info: ✅ Token decodificado:
 2025-04-12T06:38:29.684Z info: ✅ Usuario autenticado correctamente:
+2025-04-16T18:21:23.138Z info: Cargando rutas...
+2025-04-16T18:21:23.140Z info: Rutas de movementRoutes cargadas.
+2025-04-16T18:21:23.140Z info: Rutas de authRoutes cargadas.
+2025-04-16T18:21:23.140Z info: Rutas de doorRoutes cargadas.
+2025-04-16T18:21:23.140Z info: Rutas de userRoutes cargadas.
+2025-04-16T18:21:23.141Z info: Rutas de menuRoutes cargadas.
+2025-04-16T18:21:23.141Z info: Rutas de visitRoutes cargadas.
+2025-04-16T18:21:23.141Z info: Rutas de reservationRoutes cargadas.
+2025-04-16T18:21:23.144Z info: ✅ Server running on port 4000
+2025-04-16T18:21:36.607Z error: Error al validar el token: jwt expired
+2025-04-16T18:21:36.617Z error: Error al validar el token: jwt expired
+2025-04-16T18:21:36.665Z info: Iniciando la obtención de imágenes...
+2025-04-16T18:21:39.093Z info: Iniciando la obtención de imágenes...
+2025-04-16T18:21:39.863Z info: Permisos para usuario 4: Áreas Comunes,Cambio Contraseña,Configuración,Control de Ingresos y Salidas,Dashboard,Gestión de Ingreso,Gestión de Menús y Submenús,Gestión Visitas,Lista de Usuarios,Login,Recepción,Registrar Pedido,Registrar Usuarios,Reservas,Usuarios,Visitas Programadas
+2025-04-16T18:21:39.995Z info: 🛡️ authMiddleware ejecutado
+2025-04-16T18:21:39.997Z info: 🔐 Token recibido
+2025-04-16T18:21:39.998Z info: ✅ Token decodificado: ID=4, datos={"id":4,"role":"Sistemas","iat":1744827699,"exp":1744831299}
+2025-04-16T18:21:40.000Z info: 🛡️ authMiddleware ejecutado
+2025-04-16T18:21:40.000Z info: 🔐 Token recibido
+2025-04-16T18:21:40.001Z info: ✅ Token decodificado: ID=4, datos={"id":4,"role":"Sistemas","iat":1744827699,"exp":1744831299}
+2025-04-16T18:21:40.296Z info: ✅ Usuario autenticado: ID=4, Correo=jorgejesus_30@outlook.com, Tipo=1, Rol=Sistemas
+2025-04-16T18:21:40.296Z info: Solicitud de menú para el usuario ID: 4
+2025-04-16T18:21:40.582Z info: ✅ Usuario autenticado: ID=4, Correo=jorgejesus_30@outlook.com, Tipo=1, Rol=Sistemas
+2025-04-16T18:21:40.886Z info: 🛡️ authMiddleware ejecutado
+2025-04-16T18:21:40.888Z info: 🔐 Token recibido
+2025-04-16T18:21:40.889Z info: ✅ Token decodificado: ID=4, datos={"id":4,"role":"Sistemas","iat":1744827699,"exp":1744831299}
+2025-04-16T18:21:41.162Z info: Usuario verificado: ID=4, Correo=jorgejesus_30@outlook.com, Tipo=1
+2025-04-16T18:21:41.205Z info: ✅ Usuario autenticado: ID=4, Correo=jorgejesus_30@outlook.com, Tipo=1, Rol=Sistemas
+2025-04-16T18:21:41.209Z info: Solicitud de menú para el usuario ID: 4
+2025-04-16T18:21:41.452Z info: Permisos verificados para usuario 4: Áreas Comunes,Cambio Contraseña,Configuración,Control de Ingresos y Salidas,Dashboard,Gestión de Ingreso,Gestión de Menús y Submenús,Gestión Visitas,Lista de Usuarios,Login,Recepción,Registrar Pedido,Registrar Usuarios,Reservas,Usuarios,Visitas Programadas
+2025-04-16T18:21:41.761Z info: 🛡️ authMiddleware ejecutado
+2025-04-16T18:21:41.761Z info: 🔐 Token recibido
+2025-04-16T18:21:41.763Z info: ✅ Token decodificado: ID=4, datos={"id":4,"role":"Sistemas","iat":1744827699,"exp":1744831299}
+2025-04-16T18:21:42.075Z info: ✅ Usuario autenticado: ID=4, Correo=jorgejesus_30@outlook.com, Tipo=1, Rol=Sistemas
+2025-04-16T18:21:42.376Z info: Usuario verificado: ID=4, Correo=jorgejesus_30@outlook.com, Tipo=1
+2025-04-16T18:21:42.675Z info: Permisos verificados para usuario 4: Áreas Comunes,Cambio Contraseña,Configuración,Control de Ingresos y Salidas,Dashboard,Gestión de Ingreso,Gestión de Menús y Submenús,Gestión Visitas,Lista de Usuarios,Login,Recepción,Registrar Pedido,Registrar Usuarios,Reservas,Usuarios,Visitas Programadas
+2025-04-16T18:53:55.337Z info: Cargando rutas...
+2025-04-16T18:53:55.339Z info: Rutas de movementRoutes cargadas.
+2025-04-16T18:53:55.339Z info: Rutas de authRoutes cargadas.
+2025-04-16T18:53:55.339Z info: Rutas de doorRoutes cargadas.
+2025-04-16T18:53:55.339Z info: Rutas de userRoutes cargadas.
+2025-04-16T18:53:55.340Z info: Rutas de menuRoutes cargadas.
+2025-04-16T18:53:55.340Z info: Rutas de visitRoutes cargadas.
+2025-04-16T18:53:55.340Z info: Rutas de reservationRoutes cargadas.
+2025-04-16T18:53:55.343Z info: ✅ Server running on port 4000
+2025-04-16T18:54:00.752Z info: Iniciando la obtención de imágenes...
+2025-04-16T18:54:03.135Z info: Iniciando la obtención de imágenes...
+2025-04-16T18:54:04.411Z info: Permisos para usuario 4: Áreas Comunes,Cambio Contraseña,Configuración,Control de Ingresos y Salidas,Dashboard,Gestión de Ingreso,Gestión de Menús y Submenús,Gestión Visitas,Lista de Usuarios,Login,Recepción,Registrar Pedido,Registrar Usuarios,Reservas,Usuarios,Visitas Programadas
+2025-04-16T18:54:04.472Z info: 🛡️ authMiddleware ejecutado
+2025-04-16T18:54:04.473Z info: 🔐 Token recibido
+2025-04-16T18:54:04.474Z info: ✅ Token decodificado: ID=4, datos={"id":4,"role":"Sistemas","iat":1744829643,"exp":1744833243}
+2025-04-16T18:54:04.475Z info: 🛡️ authMiddleware ejecutado
+2025-04-16T18:54:04.475Z info: 🔐 Token recibido
+2025-04-16T18:54:04.476Z info: ✅ Token decodificado: ID=4, datos={"id":4,"role":"Sistemas","iat":1744829643,"exp":1744833243}
+2025-04-16T18:54:04.760Z info: ✅ Usuario autenticado: ID=4, Correo=jorgejesus_30@outlook.com, Tipo=1, Rol=Sistemas
+2025-04-16T18:54:04.761Z info: Solicitud de menú para el usuario ID: 4
+2025-04-16T18:54:04.766Z info: ✅ Usuario autenticado: ID=4, Correo=jorgejesus_30@outlook.com, Tipo=1, Rol=Sistemas
+2025-04-16T18:54:05.053Z info: Usuario verificado: ID=4, Correo=jorgejesus_30@outlook.com, Tipo=1
+2025-04-16T18:54:05.090Z info: 🛡️ authMiddleware ejecutado
+2025-04-16T18:54:05.090Z info: 🔐 Token recibido
+2025-04-16T18:54:05.091Z info: ✅ Token decodificado: ID=4, datos={"id":4,"role":"Sistemas","iat":1744829643,"exp":1744833243}
+2025-04-16T18:54:05.375Z info: ✅ Usuario autenticado: ID=4, Correo=jorgejesus_30@outlook.com, Tipo=1, Rol=Sistemas
+2025-04-16T18:54:05.376Z info: Solicitud de menú para el usuario ID: 4
+2025-04-16T18:54:05.548Z info: Permisos verificados para usuario 4: 1
+2025-04-16T18:54:05.847Z info: 🛡️ authMiddleware ejecutado
+2025-04-16T18:54:05.847Z info: 🔐 Token recibido
+2025-04-16T18:54:05.849Z info: ✅ Token decodificado: ID=4, datos={"id":4,"role":"Sistemas","iat":1744829643,"exp":1744833243}
+2025-04-16T18:54:06.137Z info: ✅ Usuario autenticado: ID=4, Correo=jorgejesus_30@outlook.com, Tipo=1, Rol=Sistemas
+2025-04-16T18:54:06.427Z info: Usuario verificado: ID=4, Correo=jorgejesus_30@outlook.com, Tipo=1
+2025-04-16T18:54:06.776Z info: Permisos verificados para usuario 4: 1
+2025-04-16T18:54:07.295Z info: 🛡️ authMiddleware ejecutado
+2025-04-16T18:54:07.295Z info: 🔐 Token recibido
+2025-04-16T18:54:07.296Z info: ✅ Token decodificado: ID=4, datos={"id":4,"role":"Sistemas","iat":1744829643,"exp":1744833243}
+2025-04-16T18:54:07.580Z info: ✅ Usuario autenticado: ID=4, Correo=jorgejesus_30@outlook.com, Tipo=1, Rol=Sistemas
+2025-04-16T18:54:07.867Z info: Usuario verificado: ID=4, Correo=jorgejesus_30@outlook.com, Tipo=1
+2025-04-16T18:54:08.335Z info: Permisos verificados para usuario 4: 1
+2025-04-16T18:54:08.913Z info: 🛡️ authMiddleware ejecutado
+2025-04-16T18:54:08.913Z info: 🔐 Token recibido
+2025-04-16T18:54:08.915Z info: ✅ Token decodificado: ID=4, datos={"id":4,"role":"Sistemas","iat":1744829643,"exp":1744833243}
+2025-04-16T18:54:08.919Z info: 🛡️ authMiddleware ejecutado
+2025-04-16T18:54:08.919Z info: 🔐 Token recibido
+2025-04-16T18:54:08.921Z info: ✅ Token decodificado: ID=4, datos={"id":4,"role":"Sistemas","iat":1744829643,"exp":1744833243}
+2025-04-16T18:54:09.211Z info: ✅ Usuario autenticado: ID=4, Correo=jorgejesus_30@outlook.com, Tipo=1, Rol=Sistemas
+2025-04-16T18:54:09.216Z info: ✅ Usuario autenticado: ID=4, Correo=jorgejesus_30@outlook.com, Tipo=1, Rol=Sistemas
+2025-04-16T18:54:09.498Z info: Usuario verificado: ID=4, Correo=jorgejesus_30@outlook.com, Tipo=1
+2025-04-16T18:54:09.501Z info: Usuario verificado: ID=4, Correo=jorgejesus_30@outlook.com, Tipo=1
+2025-04-16T18:54:09.591Z info: 🛡️ authMiddleware ejecutado
+2025-04-16T18:54:09.592Z info: 🔐 Token recibido
+2025-04-16T18:54:09.594Z info: ✅ Token decodificado: ID=4, datos={"id":4,"role":"Sistemas","iat":1744829643,"exp":1744833243}
+2025-04-16T18:54:09.799Z info: Permisos verificados para usuario 4: 10
+2025-04-16T18:54:09.892Z info: ✅ Usuario autenticado: ID=4, Correo=jorgejesus_30@outlook.com, Tipo=1, Rol=Sistemas
+2025-04-16T18:54:09.980Z info: Permisos verificados para usuario 4: 2
+2025-04-16T18:54:10.101Z info: 🛡️ authMiddleware ejecutado
+2025-04-16T18:54:10.101Z info: 🔐 Token recibido
+2025-04-16T18:54:10.103Z info: ✅ Token decodificado: ID=4, datos={"id":4,"role":"Sistemas","iat":1744829643,"exp":1744833243}
+2025-04-16T18:54:10.180Z info: Usuario verificado: ID=4, Correo=jorgejesus_30@outlook.com, Tipo=1
+2025-04-16T18:54:10.288Z info: 🛡️ authMiddleware ejecutado
+2025-04-16T18:54:10.288Z info: 🔐 Token recibido
+2025-04-16T18:54:10.289Z info: ✅ Token decodificado: ID=4, datos={"id":4,"role":"Sistemas","iat":1744829643,"exp":1744833243}
+2025-04-16T18:54:10.330Z info: 🛡️ authMiddleware ejecutado
+2025-04-16T18:54:10.330Z info: 🔐 Token recibido
+2025-04-16T18:54:10.332Z info: ✅ Token decodificado: ID=4, datos={"id":4,"role":"Sistemas","iat":1744829643,"exp":1744833243}
+2025-04-16T18:54:10.334Z info: 🛡️ authMiddleware ejecutado
+2025-04-16T18:54:10.335Z info: 🔐 Token recibido
+2025-04-16T18:54:10.337Z info: ✅ Token decodificado: ID=4, datos={"id":4,"role":"Sistemas","iat":1744829643,"exp":1744833243}
+2025-04-16T18:54:10.390Z info: ✅ Usuario autenticado: ID=4, Correo=jorgejesus_30@outlook.com, Tipo=1, Rol=Sistemas
+2025-04-16T18:54:10.467Z info: Permisos verificados para usuario 4: 3
+2025-04-16T18:54:10.580Z info: ✅ Usuario autenticado: ID=4, Correo=jorgejesus_30@outlook.com, Tipo=1, Rol=Sistemas
+2025-04-16T18:54:10.624Z info: ✅ Usuario autenticado: ID=4, Correo=jorgejesus_30@outlook.com, Tipo=1, Rol=Sistemas
+2025-04-16T18:54:10.705Z info: ✅ Usuario autenticado: ID=4, Correo=jorgejesus_30@outlook.com, Tipo=1, Rol=Sistemas
+2025-04-16T18:54:10.762Z info: Usuario verificado: ID=4, Correo=jorgejesus_30@outlook.com, Tipo=1
+2025-04-16T18:54:10.888Z info: 🛡️ authMiddleware ejecutado
+2025-04-16T18:54:10.889Z info: 🔐 Token recibido
+2025-04-16T18:54:10.893Z info: ✅ Token decodificado: ID=4, datos={"id":4,"role":"Sistemas","iat":1744829643,"exp":1744833243}
+2025-04-16T18:54:10.938Z info: Usuario verificado: ID=4, Correo=jorgejesus_30@outlook.com, Tipo=1
+2025-04-16T18:54:11.032Z info: 🛡️ authMiddleware ejecutado
+2025-04-16T18:54:11.032Z info: 🔐 Token recibido
+2025-04-16T18:54:11.033Z info: ✅ Token decodificado: ID=4, datos={"id":4,"role":"Sistemas","iat":1744829643,"exp":1744833243}
+2025-04-16T18:54:11.096Z info: Usuario verificado: ID=4, Correo=jorgejesus_30@outlook.com, Tipo=1
+2025-04-16T18:54:11.180Z info: Permisos verificados para usuario 4: 10
+2025-04-16T18:54:11.243Z info: ✅ Usuario autenticado: ID=4, Correo=jorgejesus_30@outlook.com, Tipo=1, Rol=Sistemas
+2025-04-16T18:54:11.313Z info: Permisos verificados para usuario 4: 2
+2025-04-16T18:54:11.380Z info: ✅ Usuario autenticado: ID=4, Correo=jorgejesus_30@outlook.com, Tipo=1, Rol=Sistemas
+2025-04-16T18:54:11.466Z info: Permisos verificados para usuario 4: 2
+2025-04-16T18:54:11.570Z info: Usuario verificado: ID=4, Correo=jorgejesus_30@outlook.com, Tipo=1
+2025-04-16T18:54:11.776Z info: 🛡️ authMiddleware ejecutado
+2025-04-16T18:54:11.778Z info: 🔐 Token recibido
+2025-04-16T18:54:11.779Z info: ✅ Token decodificado: ID=4, datos={"id":4,"role":"Sistemas","iat":1744829643,"exp":1744833243}
+2025-04-16T18:54:11.862Z info: Permisos verificados para usuario 4: 3
+2025-04-16T18:54:12.068Z info: ✅ Usuario autenticado: ID=4, Correo=jorgejesus_30@outlook.com, Tipo=1, Rol=Sistemas
+2025-04-16T18:54:12.356Z info: Usuario verificado: ID=4, Correo=jorgejesus_30@outlook.com, Tipo=1
+2025-04-16T18:54:12.649Z info: Permisos verificados para usuario 4: 2
+2025-04-16T18:54:14.349Z info: Iniciando la obtención de imágenes...
+2025-04-16T18:54:14.766Z info: 🛡️ authMiddleware ejecutado
+2025-04-16T18:54:14.766Z info: 🔐 Token recibido
+2025-04-16T18:54:14.768Z info: ✅ Token decodificado: ID=4, datos={"id":4,"role":"Sistemas","iat":1744829643,"exp":1744833243}
+2025-04-16T18:54:14.770Z info: 🛡️ authMiddleware ejecutado
+2025-04-16T18:54:14.771Z info: 🔐 Token recibido
+2025-04-16T18:54:14.773Z info: ✅ Token decodificado: ID=4, datos={"id":4,"role":"Sistemas","iat":1744829643,"exp":1744833243}
+2025-04-16T18:54:15.057Z info: ✅ Usuario autenticado: ID=4, Correo=jorgejesus_30@outlook.com, Tipo=1, Rol=Sistemas
+2025-04-16T18:54:15.076Z info: ✅ Usuario autenticado: ID=4, Correo=jorgejesus_30@outlook.com, Tipo=1, Rol=Sistemas
+2025-04-16T18:54:15.346Z info: Usuario verificado: ID=4, Correo=jorgejesus_30@outlook.com, Tipo=1
+2025-04-16T18:54:15.393Z info: Usuario verificado: ID=4, Correo=jorgejesus_30@outlook.com, Tipo=1
+2025-04-16T18:54:15.637Z info: Permisos verificados para usuario 4: 7
+2025-04-16T18:54:15.735Z info: Permisos verificados para usuario 4: 7
+2025-04-16T18:54:15.739Z info: Iniciando la obtención de imágenes...
+2025-04-16T18:54:15.931Z info: 🛡️ authMiddleware ejecutado
+2025-04-16T18:54:15.931Z info: 🔐 Token recibido
+2025-04-16T18:54:15.934Z info: ✅ Token decodificado: ID=4, datos={"id":4,"role":"Sistemas","iat":1744829643,"exp":1744833243}
+2025-04-16T18:54:16.062Z info: 🛡️ authMiddleware ejecutado
+2025-04-16T18:54:16.069Z info: 🔐 Token recibido
+2025-04-16T18:54:16.071Z info: ✅ Token decodificado: ID=4, datos={"id":4,"role":"Sistemas","iat":1744829643,"exp":1744833243}
+2025-04-16T18:54:16.256Z info: ✅ Usuario autenticado: ID=4, Correo=jorgejesus_30@outlook.com, Tipo=1, Rol=Sistemas
+2025-04-16T18:54:16.365Z info: ✅ Usuario autenticado: ID=4, Correo=jorgejesus_30@outlook.com, Tipo=1, Rol=Sistemas
+2025-04-16T18:54:16.546Z info: Usuario verificado: ID=4, Correo=jorgejesus_30@outlook.com, Tipo=1
+2025-04-16T18:54:16.652Z info: Usuario verificado: ID=4, Correo=jorgejesus_30@outlook.com, Tipo=1
+2025-04-16T18:54:16.739Z info: 🛡️ authMiddleware ejecutado
+2025-04-16T18:54:16.740Z info: 🔐 Token recibido
+2025-04-16T18:54:16.741Z info: ✅ Token decodificado: ID=4, datos={"id":4,"role":"Sistemas","iat":1744829643,"exp":1744833243}
+2025-04-16T18:54:16.836Z info: Permisos verificados para usuario 4: 7
+2025-04-16T18:54:16.938Z info: Permisos verificados para usuario 4: 7
+2025-04-16T18:54:17.027Z info: ✅ Usuario autenticado: ID=4, Correo=jorgejesus_30@outlook.com, Tipo=1, Rol=Sistemas
+2025-04-16T18:54:17.312Z info: Usuario verificado: ID=4, Correo=jorgejesus_30@outlook.com, Tipo=1
+2025-04-16T18:54:17.599Z info: Permisos verificados para usuario 4: 8
+2025-04-16T18:54:17.901Z info: 🛡️ authMiddleware ejecutado
+2025-04-16T18:54:17.902Z info: 🔐 Token recibido
+2025-04-16T18:54:17.904Z info: ✅ Token decodificado: ID=4, datos={"id":4,"role":"Sistemas","iat":1744829643,"exp":1744833243}
+2025-04-16T18:54:18.191Z info: ✅ Usuario autenticado: ID=4, Correo=jorgejesus_30@outlook.com, Tipo=1, Rol=Sistemas
+2025-04-16T18:54:18.486Z info: Usuario verificado: ID=4, Correo=jorgejesus_30@outlook.com, Tipo=1
+2025-04-16T18:54:18.771Z info: Permisos verificados para usuario 4: 8
+2025-04-16T18:54:22.048Z info: Permisos para usuario 4: Áreas Comunes,Cambio Contraseña,Configuración,Control de Ingresos y Salidas,Dashboard,Gestión de Ingreso,Gestión de Menús y Submenús,Gestión Visitas,Lista de Usuarios,Login,Recepción,Registrar Pedido,Registrar Usuarios,Reservas,Usuarios,Visitas Programadas
+2025-04-16T18:54:22.087Z info: 🛡️ authMiddleware ejecutado
+2025-04-16T18:54:22.087Z info: 🔐 Token recibido
+2025-04-16T18:54:22.088Z info: ✅ Token decodificado: ID=4, datos={"id":4,"role":"Sistemas","iat":1744829643,"exp":1744833243}
+2025-04-16T18:54:22.101Z info: 🛡️ authMiddleware ejecutado
+2025-04-16T18:54:22.101Z info: 🔐 Token recibido
+2025-04-16T18:54:22.102Z info: ✅ Token decodificado: ID=4, datos={"id":4,"role":"Sistemas","iat":1744829643,"exp":1744833243}
+2025-04-16T18:54:22.381Z info: ✅ Usuario autenticado: ID=4, Correo=jorgejesus_30@outlook.com, Tipo=1, Rol=Sistemas
+2025-04-16T18:54:22.381Z info: Solicitud de menú para el usuario ID: 4
+2025-04-16T18:54:22.389Z info: ✅ Usuario autenticado: ID=4, Correo=jorgejesus_30@outlook.com, Tipo=1, Rol=Sistemas
+2025-04-16T18:54:22.638Z info: Permisos para usuario 4: Áreas Comunes,Cambio Contraseña,Configuración,Control de Ingresos y Salidas,Dashboard,Gestión de Ingreso,Gestión de Menús y Submenús,Gestión Visitas,Lista de Usuarios,Login,Recepción,Registrar Pedido,Registrar Usuarios,Reservas,Usuarios,Visitas Programadas
+2025-04-16T18:54:22.677Z info: Usuario verificado: ID=4, Correo=jorgejesus_30@outlook.com, Tipo=1
+2025-04-16T18:54:22.683Z info: 🛡️ authMiddleware ejecutado
+2025-04-16T18:54:22.684Z info: 🔐 Token recibido
+2025-04-16T18:54:22.687Z info: ✅ Token decodificado: ID=4, datos={"id":4,"role":"Sistemas","iat":1744829643,"exp":1744833243}
+2025-04-16T18:54:22.963Z info: Permisos verificados para usuario 4: 1
+2025-04-16T18:54:22.976Z info: ✅ Usuario autenticado: ID=4, Correo=jorgejesus_30@outlook.com, Tipo=1, Rol=Sistemas
+2025-04-16T18:54:22.979Z info: Solicitud de menú para el usuario ID: 4
+2025-04-16T18:54:23.257Z info: 🛡️ authMiddleware ejecutado
+2025-04-16T18:54:23.257Z info: 🔐 Token recibido
+2025-04-16T18:54:23.258Z info: ✅ Token decodificado: ID=4, datos={"id":4,"role":"Sistemas","iat":1744829643,"exp":1744833243}
+2025-04-16T18:54:23.548Z info: ✅ Usuario autenticado: ID=4, Correo=jorgejesus_30@outlook.com, Tipo=1, Rol=Sistemas
+2025-04-16T18:54:23.835Z info: Usuario verificado: ID=4, Correo=jorgejesus_30@outlook.com, Tipo=1
+2025-04-16T18:54:24.123Z info: Permisos verificados para usuario 4: 1
+2025-04-16T18:54:39.669Z info: Permisos para usuario 4: Áreas Comunes,Cambio Contraseña,Configuración,Control de Ingresos y Salidas,Dashboard,Gestión de Ingreso,Gestión de Menús y Submenús,Gestión Visitas,Lista de Usuarios,Login,Recepción,Registrar Pedido,Registrar Usuarios,Reservas,Usuarios,Visitas Programadas
+2025-04-16T18:54:39.700Z info: 🛡️ authMiddleware ejecutado
+2025-04-16T18:54:39.700Z info: 🔐 Token recibido
+2025-04-16T18:54:39.700Z info: ✅ Token decodificado: ID=4, datos={"id":4,"role":"Sistemas","iat":1744829643,"exp":1744833243}
+2025-04-16T18:54:39.701Z info: 🛡️ authMiddleware ejecutado
+2025-04-16T18:54:39.701Z info: 🔐 Token recibido
+2025-04-16T18:54:39.702Z info: ✅ Token decodificado: ID=4, datos={"id":4,"role":"Sistemas","iat":1744829643,"exp":1744833243}
+2025-04-16T18:54:39.985Z info: ✅ Usuario autenticado: ID=4, Correo=jorgejesus_30@outlook.com, Tipo=1, Rol=Sistemas
+2025-04-16T18:54:39.986Z info: ✅ Usuario autenticado: ID=4, Correo=jorgejesus_30@outlook.com, Tipo=1, Rol=Sistemas
+2025-04-16T18:54:39.986Z info: Solicitud de menú para el usuario ID: 4
+2025-04-16T18:54:40.250Z info: Permisos para usuario 4: Áreas Comunes,Cambio Contraseña,Configuración,Control de Ingresos y Salidas,Dashboard,Gestión de Ingreso,Gestión de Menús y Submenús,Gestión Visitas,Lista de Usuarios,Login,Recepción,Registrar Pedido,Registrar Usuarios,Reservas,Usuarios,Visitas Programadas
+2025-04-16T18:54:40.269Z info: Usuario verificado: ID=4, Correo=jorgejesus_30@outlook.com, Tipo=1
+2025-04-16T18:54:40.278Z info: 🛡️ authMiddleware ejecutado
+2025-04-16T18:54:40.278Z info: 🔐 Token recibido
+2025-04-16T18:54:40.279Z info: ✅ Token decodificado: ID=4, datos={"id":4,"role":"Sistemas","iat":1744829643,"exp":1744833243}
+2025-04-16T18:54:40.555Z info: Permisos verificados para usuario 4: 1
+2025-04-16T18:54:40.565Z info: ✅ Usuario autenticado: ID=4, Correo=jorgejesus_30@outlook.com, Tipo=1, Rol=Sistemas
+2025-04-16T18:54:40.565Z info: Solicitud de menú para el usuario ID: 4
+2025-04-16T18:54:40.849Z info: 🛡️ authMiddleware ejecutado
+2025-04-16T18:54:40.850Z info: 🔐 Token recibido
+2025-04-16T18:54:40.850Z info: ✅ Token decodificado: ID=4, datos={"id":4,"role":"Sistemas","iat":1744829643,"exp":1744833243}
+2025-04-16T18:54:41.135Z info: ✅ Usuario autenticado: ID=4, Correo=jorgejesus_30@outlook.com, Tipo=1, Rol=Sistemas
+2025-04-16T18:54:41.421Z info: Usuario verificado: ID=4, Correo=jorgejesus_30@outlook.com, Tipo=1
+2025-04-16T18:54:41.709Z info: Permisos verificados para usuario 4: 1
+2025-04-16T18:58:15.613Z info: Iniciando la obtención de imágenes...
+2025-04-16T18:58:18.238Z info: Iniciando la obtención de imágenes...
+2025-04-16T18:58:30.847Z info: Permisos para usuario 11: Cambio Contraseña,Configuración,Dashboard,Gestión de Ingreso,Usuarios,Visitas Programadas
+2025-04-16T18:58:30.892Z info: 🛡️ authMiddleware ejecutado
+2025-04-16T18:58:30.892Z info: 🔐 Token recibido
+2025-04-16T18:58:30.894Z info: ✅ Token decodificado: ID=11, datos={"id":11,"role":"Propietario","iat":1744829910,"exp":1744833510}
+2025-04-16T18:58:30.895Z info: 🛡️ authMiddleware ejecutado
+2025-04-16T18:58:30.895Z info: 🔐 Token recibido
+2025-04-16T18:58:30.896Z info: ✅ Token decodificado: ID=11, datos={"id":11,"role":"Propietario","iat":1744829910,"exp":1744833510}
+2025-04-16T18:58:31.183Z info: ✅ Usuario autenticado: ID=11, Correo=Nata.17596@gmail.com, Tipo=4, Rol=Propietario
+2025-04-16T18:58:31.469Z info: ✅ Usuario autenticado: ID=11, Correo=Nata.17596@gmail.com, Tipo=4, Rol=Propietario
+2025-04-16T18:58:31.469Z info: Solicitud de menú para el usuario ID: 11
+2025-04-16T18:58:31.755Z info: Usuario verificado: ID=11, Correo=Nata.17596@gmail.com, Tipo=4
+2025-04-16T18:58:32.053Z info: 🛡️ authMiddleware ejecutado
+2025-04-16T18:58:32.054Z info: 🔐 Token recibido
+2025-04-16T18:58:32.056Z info: ✅ Token decodificado: ID=11, datos={"id":11,"role":"Propietario","iat":1744829910,"exp":1744833510}
+2025-04-16T18:58:32.344Z info: ✅ Usuario autenticado: ID=11, Correo=Nata.17596@gmail.com, Tipo=4, Rol=Propietario
+2025-04-16T18:58:32.345Z info: Solicitud de menú para el usuario ID: 11
+2025-04-16T18:58:32.453Z info: Permisos verificados para usuario 11: 1
+2025-04-16T18:58:32.757Z info: 🛡️ authMiddleware ejecutado
+2025-04-16T18:58:32.758Z info: 🔐 Token recibido
+2025-04-16T18:58:32.759Z info: ✅ Token decodificado: ID=11, datos={"id":11,"role":"Propietario","iat":1744829910,"exp":1744833510}
+2025-04-16T18:58:33.046Z info: ✅ Usuario autenticado: ID=11, Correo=Nata.17596@gmail.com, Tipo=4, Rol=Propietario
+2025-04-16T18:58:33.336Z info: Usuario verificado: ID=11, Correo=Nata.17596@gmail.com, Tipo=4
+2025-04-16T18:58:33.623Z info: Permisos verificados para usuario 11: 1
+2025-04-16T18:59:35.910Z info: Iniciando la obtención de imágenes...
+2025-04-16T18:59:38.399Z info: Iniciando la obtención de imágenes...
+2025-04-16T18:59:39.666Z info: Permisos para usuario 4: Áreas Comunes,Cambio Contraseña,Configuración,Control de Ingresos y Salidas,Dashboard,Gestión de Ingreso,Gestión de Menús y Submenús,Gestión Visitas,Lista de Usuarios,Login,Recepción,Registrar Pedido,Registrar Usuarios,Reservas,Usuarios,Visitas Programadas
+2025-04-16T18:59:39.744Z info: 🛡️ authMiddleware ejecutado
+2025-04-16T18:59:39.744Z info: 🔐 Token recibido
+2025-04-16T18:59:39.745Z info: ✅ Token decodificado: ID=4, datos={"id":4,"role":"Sistemas","iat":1744829978,"exp":1744833578}
+2025-04-16T18:59:39.746Z info: 🛡️ authMiddleware ejecutado
+2025-04-16T18:59:39.746Z info: 🔐 Token recibido
+2025-04-16T18:59:39.747Z info: ✅ Token decodificado: ID=4, datos={"id":4,"role":"Sistemas","iat":1744829978,"exp":1744833578}
+2025-04-16T18:59:40.032Z info: ✅ Usuario autenticado: ID=4, Correo=jorgejesus_30@outlook.com, Tipo=1, Rol=Sistemas
+2025-04-16T18:59:40.032Z info: Solicitud de menú para el usuario ID: 4
+2025-04-16T18:59:40.033Z info: ✅ Usuario autenticado: ID=4, Correo=jorgejesus_30@outlook.com, Tipo=1, Rol=Sistemas
+2025-04-16T18:59:40.321Z info: Usuario verificado: ID=4, Correo=jorgejesus_30@outlook.com, Tipo=1
+2025-04-16T18:59:40.333Z info: 🛡️ authMiddleware ejecutado
+2025-04-16T18:59:40.333Z info: 🔐 Token recibido
+2025-04-16T18:59:40.334Z info: ✅ Token decodificado: ID=4, datos={"id":4,"role":"Sistemas","iat":1744829978,"exp":1744833578}
+2025-04-16T18:59:40.609Z info: Permisos verificados para usuario 4: 1
+2025-04-16T18:59:40.620Z info: ✅ Usuario autenticado: ID=4, Correo=jorgejesus_30@outlook.com, Tipo=1, Rol=Sistemas
+2025-04-16T18:59:40.620Z info: Solicitud de menú para el usuario ID: 4
+2025-04-16T18:59:40.904Z info: 🛡️ authMiddleware ejecutado
+2025-04-16T18:59:40.905Z info: 🔐 Token recibido
+2025-04-16T18:59:40.905Z info: ✅ Token decodificado: ID=4, datos={"id":4,"role":"Sistemas","iat":1744829978,"exp":1744833578}
+2025-04-16T18:59:41.192Z info: ✅ Usuario autenticado: ID=4, Correo=jorgejesus_30@outlook.com, Tipo=1, Rol=Sistemas
+2025-04-16T18:59:41.479Z info: Usuario verificado: ID=4, Correo=jorgejesus_30@outlook.com, Tipo=1
+2025-04-16T18:59:41.788Z info: Permisos verificados para usuario 4: 1
+2025-04-16T18:59:43.619Z info: 🛡️ authMiddleware ejecutado
+2025-04-16T18:59:43.619Z info: 🔐 Token recibido
+2025-04-16T18:59:43.621Z info: ✅ Token decodificado: ID=4, datos={"id":4,"role":"Sistemas","iat":1744829978,"exp":1744833578}
+2025-04-16T18:59:43.907Z info: ✅ Usuario autenticado: ID=4, Correo=jorgejesus_30@outlook.com, Tipo=1, Rol=Sistemas
+2025-04-16T18:59:44.194Z info: Usuario verificado: ID=4, Correo=jorgejesus_30@outlook.com, Tipo=1
+2025-04-16T18:59:44.483Z info: Permisos verificados para usuario 4: 1
+2025-04-16T19:00:49.886Z info: 🛡️ authMiddleware ejecutado
+2025-04-16T19:00:49.886Z info: 🔐 Token recibido
+2025-04-16T19:00:49.887Z info: ✅ Token decodificado: ID=4, datos={"id":4,"role":"Sistemas","iat":1744829978,"exp":1744833578}
+2025-04-16T19:00:49.888Z info: 🛡️ authMiddleware ejecutado
+2025-04-16T19:00:49.888Z info: 🔐 Token recibido
+2025-04-16T19:00:49.889Z info: ✅ Token decodificado: ID=4, datos={"id":4,"role":"Sistemas","iat":1744829978,"exp":1744833578}
+2025-04-16T19:00:51.157Z info: ✅ Usuario autenticado: ID=4, Correo=jorgejesus_30@outlook.com, Tipo=1, Rol=Sistemas
+2025-04-16T19:00:51.160Z info: ✅ Usuario autenticado: ID=4, Correo=jorgejesus_30@outlook.com, Tipo=1, Rol=Sistemas
+2025-04-16T19:00:51.442Z info: Usuario verificado: ID=4, Correo=jorgejesus_30@outlook.com, Tipo=1
+2025-04-16T19:00:51.446Z info: Usuario verificado: ID=4, Correo=jorgejesus_30@outlook.com, Tipo=1
+2025-04-16T19:00:51.729Z info: Permisos verificados para usuario 4: 7
+2025-04-16T19:00:51.734Z info: Permisos verificados para usuario 4: 7
+2025-04-16T19:00:52.033Z info: 🛡️ authMiddleware ejecutado
+2025-04-16T19:00:52.033Z info: 🔐 Token recibido
+2025-04-16T19:00:52.034Z info: ✅ Token decodificado: ID=4, datos={"id":4,"role":"Sistemas","iat":1744829978,"exp":1744833578}
+2025-04-16T19:00:52.035Z info: 🛡️ authMiddleware ejecutado
+2025-04-16T19:00:52.035Z info: 🔐 Token recibido
+2025-04-16T19:00:52.036Z info: ✅ Token decodificado: ID=4, datos={"id":4,"role":"Sistemas","iat":1744829978,"exp":1744833578}
+2025-04-16T19:00:52.331Z info: ✅ Usuario autenticado: ID=4, Correo=jorgejesus_30@outlook.com, Tipo=1, Rol=Sistemas
+2025-04-16T19:00:52.333Z info: ✅ Usuario autenticado: ID=4, Correo=jorgejesus_30@outlook.com, Tipo=1, Rol=Sistemas
+2025-04-16T19:00:52.618Z info: Usuario verificado: ID=4, Correo=jorgejesus_30@outlook.com, Tipo=1
+2025-04-16T19:00:52.619Z info: Usuario verificado: ID=4, Correo=jorgejesus_30@outlook.com, Tipo=1
+2025-04-16T19:00:52.907Z info: Permisos verificados para usuario 4: 7
+2025-04-16T19:00:52.908Z info: Permisos verificados para usuario 4: 7
+2025-04-16T19:01:06.287Z info: 🛡️ authMiddleware ejecutado
+2025-04-16T19:01:06.287Z info: 🔐 Token recibido
+2025-04-16T19:01:06.288Z info: ✅ Token decodificado: ID=4, datos={"id":4,"role":"Sistemas","iat":1744829978,"exp":1744833578}
+2025-04-16T19:01:06.579Z info: ✅ Usuario autenticado: ID=4, Correo=jorgejesus_30@outlook.com, Tipo=1, Rol=Sistemas
+2025-04-16T19:01:06.870Z info: Usuario verificado: ID=4, Correo=jorgejesus_30@outlook.com, Tipo=1
+2025-04-16T19:01:07.160Z info: Permisos verificados para usuario 4: 7
+2025-04-16T19:01:07.484Z info: 🛡️ authMiddleware ejecutado
+2025-04-16T19:01:07.484Z info: 🔐 Token recibido
+2025-04-16T19:01:07.485Z info: ✅ Token decodificado: ID=4, datos={"id":4,"role":"Sistemas","iat":1744829978,"exp":1744833578}
+2025-04-16T19:01:07.772Z info: ✅ Usuario autenticado: ID=4, Correo=jorgejesus_30@outlook.com, Tipo=1, Rol=Sistemas
+2025-04-16T19:01:08.060Z info: Usuario verificado: ID=4, Correo=jorgejesus_30@outlook.com, Tipo=1
+2025-04-16T19:01:08.352Z info: Permisos verificados para usuario 4: 7
+2025-04-16T19:01:11.539Z info: Permisos para usuario 4: Áreas Comunes,Cambio Contraseña,Configuración,Control de Ingresos y Salidas,Dashboard,Gestión de Ingresoooo,Gestión de Menús y Submenús,Gestión Visitas,Lista de Usuarios,Login,Recepción,Registrar Pedido,Registrar Usuarios,Reservas,Usuarios,Visitas Programadas
+2025-04-16T19:01:11.584Z info: 🛡️ authMiddleware ejecutado
+2025-04-16T19:01:11.584Z info: 🔐 Token recibido
+2025-04-16T19:01:11.585Z info: ✅ Token decodificado: ID=4, datos={"id":4,"role":"Sistemas","iat":1744829978,"exp":1744833578}
+2025-04-16T19:01:11.588Z info: 🛡️ authMiddleware ejecutado
+2025-04-16T19:01:11.588Z info: 🔐 Token recibido
+2025-04-16T19:01:11.589Z info: ✅ Token decodificado: ID=4, datos={"id":4,"role":"Sistemas","iat":1744829978,"exp":1744833578}
+2025-04-16T19:01:11.874Z info: ✅ Usuario autenticado: ID=4, Correo=jorgejesus_30@outlook.com, Tipo=1, Rol=Sistemas
+2025-04-16T19:01:11.889Z info: 🛡️ authMiddleware ejecutado
+2025-04-16T19:01:11.890Z info: 🔐 Token recibido
+2025-04-16T19:01:11.891Z info: ✅ Token decodificado: ID=4, datos={"id":4,"role":"Sistemas","iat":1744829978,"exp":1744833578}
+2025-04-16T19:01:12.131Z info: ✅ Usuario autenticado: ID=4, Correo=jorgejesus_30@outlook.com, Tipo=1, Rol=Sistemas
+2025-04-16T19:01:12.132Z info: Solicitud de menú para el usuario ID: 4
+2025-04-16T19:01:12.159Z info: Permisos para usuario 4: Áreas Comunes,Cambio Contraseña,Configuración,Control de Ingresos y Salidas,Dashboard,Gestión de Ingresoooo,Gestión de Menús y Submenús,Gestión Visitas,Lista de Usuarios,Login,Recepción,Registrar Pedido,Registrar Usuarios,Reservas,Usuarios,Visitas Programadas
+2025-04-16T19:01:12.418Z info: Usuario verificado: ID=4, Correo=jorgejesus_30@outlook.com, Tipo=1
+2025-04-16T19:01:12.446Z info: ✅ Usuario autenticado: ID=4, Correo=jorgejesus_30@outlook.com, Tipo=1, Rol=Sistemas
+2025-04-16T19:01:12.728Z info: 🛡️ authMiddleware ejecutado
+2025-04-16T19:01:12.728Z info: 🔐 Token recibido
+2025-04-16T19:01:12.730Z info: ✅ Token decodificado: ID=4, datos={"id":4,"role":"Sistemas","iat":1744829978,"exp":1744833578}
+2025-04-16T19:01:12.744Z info: Permisos verificados para usuario 4: 7
+2025-04-16T19:01:12.853Z info: Usuario verificado: ID=4, Correo=jorgejesus_30@outlook.com, Tipo=1
+2025-04-16T19:01:13.018Z info: ✅ Usuario autenticado: ID=4, Correo=jorgejesus_30@outlook.com, Tipo=1, Rol=Sistemas
+2025-04-16T19:01:13.018Z info: Solicitud de menú para el usuario ID: 4
+2025-04-16T19:01:13.038Z info: 🛡️ authMiddleware ejecutado
+2025-04-16T19:01:13.038Z info: 🔐 Token recibido
+2025-04-16T19:01:13.040Z info: ✅ Token decodificado: ID=4, datos={"id":4,"role":"Sistemas","iat":1744829978,"exp":1744833578}
+2025-04-16T19:01:13.144Z info: Permisos verificados para usuario 4: 7
+2025-04-16T19:01:13.333Z info: ✅ Usuario autenticado: ID=4, Correo=jorgejesus_30@outlook.com, Tipo=1, Rol=Sistemas
+2025-04-16T19:01:13.441Z info: 🛡️ authMiddleware ejecutado
+2025-04-16T19:01:13.441Z info: 🔐 Token recibido
+2025-04-16T19:01:13.442Z info: ✅ Token decodificado: ID=4, datos={"id":4,"role":"Sistemas","iat":1744829978,"exp":1744833578}
+2025-04-16T19:01:13.622Z info: Usuario verificado: ID=4, Correo=jorgejesus_30@outlook.com, Tipo=1
+2025-04-16T19:01:13.734Z info: ✅ Usuario autenticado: ID=4, Correo=jorgejesus_30@outlook.com, Tipo=1, Rol=Sistemas
+2025-04-16T19:01:13.910Z info: Permisos verificados para usuario 4: 7
+2025-04-16T19:01:14.023Z info: Usuario verificado: ID=4, Correo=jorgejesus_30@outlook.com, Tipo=1
+2025-04-16T19:01:14.312Z info: Permisos verificados para usuario 4: 7
+2025-04-16T19:04:30.047Z info: 🛡️ authMiddleware ejecutado
+2025-04-16T19:04:30.047Z info: 🔐 Token recibido
+2025-04-16T19:04:30.048Z info: ✅ Token decodificado: ID=4, datos={"id":4,"role":"Sistemas","iat":1744829978,"exp":1744833578}
+2025-04-16T19:04:31.362Z info: ✅ Usuario autenticado: ID=4, Correo=jorgejesus_30@outlook.com, Tipo=1, Rol=Sistemas
+2025-04-16T19:04:31.646Z info: Usuario verificado: ID=4, Correo=jorgejesus_30@outlook.com, Tipo=1
+2025-04-16T19:04:31.930Z info: Permisos verificados para usuario 4: 7
+2025-04-16T19:04:32.270Z info: 🛡️ authMiddleware ejecutado
+2025-04-16T19:04:32.271Z info: 🔐 Token recibido
+2025-04-16T19:04:32.273Z info: ✅ Token decodificado: ID=4, datos={"id":4,"role":"Sistemas","iat":1744829978,"exp":1744833578}
+2025-04-16T19:04:32.564Z info: ✅ Usuario autenticado: ID=4, Correo=jorgejesus_30@outlook.com, Tipo=1, Rol=Sistemas
+2025-04-16T19:04:32.922Z info: Usuario verificado: ID=4, Correo=jorgejesus_30@outlook.com, Tipo=1
+2025-04-16T19:04:33.208Z info: Permisos verificados para usuario 4: 7

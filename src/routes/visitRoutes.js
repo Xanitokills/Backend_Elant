@@ -16,16 +16,21 @@ const {
 } = require("../controllers/visitController");
 const authMiddleware = require("../middleware/authMiddleware");
 
-router.post("/visits", authMiddleware, checkPermission("Gestión de Ingreso"), registerVisit);
-router.get("/visits", authMiddleware, checkPermission("Gestión de Ingreso"), getAllVisits);
-router.get("/dni", authMiddleware, checkPermission("Gestión de Ingreso"), getDniInfo);
-router.get("/owners", authMiddleware, checkPermission("Gestión de Ingreso"), getOwnersByDpto);
-router.put("/visits/:id_visita/end", authMiddleware, checkPermission("Gestión de Ingreso"), endVisit);
-router.post("/scheduled-visits", authMiddleware, checkPermission("Gestión de Ingreso"), registerScheduledVisit);
-router.get("/scheduled-visits", authMiddleware, checkPermission("Gestión de Ingreso"), getScheduledVisits);
-router.post("/scheduled-visits/:id_visita_programada/accept", authMiddleware, checkPermission("Visitas Programadas"), acceptScheduledVisit);
-router.put("/scheduled-visits/:id_visita_programada/cancel", authMiddleware, checkPermission("Visitas Programadas"), cancelScheduledVisit);
-router.get("/all-scheduled-visits", authMiddleware, checkPermission("Visitas Programadas"), getAllScheduledVisits);
-router.get("/users/:id/departments", authMiddleware, getOwnerDepartments); // Sin checkPermission si es para el propio usuario
+// Rutas protegidas con ID_MENU=2 (Gestión de Ingreso)
+router.post("/visits", authMiddleware, checkPermission({ menuId: 2 }), registerVisit);
+router.get("/visits", authMiddleware, checkPermission({ menuId: 2 }), getAllVisits);
+router.get("/dni", authMiddleware, checkPermission({ menuId: 2 }), getDniInfo);
+router.get("/owners", authMiddleware, checkPermission({ menuId: 2 }), getOwnersByDpto);
+router.put("/visits/:id_visita/end", authMiddleware, checkPermission({ menuId: 2 }), endVisit);
+router.post("/scheduled-visits", authMiddleware, checkPermission({ menuId: 2 }), registerScheduledVisit);
+router.get("/scheduled-visits", authMiddleware, checkPermission({ menuId: 2 }), getScheduledVisits);
+
+// Rutas protegidas con ID_SUBMENU=10 (Visitas Programadas)
+router.post("/scheduled-visits/:id_visita_programada/accept", authMiddleware, checkPermission({ submenuId: 10 }), acceptScheduledVisit);
+router.put("/scheduled-visits/:id_visita_programada/cancel", authMiddleware, checkPermission({ submenuId: 10 }), cancelScheduledVisit);
+router.get("/all-scheduled-visits", authMiddleware, checkPermission({ submenuId: 10 }), getAllScheduledVisits);
+
+// Ruta sin permisos específicos
+router.get("/users/:id/departments", authMiddleware, getOwnerDepartments);
 
 module.exports = router;
