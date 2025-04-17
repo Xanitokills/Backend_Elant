@@ -14,6 +14,3 @@ BEGIN
 END;
 GO
 
-
--- Asignar menú a administrador
---EXEC SP_INSERTAR_ROL_MENU 2, 1;

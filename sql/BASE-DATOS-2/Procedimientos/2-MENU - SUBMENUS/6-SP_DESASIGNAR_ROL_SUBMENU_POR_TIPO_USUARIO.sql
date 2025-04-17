@@ -8,5 +8,3 @@ BEGIN
 END;
 GO
 
--- Eliminar acceso de tipo 2 al submenú 10
---EXEC SP_ELIMINAR_ROL_SUBMENU 2, 10;

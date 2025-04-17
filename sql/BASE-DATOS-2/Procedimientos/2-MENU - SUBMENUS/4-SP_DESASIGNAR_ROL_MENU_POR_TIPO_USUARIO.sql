@@ -8,5 +8,3 @@ BEGIN
 END;
 GO
 
--- Eliminar acceso de tipo 3 al menú 5
---EXEC SP_ELIMINAR_ROL_MENU 3, 5;

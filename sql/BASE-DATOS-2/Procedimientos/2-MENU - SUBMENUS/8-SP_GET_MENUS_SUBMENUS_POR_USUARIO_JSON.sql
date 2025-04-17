@@ -11,8 +11,8 @@ BEGIN
     UNION
     SELECT ID_TIPO_USUARIO FROM MAE_USUARIO_ROL WHERE ID_USUARIO = @ID_USUARIO;
 
-    -- CTE para obtener menús con al menos un submenú permitido
-    WITH MenusConSubmenus AS (
+    -- CTE para obtener menús accesibles por el usuario
+    WITH MenusAccesibles AS (
         SELECT DISTINCT
             m.ID_MENU,
             m.NOMBRE AS MENU_NOMBRE,
@@ -24,17 +24,22 @@ BEGIN
         JOIN MAE_ROL_MENU rm ON rm.ID_MENU = m.ID_MENU
         WHERE m.ESTADO = 1
           AND rm.ID_TIPO_USUARIO IN (SELECT ID_TIPO_USUARIO FROM @TIPOS_USUARIO)
-          AND EXISTS (
-              SELECT 1
-              FROM MAE_SUBMENU sm
-              JOIN MAE_ROL_SUBMENU rs ON rs.ID_SUBMENU = sm.ID_SUBMENU
-              WHERE sm.ID_MENU = m.ID_MENU
-                AND sm.ESTADO = 1
-                AND rs.ID_TIPO_USUARIO IN (SELECT ID_TIPO_USUARIO FROM @TIPOS_USUARIO)
+          AND (
+              -- Incluir menús con URL no nula
+              m.URL IS NOT NULL
+              -- O menús sin URL pero con al menos un submenú permitido
+              OR EXISTS (
+                  SELECT 1
+                  FROM MAE_SUBMENU sm
+                  JOIN MAE_ROL_SUBMENU rs ON rs.ID_SUBMENU = sm.ID_SUBMENU
+                  WHERE sm.ID_MENU = m.ID_MENU
+                    AND sm.ESTADO = 1
+                    AND rs.ID_TIPO_USUARIO IN (SELECT ID_TIPO_USUARIO FROM @TIPOS_USUARIO)
+              )
           )
     )
 
-    -- Seleccionar menús con submenús permitidos como JSON
+    -- Seleccionar menús con submenús permitidos (o sin submenús) como JSON
     SELECT 
         m.ID_MENU,
         m.MENU_NOMBRE,
@@ -58,9 +63,8 @@ BEGIN
             ORDER BY sm.ORDEN ASC
             FOR JSON PATH
         ) AS SUBMENUS
-    FROM MenusConSubmenus m
+    FROM MenusAccesibles m
     ORDER BY m.MENU_ORDEN
     FOR JSON PATH;
-
 END;
 GO

@@ -13,6 +13,3 @@ BEGIN
     END
 END;
 GO
-
--- Asignar submenú a administrador
---EXEC SP_INSERTAR_ROL_SUBMENU 2, 1;
