@@ -7,6 +7,7 @@ const { checkPermission } = require("../middleware/permissions");
 // Rutas protegidas con ID_SUBMENU=7 (Gestión de Menús y Submenús)
 router.get("/menus-submenus", authMiddleware, checkPermission({ submenuId: 7 }), menuController.getMenusAndSubmenus);
 router.get("/tiposUsuario", authMiddleware, checkPermission({ submenuId: 7 }), menuController.getTiposUsuario);
+router.get("/rol-menu-submenu/:idTipoUsuario", authMiddleware, checkPermission({ submenuId: 7 }), menuController.getMenuSubmenuAssignments);
 router.post("/menu", authMiddleware, checkPermission({ submenuId: 7 }), menuController.createMenu);
 router.put("/menu/:id", authMiddleware, checkPermission({ submenuId: 7 }), menuController.updateMenu);
 router.post("/submenu", authMiddleware, checkPermission({ submenuId: 7 }), menuController.createSubmenu);
