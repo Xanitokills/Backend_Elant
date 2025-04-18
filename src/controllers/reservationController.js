@@ -1,4 +1,5 @@
 const { poolPromise } = require("../config/db");
+
 const getAreas = async (req, res) => {
   try {
     console.log("Ejecutando getAreas...");
@@ -14,20 +15,16 @@ const getAreas = async (req, res) => {
 
 const getSlots = async (req, res) => {
   console.log("Ejecutando getSlots...");
-  // Placeholder: Implementar lógica para obtener slots disponibles si es necesario
   res.status(200).json([]);
 };
 
 const getOccupiedSlots = async (req, res) => {
   const { areaId, date } = req.query;
-
   console.log("Ejecutando getOccupiedSlots con parámetros:", { areaId, date });
-
   if (!areaId || !date) {
     console.log("Faltan parámetros: areaId y date son requeridos");
     return res.status(400).json({ message: "Faltan parámetros: areaId y date son requeridos" });
   }
-
   try {
     const pool = await poolPromise;
     console.log("Conexión a la base de datos establecida.");
@@ -54,14 +51,11 @@ const getOccupiedSlots = async (req, res) => {
 
 const createReservation = async (req, res) => {
   const { userId, areaId, date, startTime, endTime, departmentNumber } = req.body;
-
   console.log("Ejecutando createReservation con datos:", req.body);
-
   if (!userId || !areaId || !date || !startTime || !endTime || !departmentNumber) {
     console.log("Faltan campos requeridos");
     return res.status(400).json({ message: "Faltan campos requeridos" });
   }
-
   try {
     const pool = await poolPromise;
     await pool
@@ -87,14 +81,11 @@ const createReservation = async (req, res) => {
 
 const getUserReservations = async (req, res) => {
   const { userId } = req.params;
-
   console.log("Ejecutando getUserReservations para userId:", userId);
-
   if (!userId) {
     console.log("Falta el parámetro userId");
     return res.status(400).json({ message: "Falta el parámetro userId" });
   }
-
   try {
     const pool = await poolPromise;
     const result = await pool
@@ -103,14 +94,17 @@ const getUserReservations = async (req, res) => {
       .query(`
         SELECT 
           ID_RESERVA as id,
+          TIPO_AREA as areaId,
           TIPO_AREA as areaName,
-          FECHA_RESERVA as date,
-          HORA_INICIO as startTime,
-          HORA_FIN as endTime,
+          CONVERT(VARCHAR(10), FECHA_RESERVA, 120) as date,
+          ISNULL(CONVERT(VARCHAR(8), HORA_INICIO, 108), '00:00:00') as startTime,
+          ISNULL(CONVERT(VARCHAR(8), HORA_FIN, 108), '00:00:00') as endTime,
           ESTADO as status,
           NRO_DPTO as departmentNumber
         FROM dbo.MAE_RESERVA 
         WHERE ID_USUARIO = @ID_USUARIO
+          AND HORA_INICIO IS NOT NULL
+          AND HORA_FIN IS NOT NULL
       `);
     console.log("Reservas obtenidas para el usuario:", result.recordset);
     res.status(200).json(result.recordset);
