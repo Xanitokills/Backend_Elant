@@ -8,6 +8,7 @@ const reservationRoutes = require("./routes/reservationRoutes");
 const visitRoutes = require("./routes/visitRoutes");
 const logger = require("./config/logger");
 const menuRoutes = require("./routes/menuRoutes");
+const dashboardRoutes = require("./routes/dashboardRoutes");
 require("dotenv").config();
 
 const app = express();
@@ -41,6 +42,9 @@ app.use("/api", visitRoutes);
 logger.info("Rutas de visitRoutes cargadas.");
 app.use("/api/reservations", reservationRoutes); // Reservas (áreas, slots, reservas de usuario)
 logger.info("Rutas de reservationRoutes cargadas.");
+app.use("/api", dashboardRoutes); // dashboard
+logger.info("Rutas de dashboardRoutes cargadas.")
+
 
 // Middleware para depurar todas las solicitudes
 app.use((req, res, next) => {
