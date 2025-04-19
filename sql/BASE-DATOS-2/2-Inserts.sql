@@ -27,15 +27,17 @@ VALUES ('Masculino'), ('Femenino');
 
 
 -- INSERTAR ELEMENTOS DASHBOARD
-INSERT INTO MAE_ELEMENTOS_DASHBOARD (NOMBRE_ELEMENTO, DESCRIPCION, ESTADO) VALUES
-('DEUDORES', 'Sección de deudas pendientes (botón y card)', 1),
-('CUENTA_MANCOMUNADA', 'Sección de cuenta mancomunada (botón y card)', 1),
-('NOTICIAS', 'Sección de noticias (botón y card)', 1),
-('EVENTOS', 'Sección de eventos (botón y card)', 1),
-('DOCUMENTOS', 'Sección de documentos (botón y card)', 1),
-('ENCARGOS', 'Sección de encargos pendientes (botón y card)', 1),
-('BOTON_REPORTAR_PROBLEMA', 'Botón para reportar un problema (modal)', 1);
-GO
+INSERT INTO MAE_ELEMENTOS_DASHBOARD (NOMBRE_ELEMENTO, DESCRIPCION, ORDEN, ICONO, ESTADO)
+VALUES 
+    ('DEUDORES', 'Ver pagos pendientes', 1, 'FaExclamationCircle', 1),
+    ('CUENTA_MANCOMUNADA', 'Información de cuenta', 2, 'FaInfoCircle', 1),
+    ('NOTICIAS', 'Noticias del edificio', 3, 'FaBell', 1),
+    ('EVENTOS', 'Eventos próximos', 4, 'FaCalendarAlt', 1),
+    ('DOCUMENTOS', 'Documentos administrativos', 5, 'FaFileDownload', 1),
+    ('ENCARGOS', 'Encargos pendientes', 6, 'FaBox', 1),
+    ('BOTON_REPORTAR_PROBLEMA', 'Reportar problemas', 7, 'FaExclamationCircle', 1);
+
+
 
 --PERMISOS DE ELEMENTOS DASHBOARD
 -- Sistemas: Ve todo
