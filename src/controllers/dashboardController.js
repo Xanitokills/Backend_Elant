@@ -1,11 +1,13 @@
+// dashboardController.js
 const sql = require("mssql");
 const logger = require("../config/logger");
 const { poolPromise } = require("../config/db");
+const { io } = require("../index");
 
 const getDashboardData = async (req, res) => {
-  const userId = req.user?.id; // Obtenido del token JWT
+  const userId = req.user?.id;
   logger.info(`Iniciando getDashboardData para userId: ${userId}`);
-  
+
   if (!userId) {
     logger.error("Usuario no autenticado");
     return res.status(401).json({ message: "Usuario no autenticado" });
@@ -15,7 +17,7 @@ const getDashboardData = async (req, res) => {
     const pool = await poolPromise;
     logger.info("Conexión a la base de datos establecida");
 
-    // Obtener todos los ID_TIPO_USUARIO del usuario (MAE_USUARIO y MAE_USUARIO_ROL)
+    // Obtener todos los ID_TIPO_USUARIO del usuario
     const userRolesResult = await pool
       .request()
       .input("userId", sql.Int, userId)
@@ -32,7 +34,7 @@ const getDashboardData = async (req, res) => {
       return res.status(404).json({ message: "Usuario no encontrado o sin roles asignados" });
     }
 
-    // Obtener permisos de visibilidad para todos los tipos de usuario
+    // Obtener permisos de visibilidad con ORDEN e ICONO
     const permissionsResult = await pool
       .request()
       .query(`
@@ -41,14 +43,16 @@ const getDashboardData = async (req, res) => {
           CASE 
             WHEN SUM(CAST(p.VISIBLE AS INT)) > 0 THEN 1 
             ELSE 0 
-          END AS VISIBLE
+          END AS VISIBLE,
+          e.ORDEN,
+          e.ICONO
         FROM MAE_PERMISOS_DASHBOARD p
         JOIN MAE_ELEMENTOS_DASHBOARD e ON p.ID_ELEMENTO = e.ID_ELEMENTO
         WHERE p.ID_TIPO_USUARIO IN (${userRoleIds.join(",")}) AND e.ESTADO = 1
-        GROUP BY e.NOMBRE_ELEMENTO
+        GROUP BY e.NOMBRE_ELEMENTO, e.ORDEN, e.ICONO
       `);
-    const permissions = permissionsResult.recordset.reduce((acc, { NOMBRE_ELEMENTO, VISIBLE }) => {
-      acc[NOMBRE_ELEMENTO] = VISIBLE === 1;
+    const permissions = permissionsResult.recordset.reduce((acc, { NOMBRE_ELEMENTO, VISIBLE, ORDEN, ICONO }) => {
+      acc[NOMBRE_ELEMENTO] = { visible: VISIBLE === 1, order: ORDEN, icon: ICONO };
       return acc;
     }, {});
     logger.info(`Permisos obtenidos: ${JSON.stringify(permissions)}`);
@@ -93,42 +97,67 @@ const getDashboardData = async (req, res) => {
     const accountInfo = accountResult.recordset[0] || null;
     logger.info(`Cuenta mancomunada: ${accountInfo ? JSON.stringify(accountInfo) : "Ninguna"}`);
 
-    // Obtener noticias (MAE_AVISO)
+    // Obtener noticias filtradas por permisos
     const newsResult = await pool.request().query(`
-      SELECT TITULO AS title, DESCRIPCION AS description, CONVERT(VARCHAR, FECHA_PUBLICACION, 23) AS date
-      FROM MAE_AVISO
-      WHERE ESTADO = 1 AND (FECHA_EXPIRACION IS NULL OR FECHA_EXPIRACION > GETDATE())
-      ORDER BY FECHA_PUBLICACION DESC
+      SELECT TOP 5 
+        a.TITULO AS title, 
+        a.DESCRIPCION AS description, 
+        CONVERT(VARCHAR, a.FECHA_PUBLICACION, 23) AS date
+      FROM MAE_AVISO a
+      LEFT JOIN MAE_AVISO_PERMISOS ap ON a.ID_AVISO = ap.ID_AVISO
+      WHERE a.ESTADO = 1 
+        AND (a.FECHA_EXPIRACION IS NULL OR a.FECHA_EXPIRACION > GETDATE())
+        AND (ap.ID_TIPO_USUARIO IN (${userRoleIds.join(",")}) OR ap.ID_TIPO_USUARIO IS NULL)
+      ORDER BY a.FECHA_PUBLICACION DESC
     `);
     const news = newsResult.recordset;
     logger.info(`Noticias obtenidas: ${news.length}`);
 
-    // Obtener eventos (MAE_MANTENIMIENTO)
+    // Obtener eventos filtrados por permisos
     const eventsResult = await pool.request().query(`
-      SELECT CONVERT(VARCHAR, FECHA_MANTENIMIENTO, 23) AS date, DESCRIPCION AS title
-      FROM MAE_MANTENIMIENTO
-      WHERE ESTADO = 1 AND FECHA_MANTENIMIENTO >= GETDATE()
-      ORDER BY FECHA_MANTENIMIENTO ASC
+      SELECT TOP 5 
+        CONVERT(VARCHAR, e.FECHA_EVENTO, 23) AS date,
+        e.TITULO AS title,
+        e.TIPO_EVENTO AS type,
+        e.HORA_INICIO AS startTime,
+        e.HORA_FIN AS endTime,
+        e.UBICACION AS location,
+        e.DESCRIPCION AS description
+      FROM MAE_EVENTO e
+      LEFT JOIN MAE_EVENTO_PERMISOS ep ON e.ID_EVENTO = ep.ID_EVENTO
+      WHERE e.ESTADO = 1 
+        AND e.FECHA_EVENTO >= GETDATE()
+        AND (ep.ID_TIPO_USUARIO IN (${userRoleIds.join(",")}) OR ep.ID_TIPO_USUARIO IS NULL)
+      ORDER BY e.FECHA_EVENTO ASC
     `);
     const events = eventsResult.recordset;
     logger.info(`Eventos obtenidos: ${events.length}`);
 
-    // Obtener documentos (MAE_DOCUMENTO_ADMIN)
+    // Obtener documentos filtrados por permisos
     const documentsResult = await pool.request().query(`
-      SELECT TITULO AS name, TIPO_DOCUMENTO AS type, RUTA_ARCHIVO AS url
-      FROM MAE_DOCUMENTO_ADMIN
-      WHERE ESTADO = 1
-      ORDER BY FECHA_SUBIDA DESC
+      SELECT TOP 5 
+        d.TITULO AS name, 
+        d.TIPO_DOCUMENTO AS type, 
+        d.RUTA_ARCHIVO AS url,
+        CONVERT(VARCHAR, d.FECHA_SUBIDA, 23) AS uploadDate
+      FROM MAE_DOCUMENTO_ADMIN d
+      LEFT JOIN MAE_DOCUMENTO_PERMISOS dp ON d.ID_DOCUMENTO = dp.ID_DOCUMENTO
+      WHERE d.ESTADO = 1
+        AND (dp.ID_TIPO_USUARIO IN (${userRoleIds.join(",")}) OR dp.ID_TIPO_USUARIO IS NULL)
+      ORDER BY d.FECHA_SUBIDA DESC
     `);
     const documents = documentsResult.recordset;
     logger.info(`Documentos obtenidos: ${documents.length}`);
 
-    // Obtener encargos pendientes (MAE_ENCARGO)
+    // Obtener encargos pendientes
     const encargosResult = await pool
       .request()
       .input("userId", sql.Int, userId)
       .query(`
-        SELECT e.ID_ENCARGO, e.DESCRIPCION AS descripcion, CONVERT(VARCHAR, e.FECHA_RECEPCION, 23) AS fechaRecepcion
+        SELECT TOP 5 
+          e.ID_ENCARGO, 
+          e.DESCRIPCION AS descripcion, 
+          CONVERT(VARCHAR, e.FECHA_RECEPCION, 23) AS fechaRecepcion
         FROM MAE_ENCARGO e
         JOIN MAE_USUARIO_DEPARTAMENTO ud ON e.NRO_DPTO = ud.NRO_DPTO
         WHERE e.ESTADO = 1 AND e.FECHA_ENTREGA IS NULL AND ud.ID_USUARIO = @userId
@@ -137,6 +166,22 @@ const getDashboardData = async (req, res) => {
     const encargos = encargosResult.recordset;
     logger.info(`Encargos obtenidos: ${encargos.length}`);
 
+    // Obtener eventos de mantenimiento
+    const maintenanceResult = await pool.request().query(`
+      SELECT TOP 5 
+        m.DESCRIPCION AS title,
+        CONVERT(VARCHAR, m.FECHA_MANTENIMIENTO, 23) AS date,
+        p.NOMBRE AS providerName,
+        p.TIPO_SERVICIO AS providerType,
+        m.COSTO AS cost
+      FROM MAE_MANTENIMIENTO m
+      JOIN MAE_PROVEEDOR p ON m.ID_PROVEEDOR = p.ID_PROVEEDOR
+      WHERE m.ESTADO = 1 AND m.FECHA_MANTENIMIENTO >= GETDATE()
+      ORDER BY m.FECHA_MANTENIMIENTO ASC
+    `);
+    const maintenanceEvents = maintenanceResult.recordset;
+    logger.info(`Eventos de mantenimiento obtenidos: ${maintenanceEvents.length}`);
+
     res.status(200).json({
       pendingPayments,
       totalDebt,
@@ -144,6 +189,7 @@ const getDashboardData = async (req, res) => {
       accountInfo,
       news,
       events,
+      maintenanceEvents,
       documents,
       encargos,
       permissions,
@@ -156,4 +202,65 @@ const getDashboardData = async (req, res) => {
   }
 };
 
-module.exports = { getDashboardData };
+const emitUpdate = async (type, data) => {
+  try {
+    const pool = await poolPromise;
+    let updateData;
+
+    switch (type) {
+      case "news":
+        const newsResult = await pool.request().query(`
+          SELECT TOP 5 
+            a.TITULO AS title, 
+            a.DESCRIPCION AS description, 
+            CONVERT(VARCHAR, a.FECHA_PUBLICACION, 23) AS date
+          FROM MAE_AVISO a
+          WHERE a.ESTADO = 1 AND (a.FECHA_EXPIRACION IS NULL OR a.FECHA_EXPIRACION > GETDATE())
+          ORDER BY a.FECHA_PUBLICACION DESC
+        `);
+        updateData = { news: newsResult.recordset };
+        break;
+
+      case "events":
+        const eventsResult = await pool.request().query(`
+          SELECT TOP 5 
+            CONVERT(VARCHAR, e.FECHA_EVENTO, 23) AS date,
+            e.TITULO AS title,
+            e.TIPO_EVENTO AS type,
+            e.HORA_INICIO AS startTime,
+            e.HORA_FIN AS endTime,
+            e.UBICACION AS location,
+            e.DESCRIPCION AS description
+          FROM MAE_EVENTO e
+          WHERE e.ESTADO = 1 AND e.FECHA_EVENTO >= GETDATE()
+          ORDER BY e.FECHA_EVENTO ASC
+        `);
+        updateData = { events: eventsResult.recordset };
+        break;
+
+      case "documents":
+        const documentsResult = await pool.request().query(`
+          SELECT TOP 5 
+            d.TITULO AS name, 
+            d.TIPO_DOCUMENTO AS type, 
+            d.RUTA_ARCHIVO AS url,
+            CONVERT(VARCHAR, d.FECHA_SUBIDA, 23) AS uploadDate
+          FROM MAE_DOCUMENTO_ADMIN d
+          WHERE d.ESTADO = 1
+          ORDER BY d.FECHA_SUBIDA DESC
+        `);
+        updateData = { documents: documentsResult.recordset };
+        break;
+
+      default:
+        return;
+    }
+
+    io.emit("dashboardUpdate", updateData);
+    logger.info(`Actualización emitida para ${type}: ${JSON.stringify(updateData)}`);
+  } catch (error) {
+    logger.error(`Error al emitir actualización para ${type}: ${error.message}`);
+  }
+};
+
+module.exports = { getDashboardData, emitUpdate };

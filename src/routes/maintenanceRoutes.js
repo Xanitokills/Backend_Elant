@@ -1,10 +1,9 @@
 const express = require("express");
 const router = express.Router();
-const { getDashboardData } = require("../controllers/dashboardController");
+const { createMaintenance } = require("../controllers/maintenanceController");
 const authMiddleware = require("../middleware/authMiddleware");
 const upload = require("../config/multerConfig");
 
-// Rutas protegidas
-router.get("/dashboard", authMiddleware, getDashboardData);
+router.post("/maintenance", authMiddleware, createMaintenance);
 
 module.exports = router;
