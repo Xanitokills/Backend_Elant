@@ -300,6 +300,32 @@ const quitarRolComite = async (req, res) => {
   }
 };
 
+const getUserRoles = async (req, res) => {
+  const userId = req.user?.id;
+  logger.info(`Iniciando getUserRoles para userId: ${userId}`);
+
+  if (!userId) {
+    logger.error("Usuario no autenticado");
+    return res.status(401).json({ message: "Usuario no autenticado" });
+  }
+
+  try {
+    const pool = await poolPromise;
+    const result = await pool
+      .request()
+      .input("userId", sql.Int, userId)
+      .query(`
+        SELECT ID_TIPO_USUARIO FROM MAE_USUARIO WHERE ID_USUARIO = @userId AND ESTADO = 1
+        UNION
+        SELECT ID_TIPO_USUARIO FROM MAE_USUARIO_ROL WHERE ID_USUARIO = @userId
+      `);
+    res.status(200).json(result.recordset);
+  } catch (error) {
+    logger.error(`Error al obtener roles para userId ${userId}: ${error.message}`);
+    res.status(500).json({ message: "Error al obtener roles", error: error.message });
+  }
+};
+
 module.exports = {
   getUserTypes,
   getSexes,
@@ -311,5 +337,6 @@ module.exports = {
   changePassword,
   getSidebarByUserId,
   asignarRolComite,
-  quitarRolComite
+  quitarRolComite,
+  getUserRoles
 };

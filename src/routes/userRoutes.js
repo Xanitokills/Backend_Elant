@@ -13,6 +13,7 @@ const {
   changePassword,
   asignarRolComite,
   quitarRolComite,
+  getUserRoles
 } = require("../controllers/userController");
 
 // Rutas protegidas con ID_MENU=1 (Usuarios)
@@ -25,6 +26,7 @@ router.delete("/users/:id/quitar-comite", authMiddleware, checkPermission({ menu
 router.get("/user-types", getUserTypes);
 router.get("/sexes", getSexes);
 router.get("/get-roles", getRoles);
+router.get("/user-roles", authMiddleware, getUserRoles);
 router.get("/sidebar/:id", authMiddleware, getSidebarByUserId);
 
 module.exports = router;

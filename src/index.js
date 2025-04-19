@@ -1,7 +1,7 @@
 const express = require("express");
 const cors = require("cors");
-const http = require("http"); // Necesario para Socket.IO
-const { Server } = require("socket.io"); // Importar Socket.IO
+const http = require("http");
+const { Server } = require("socket.io");
 const authRoutes = require("./routes/authRoutes");
 const doorRoutes = require("./routes/doorRoutes");
 const movementRoutes = require("./routes/movementRoutes");
@@ -12,17 +12,18 @@ const logger = require("./config/logger");
 const menuRoutes = require("./routes/menuRoutes");
 const dashboardRoutes = require("./routes/dashboardRoutes");
 const maintenanceRoutes = require("./routes/maintenanceRoutes");
+const { checkForUpdates } = require("./controllers/dashboardController"); // Importar checkForUpdates
 require("dotenv").config();
 
 const app = express();
-const server = http.createServer(app); // Crear servidor HTTP
+const server = http.createServer(app);
 const io = new Server(server, {
   cors: {
     origin: process.env.FRONTEND_URL || "http://localhost:5173",
     methods: ["GET", "POST"],
     credentials: true,
   },
-}); // Integrar Socket.IO
+});
 
 // Middleware
 app.use(express.json());
@@ -76,9 +77,6 @@ io.on("connection", (socket) => {
     return;
   }
 
-  // Aquí puedes verificar el token JWT si es necesario
-  // Ejemplo: jwt.verify(token.replace("Bearer ", ""), process.env.JWT_SECRET);
-
   socket.on("disconnect", () => {
     logger.info(`Cliente desconectado: ${socket.id}`);
   });
@@ -86,6 +84,9 @@ io.on("connection", (socket) => {
 
 // Hacer que `io` esté disponible en los controladores
 app.set("io", io);
+
+// Iniciar polling para verificar cambios cada 5 segundos
+setInterval(() => checkForUpdates(io), 5000);
 
 // Middleware de manejo de errores
 app.use((err, req, res, next) => {
