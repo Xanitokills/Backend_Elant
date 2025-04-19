@@ -29,34 +29,32 @@ VALUES ('Masculino'), ('Femenino');
 -- INSERTAR ELEMENTOS DASHBOARD
 INSERT INTO MAE_ELEMENTOS_DASHBOARD (NOMBRE_ELEMENTO, DESCRIPCION, ORDEN, ICONO, ESTADO)
 VALUES 
-    ('DEUDORES', 'Ver pagos pendientes', 1, 'FaExclamationCircle', 1),
-    ('CUENTA_MANCOMUNADA', 'Información de cuenta', 2, 'FaInfoCircle', 1),
-    ('NOTICIAS', 'Noticias del edificio', 3, 'FaBell', 1),
-    ('EVENTOS', 'Eventos próximos', 4, 'FaCalendarAlt', 1),
-    ('DOCUMENTOS', 'Documentos administrativos', 5, 'FaFileDownload', 1),
-    ('ENCARGOS', 'Encargos pendientes', 6, 'FaBox', 1),
-    ('BOTON_REPORTAR_PROBLEMA', 'Reportar problemas', 7, 'FaExclamationCircle', 1);
+    ('Deudores', 'Ver pagos pendientes', 1, 'FaExclamationCircle', 1),
+    ('Cuenta Mancomunada', 'Información de cuenta', 2, 'FaInfoCircle', 1),
+    ('Noticias', 'Noticias del edificio', 3, 'FaBell', 1),
+    ('Eventos', 'Eventos próximos', 4, 'FaCalendarAlt', 1),
+    ('Documentos', 'Documentos administrativos', 5, 'FaFileDownload', 1),
+    ('Encargos', 'Encargos pendientes', 6, 'FaBox', 1),
+    ('Reportar Problema', 'Reportar problemas', 7, 'FaExclamationCircle', 1);
 
 
-
---PERMISOS DE ELEMENTOS DASHBOARD
--- Sistemas: Ve todo
+	-- Sistemas: Ve todo
 INSERT INTO MAE_PERMISOS_DASHBOARD (ID_TIPO_USUARIO, ID_ELEMENTO, VISIBLE)
 SELECT 1, ID_ELEMENTO, 1 FROM MAE_ELEMENTOS_DASHBOARD;
 
 -- Administrador: Ve todo excepto DEUDORES
 INSERT INTO MAE_PERMISOS_DASHBOARD (ID_TIPO_USUARIO, ID_ELEMENTO, VISIBLE)
-SELECT 2, ID_ELEMENTO, CASE WHEN NOMBRE_ELEMENTO = 'DEUDORES' THEN 0 ELSE 1 END
+SELECT 2, ID_ELEMENTO, CASE WHEN NOMBRE_ELEMENTO = 'Deudores' THEN 0 ELSE 1 END
 FROM MAE_ELEMENTOS_DASHBOARD;
 
 -- Comité: Ve todo excepto DEUDORES y ENCARGOS
 INSERT INTO MAE_PERMISOS_DASHBOARD (ID_TIPO_USUARIO, ID_ELEMENTO, VISIBLE)
-SELECT 3, ID_ELEMENTO, CASE WHEN NOMBRE_ELEMENTO IN ('DEUDORES', 'ENCARGOS') THEN 0 ELSE 1 END
+SELECT 3, ID_ELEMENTO, CASE WHEN NOMBRE_ELEMENTO IN ('Deudores', 'Encargos') THEN 0 ELSE 1 END
 FROM MAE_ELEMENTOS_DASHBOARD;
 
 -- Seguridad: Solo ve NOTICIAS, EVENTOS, y BOTON_REPORTAR_PROBLEMA
 INSERT INTO MAE_PERMISOS_DASHBOARD (ID_TIPO_USUARIO, ID_ELEMENTO, VISIBLE)
-SELECT 4, ID_ELEMENTO, CASE WHEN NOMBRE_ELEMENTO IN ('NOTICIAS', 'EVENTOS', 'BOTON_REPORTAR_PROBLEMA') THEN 1 ELSE 0 END
+SELECT 4, ID_ELEMENTO, CASE WHEN NOMBRE_ELEMENTO IN ('Noticias', 'Eventos', 'Reportar Problema') THEN 1 ELSE 0 END
 FROM MAE_ELEMENTOS_DASHBOARD;
 
 -- Propietario: Ve todo
@@ -67,6 +65,7 @@ SELECT 5, ID_ELEMENTO, 1 FROM MAE_ELEMENTOS_DASHBOARD;
 INSERT INTO MAE_PERMISOS_DASHBOARD (ID_TIPO_USUARIO, ID_ELEMENTO, VISIBLE)
 SELECT 6, ID_ELEMENTO, 1 FROM MAE_ELEMENTOS_DASHBOARD;
 GO
+
 
 
 
