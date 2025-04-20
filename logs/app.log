@@ -9585,3 +9585,393 @@
 2025-04-18T00:28:15.798Z info: ✅ Usuario autenticado: ID=6, Correo=saavedracastrosandro@gmail.com, Tipo=1, Rol=Sistemas
 2025-04-18T00:28:16.101Z info: Usuario verificado: ID=6, Correo=saavedracastrosandro@gmail.com, Tipo=1
 2025-04-18T00:28:16.403Z info: Permisos verificados para usuario 6: 8
+2025-04-18T00:44:15.214Z info: Permisos para usuario 6: Áreas Comunes,Cambio Contraseña,Configuración,Control de Ingresos y Salidas,Dashboard,Gestión de Ingreso,Gestión de Menús y Submenús,Gestión Visitas,Lista de Usuarios,Login,Recepción,Registrar Pedido,Registrar Usuarios,Reservas,Usuarios,Visitas Programadas
+2025-04-18T00:44:15.234Z info: 🛡️ authMiddleware ejecutado
+2025-04-18T00:44:15.234Z info: 🔐 Token recibido
+2025-04-18T00:44:15.235Z info: ✅ Token decodificado: ID=6, datos={"id":6,"role":"Sistemas","iat":1744935886,"exp":1744939486}
+2025-04-18T00:44:15.532Z info: 🛡️ authMiddleware ejecutado
+2025-04-18T00:44:15.533Z info: 🔐 Token recibido
+2025-04-18T00:44:15.535Z info: ✅ Token decodificado: ID=6, datos={"id":6,"role":"Sistemas","iat":1744935886,"exp":1744939486}
+2025-04-18T00:44:16.125Z info: ✅ Usuario autenticado: ID=6, Correo=saavedracastrosandro@gmail.com, Tipo=1, Rol=Sistemas
+2025-04-18T00:44:16.427Z info: Permisos para usuario 6: Áreas Comunes,Cambio Contraseña,Configuración,Control de Ingresos y Salidas,Dashboard,Gestión de Ingreso,Gestión de Menús y Submenús,Gestión Visitas,Lista de Usuarios,Login,Recepción,Registrar Pedido,Registrar Usuarios,Reservas,Usuarios,Visitas Programadas
+2025-04-18T00:44:16.485Z info: ✅ Usuario autenticado: ID=6, Correo=saavedracastrosandro@gmail.com, Tipo=1, Rol=Sistemas
+2025-04-18T00:44:16.729Z info: Usuario verificado: ID=6, Correo=saavedracastrosandro@gmail.com, Tipo=1
+2025-04-18T00:44:16.788Z info: Usuario verificado: ID=6, Correo=saavedracastrosandro@gmail.com, Tipo=1
+2025-04-18T00:44:17.031Z info: Permisos verificados para usuario 6: 8
+2025-04-18T00:44:17.090Z info: Permisos verificados para usuario 6: 8
+2025-04-18T00:44:21.974Z info: Permisos para usuario 6: Áreas Comunes,Cambio Contraseña,Configuración,Control de Ingresos y Salidas,Dashboard,Gestión de Ingreso,Gestión de Menús y Submenús,Gestión Visitas,Lista de Usuarios,Login,Recepción,Registrar Pedido,Registrar Usuarios,Reservas,Usuarios,Visitas Programadas
+2025-04-18T00:44:22.004Z info: Solicitud recibida: GET /api/news
+2025-04-18T00:44:22.008Z info: Solicitud recibida: GET /api/news
+2025-04-18T00:44:22.580Z info: Permisos para usuario 6: Áreas Comunes,Cambio Contraseña,Configuración,Control de Ingresos y Salidas,Dashboard,Gestión de Ingreso,Gestión de Menús y Submenús,Gestión Visitas,Lista de Usuarios,Login,Recepción,Registrar Pedido,Registrar Usuarios,Reservas,Usuarios,Visitas Programadas
+2025-04-18T00:44:26.599Z info: 🛡️ authMiddleware ejecutado
+2025-04-18T00:44:26.599Z info: 🔐 Token recibido
+2025-04-18T00:44:26.600Z info: ✅ Token decodificado: ID=6, datos={"id":6,"role":"Sistemas","iat":1744935886,"exp":1744939486}
+2025-04-18T00:44:26.601Z info: 🛡️ authMiddleware ejecutado
+2025-04-18T00:44:26.601Z info: 🔐 Token recibido
+2025-04-18T00:44:26.602Z info: ✅ Token decodificado: ID=6, datos={"id":6,"role":"Sistemas","iat":1744935886,"exp":1744939486}
+2025-04-18T00:44:26.902Z info: ✅ Usuario autenticado: ID=6, Correo=saavedracastrosandro@gmail.com, Tipo=1, Rol=Sistemas
+2025-04-18T00:44:26.914Z info: ✅ Usuario autenticado: ID=6, Correo=saavedracastrosandro@gmail.com, Tipo=1, Rol=Sistemas
+2025-04-18T00:44:27.205Z info: Usuario verificado: ID=6, Correo=saavedracastrosandro@gmail.com, Tipo=1
+2025-04-18T00:44:27.228Z info: Usuario verificado: ID=6, Correo=saavedracastrosandro@gmail.com, Tipo=1
+2025-04-18T00:44:27.508Z info: Permisos verificados para usuario 6: 8
+2025-04-18T00:44:27.542Z info: Permisos verificados para usuario 6: 8
+2025-04-18T00:44:31.599Z info: 🛡️ authMiddleware ejecutado
+2025-04-18T00:44:31.600Z info: 🔐 Token recibido
+2025-04-18T00:44:31.600Z info: ✅ Token decodificado: ID=6, datos={"id":6,"role":"Sistemas","iat":1744935886,"exp":1744939486}
+2025-04-18T00:44:31.914Z info: ✅ Usuario autenticado: ID=6, Correo=saavedracastrosandro@gmail.com, Tipo=1, Rol=Sistemas
+2025-04-18T00:44:32.227Z info: Usuario verificado: ID=6, Correo=saavedracastrosandro@gmail.com, Tipo=1
+2025-04-18T00:44:32.540Z info: Permisos verificados para usuario 6: 8
+2025-04-18T00:44:36.602Z info: 🛡️ authMiddleware ejecutado
+2025-04-18T00:44:36.602Z info: 🔐 Token recibido
+2025-04-18T00:44:36.604Z info: ✅ Token decodificado: ID=6, datos={"id":6,"role":"Sistemas","iat":1744935886,"exp":1744939486}
+2025-04-18T00:44:36.922Z info: ✅ Usuario autenticado: ID=6, Correo=saavedracastrosandro@gmail.com, Tipo=1, Rol=Sistemas
+2025-04-18T00:44:37.234Z info: Usuario verificado: ID=6, Correo=saavedracastrosandro@gmail.com, Tipo=1
+2025-04-18T00:44:37.548Z info: Permisos verificados para usuario 6: 8
+2025-04-18T00:44:41.599Z info: 🛡️ authMiddleware ejecutado
+2025-04-18T00:44:41.600Z info: 🔐 Token recibido
+2025-04-18T00:44:41.601Z info: ✅ Token decodificado: ID=6, datos={"id":6,"role":"Sistemas","iat":1744935886,"exp":1744939486}
+2025-04-18T00:44:41.914Z info: ✅ Usuario autenticado: ID=6, Correo=saavedracastrosandro@gmail.com, Tipo=1, Rol=Sistemas
+2025-04-18T00:44:42.227Z info: Usuario verificado: ID=6, Correo=saavedracastrosandro@gmail.com, Tipo=1
+2025-04-18T00:44:42.541Z info: Permisos verificados para usuario 6: 8
+2025-04-18T00:44:46.604Z info: 🛡️ authMiddleware ejecutado
+2025-04-18T00:44:46.605Z info: 🔐 Token recibido
+2025-04-18T00:44:46.606Z info: ✅ Token decodificado: ID=6, datos={"id":6,"role":"Sistemas","iat":1744935886,"exp":1744939486}
+2025-04-18T00:44:46.920Z info: ✅ Usuario autenticado: ID=6, Correo=saavedracastrosandro@gmail.com, Tipo=1, Rol=Sistemas
+2025-04-18T00:44:47.233Z info: Usuario verificado: ID=6, Correo=saavedracastrosandro@gmail.com, Tipo=1
+2025-04-18T00:44:47.546Z info: Permisos verificados para usuario 6: 8
+2025-04-18T00:44:51.604Z info: 🛡️ authMiddleware ejecutado
+2025-04-18T00:44:51.605Z info: 🔐 Token recibido
+2025-04-18T00:44:51.605Z info: ✅ Token decodificado: ID=6, datos={"id":6,"role":"Sistemas","iat":1744935886,"exp":1744939486}
+2025-04-18T00:44:51.919Z info: ✅ Usuario autenticado: ID=6, Correo=saavedracastrosandro@gmail.com, Tipo=1, Rol=Sistemas
+2025-04-18T00:44:52.232Z info: Usuario verificado: ID=6, Correo=saavedracastrosandro@gmail.com, Tipo=1
+2025-04-18T00:44:52.546Z info: Permisos verificados para usuario 6: 8
+2025-04-18T00:44:55.641Z info: Solicitud recibida: DELETE /api/reservations/areas/undefined
+2025-04-18T00:44:56.604Z info: 🛡️ authMiddleware ejecutado
+2025-04-18T00:44:56.604Z info: 🔐 Token recibido
+2025-04-18T00:44:56.605Z info: ✅ Token decodificado: ID=6, datos={"id":6,"role":"Sistemas","iat":1744935886,"exp":1744939486}
+2025-04-18T00:44:56.918Z info: ✅ Usuario autenticado: ID=6, Correo=saavedracastrosandro@gmail.com, Tipo=1, Rol=Sistemas
+2025-04-18T00:44:57.232Z info: Usuario verificado: ID=6, Correo=saavedracastrosandro@gmail.com, Tipo=1
+2025-04-18T00:44:57.545Z info: Permisos verificados para usuario 6: 8
+2025-04-18T00:45:01.599Z info: 🛡️ authMiddleware ejecutado
+2025-04-18T00:45:01.600Z info: 🔐 Token recibido
+2025-04-18T00:45:01.601Z info: ✅ Token decodificado: ID=6, datos={"id":6,"role":"Sistemas","iat":1744935886,"exp":1744939486}
+2025-04-18T00:45:01.914Z info: ✅ Usuario autenticado: ID=6, Correo=saavedracastrosandro@gmail.com, Tipo=1, Rol=Sistemas
+2025-04-18T00:45:02.227Z info: Usuario verificado: ID=6, Correo=saavedracastrosandro@gmail.com, Tipo=1
+2025-04-18T00:45:02.541Z info: Permisos verificados para usuario 6: 8
+2025-04-18T00:45:03.191Z info: Solicitud recibida: DELETE /api/reservations/areas/undefined
+2025-04-18T00:45:09.022Z info: Permisos para usuario 6: Áreas Comunes,Cambio Contraseña,Configuración,Control de Ingresos y Salidas,Dashboard,Gestión de Ingreso,Gestión de Menús y Submenús,Gestión Visitas,Lista de Usuarios,Login,Recepción,Registrar Pedido,Registrar Usuarios,Reservas,Usuarios,Visitas Programadas
+2025-04-18T00:45:09.040Z info: Solicitud recibida: GET /api/news
+2025-04-18T00:45:09.043Z info: Solicitud recibida: GET /api/news
+2025-04-18T00:45:09.651Z info: Permisos para usuario 6: Áreas Comunes,Cambio Contraseña,Configuración,Control de Ingresos y Salidas,Dashboard,Gestión de Ingreso,Gestión de Menús y Submenús,Gestión Visitas,Lista de Usuarios,Login,Recepción,Registrar Pedido,Registrar Usuarios,Reservas,Usuarios,Visitas Programadas
+2025-04-18T00:45:11.791Z info: 🛡️ authMiddleware ejecutado
+2025-04-18T00:45:11.792Z info: 🔐 Token recibido
+2025-04-18T00:45:11.793Z info: ✅ Token decodificado: ID=6, datos={"id":6,"role":"Sistemas","iat":1744935886,"exp":1744939486}
+2025-04-18T00:45:11.794Z info: 🛡️ authMiddleware ejecutado
+2025-04-18T00:45:11.794Z info: 🔐 Token recibido
+2025-04-18T00:45:11.795Z info: ✅ Token decodificado: ID=6, datos={"id":6,"role":"Sistemas","iat":1744935886,"exp":1744939486}
+2025-04-18T00:45:12.417Z info: ✅ Usuario autenticado: ID=6, Correo=saavedracastrosandro@gmail.com, Tipo=1, Rol=Sistemas
+2025-04-18T00:45:12.729Z info: ✅ Usuario autenticado: ID=6, Correo=saavedracastrosandro@gmail.com, Tipo=1, Rol=Sistemas
+2025-04-18T00:45:13.356Z info: Usuario verificado: ID=6, Correo=saavedracastrosandro@gmail.com, Tipo=1
+2025-04-18T00:45:13.390Z info: Usuario verificado: ID=6, Correo=saavedracastrosandro@gmail.com, Tipo=1
+2025-04-18T00:45:13.669Z info: Permisos verificados para usuario 6: 8
+2025-04-18T00:45:13.694Z info: Permisos verificados para usuario 6: 8
+2025-04-18T00:45:16.805Z info: 🛡️ authMiddleware ejecutado
+2025-04-18T00:45:16.805Z info: 🔐 Token recibido
+2025-04-18T00:45:16.806Z info: ✅ Token decodificado: ID=6, datos={"id":6,"role":"Sistemas","iat":1744935886,"exp":1744939486}
+2025-04-18T00:45:17.105Z info: ✅ Usuario autenticado: ID=6, Correo=saavedracastrosandro@gmail.com, Tipo=1, Rol=Sistemas
+2025-04-18T00:45:17.403Z info: Usuario verificado: ID=6, Correo=saavedracastrosandro@gmail.com, Tipo=1
+2025-04-18T00:45:17.712Z info: Permisos verificados para usuario 6: 8
+2025-04-18T00:45:21.886Z info: 🛡️ authMiddleware ejecutado
+2025-04-18T00:45:21.886Z info: 🔐 Token recibido
+2025-04-18T00:45:21.887Z info: ✅ Token decodificado: ID=6, datos={"id":6,"role":"Sistemas","iat":1744935886,"exp":1744939486}
+2025-04-18T00:45:22.185Z info: ✅ Usuario autenticado: ID=6, Correo=saavedracastrosandro@gmail.com, Tipo=1, Rol=Sistemas
+2025-04-18T00:45:22.484Z info: Usuario verificado: ID=6, Correo=saavedracastrosandro@gmail.com, Tipo=1
+2025-04-18T00:45:22.781Z info: Permisos verificados para usuario 6: 8
+2025-04-18T00:45:26.883Z info: 🛡️ authMiddleware ejecutado
+2025-04-18T00:45:26.883Z info: 🔐 Token recibido
+2025-04-18T00:45:26.884Z info: ✅ Token decodificado: ID=6, datos={"id":6,"role":"Sistemas","iat":1744935886,"exp":1744939486}
+2025-04-18T00:45:27.182Z info: ✅ Usuario autenticado: ID=6, Correo=saavedracastrosandro@gmail.com, Tipo=1, Rol=Sistemas
+2025-04-18T00:45:27.479Z info: Usuario verificado: ID=6, Correo=saavedracastrosandro@gmail.com, Tipo=1
+2025-04-18T00:45:27.784Z info: Permisos verificados para usuario 6: 8
+2025-04-18T00:45:31.890Z info: 🛡️ authMiddleware ejecutado
+2025-04-18T00:45:31.891Z info: 🔐 Token recibido
+2025-04-18T00:45:31.892Z info: ✅ Token decodificado: ID=6, datos={"id":6,"role":"Sistemas","iat":1744935886,"exp":1744939486}
+2025-04-18T00:45:32.189Z info: ✅ Usuario autenticado: ID=6, Correo=saavedracastrosandro@gmail.com, Tipo=1, Rol=Sistemas
+2025-04-18T00:45:32.486Z info: Usuario verificado: ID=6, Correo=saavedracastrosandro@gmail.com, Tipo=1
+2025-04-18T00:45:32.784Z info: Permisos verificados para usuario 6: 8
+2025-04-18T00:45:36.889Z info: 🛡️ authMiddleware ejecutado
+2025-04-18T00:45:36.890Z info: 🔐 Token recibido
+2025-04-18T00:45:36.891Z info: ✅ Token decodificado: ID=6, datos={"id":6,"role":"Sistemas","iat":1744935886,"exp":1744939486}
+2025-04-18T00:45:37.190Z info: ✅ Usuario autenticado: ID=6, Correo=saavedracastrosandro@gmail.com, Tipo=1, Rol=Sistemas
+2025-04-18T00:45:37.489Z info: Usuario verificado: ID=6, Correo=saavedracastrosandro@gmail.com, Tipo=1
+2025-04-18T00:45:37.789Z info: Permisos verificados para usuario 6: 8
+2025-04-18T00:45:41.893Z info: 🛡️ authMiddleware ejecutado
+2025-04-18T00:45:41.893Z info: 🔐 Token recibido
+2025-04-18T00:45:41.894Z info: ✅ Token decodificado: ID=6, datos={"id":6,"role":"Sistemas","iat":1744935886,"exp":1744939486}
+2025-04-18T00:45:42.193Z info: ✅ Usuario autenticado: ID=6, Correo=saavedracastrosandro@gmail.com, Tipo=1, Rol=Sistemas
+2025-04-18T00:45:42.491Z info: Usuario verificado: ID=6, Correo=saavedracastrosandro@gmail.com, Tipo=1
+2025-04-18T00:45:42.797Z info: Permisos verificados para usuario 6: 8
+2025-04-18T00:45:46.889Z info: 🛡️ authMiddleware ejecutado
+2025-04-18T00:45:46.890Z info: 🔐 Token recibido
+2025-04-18T00:45:46.891Z info: ✅ Token decodificado: ID=6, datos={"id":6,"role":"Sistemas","iat":1744935886,"exp":1744939486}
+2025-04-18T00:45:47.194Z info: ✅ Usuario autenticado: ID=6, Correo=saavedracastrosandro@gmail.com, Tipo=1, Rol=Sistemas
+2025-04-18T00:45:47.491Z info: Usuario verificado: ID=6, Correo=saavedracastrosandro@gmail.com, Tipo=1
+2025-04-18T00:45:47.789Z info: Permisos verificados para usuario 6: 8
+2025-04-18T00:45:51.889Z info: 🛡️ authMiddleware ejecutado
+2025-04-18T00:45:51.889Z info: 🔐 Token recibido
+2025-04-18T00:45:51.890Z info: ✅ Token decodificado: ID=6, datos={"id":6,"role":"Sistemas","iat":1744935886,"exp":1744939486}
+2025-04-18T00:45:52.188Z info: ✅ Usuario autenticado: ID=6, Correo=saavedracastrosandro@gmail.com, Tipo=1, Rol=Sistemas
+2025-04-18T00:45:52.485Z info: Usuario verificado: ID=6, Correo=saavedracastrosandro@gmail.com, Tipo=1
+2025-04-18T00:45:52.783Z info: Permisos verificados para usuario 6: 8
+2025-04-18T00:45:56.894Z info: 🛡️ authMiddleware ejecutado
+2025-04-18T00:45:56.894Z info: 🔐 Token recibido
+2025-04-18T00:45:56.895Z info: ✅ Token decodificado: ID=6, datos={"id":6,"role":"Sistemas","iat":1744935886,"exp":1744939486}
+2025-04-18T00:45:57.192Z info: ✅ Usuario autenticado: ID=6, Correo=saavedracastrosandro@gmail.com, Tipo=1, Rol=Sistemas
+2025-04-18T00:45:57.491Z info: Usuario verificado: ID=6, Correo=saavedracastrosandro@gmail.com, Tipo=1
+2025-04-18T00:45:57.788Z info: Permisos verificados para usuario 6: 8
+2025-04-18T00:46:01.891Z info: 🛡️ authMiddleware ejecutado
+2025-04-18T00:46:01.892Z info: 🔐 Token recibido
+2025-04-18T00:46:01.893Z info: ✅ Token decodificado: ID=6, datos={"id":6,"role":"Sistemas","iat":1744935886,"exp":1744939486}
+2025-04-18T00:46:02.190Z info: ✅ Usuario autenticado: ID=6, Correo=saavedracastrosandro@gmail.com, Tipo=1, Rol=Sistemas
+2025-04-18T00:46:02.488Z info: Usuario verificado: ID=6, Correo=saavedracastrosandro@gmail.com, Tipo=1
+2025-04-18T00:46:02.786Z info: Permisos verificados para usuario 6: 8
+2025-04-18T00:46:06.793Z info: 🛡️ authMiddleware ejecutado
+2025-04-18T00:46:06.793Z info: 🔐 Token recibido
+2025-04-18T00:46:06.794Z info: ✅ Token decodificado: ID=6, datos={"id":6,"role":"Sistemas","iat":1744935886,"exp":1744939486}
+2025-04-18T00:46:07.091Z info: ✅ Usuario autenticado: ID=6, Correo=saavedracastrosandro@gmail.com, Tipo=1, Rol=Sistemas
+2025-04-18T00:46:07.389Z info: Usuario verificado: ID=6, Correo=saavedracastrosandro@gmail.com, Tipo=1
+2025-04-18T00:46:07.686Z info: Permisos verificados para usuario 6: 8
+2025-04-18T00:46:12.274Z info: Permisos para usuario 6: Áreas Comunes,Cambio Contraseña,Configuración,Control de Ingresos y Salidas,Dashboard,Gestión de Ingreso,Gestión de Menús y Submenús,Gestión Visitas,Lista de Usuarios,Login,Recepción,Registrar Pedido,Registrar Usuarios,Reservas,Usuarios,Visitas Programadas
+2025-04-18T00:46:12.621Z info: 🛡️ authMiddleware ejecutado
+2025-04-18T00:46:12.622Z info: 🔐 Token recibido
+2025-04-18T00:46:12.623Z info: ✅ Token decodificado: ID=6, datos={"id":6,"role":"Sistemas","iat":1744935886,"exp":1744939486}
+2025-04-18T00:46:13.472Z info: Permisos para usuario 6: Áreas Comunes,Cambio Contraseña,Configuración,Control de Ingresos y Salidas,Dashboard,Gestión de Ingreso,Gestión de Menús y Submenús,Gestión Visitas,Lista de Usuarios,Login,Recepción,Registrar Pedido,Registrar Usuarios,Reservas,Usuarios,Visitas Programadas
+2025-04-18T00:46:13.768Z info: ✅ Usuario autenticado: ID=6, Correo=saavedracastrosandro@gmail.com, Tipo=1, Rol=Sistemas
+2025-04-18T00:46:14.066Z info: Usuario verificado: ID=6, Correo=saavedracastrosandro@gmail.com, Tipo=1
+2025-04-18T00:46:14.367Z info: Permisos verificados para usuario 6: 8
+2025-04-18T01:07:57.957Z info: Permisos para usuario 6: Áreas Comunes,Cambio Contraseña,Configuración,Control de Ingresos y Salidas,Dashboard,Gestión de Ingreso,Gestión de Menús y Submenús,Gestión Visitas,Lista de Usuarios,Login,Recepción,Registrar Pedido,Registrar Usuarios,Reservas,Usuarios,Visitas Programadas
+2025-04-18T01:07:58.008Z info: Solicitud recibida: GET /api/news
+2025-04-18T01:07:58.012Z info: Solicitud recibida: GET /api/news
+2025-04-18T01:07:58.545Z info: Permisos para usuario 6: Áreas Comunes,Cambio Contraseña,Configuración,Control de Ingresos y Salidas,Dashboard,Gestión de Ingreso,Gestión de Menús y Submenús,Gestión Visitas,Lista de Usuarios,Login,Recepción,Registrar Pedido,Registrar Usuarios,Reservas,Usuarios,Visitas Programadas
+2025-04-18T01:08:01.497Z info: 🛡️ authMiddleware ejecutado
+2025-04-18T01:08:01.497Z info: 🔐 Token recibido
+2025-04-18T01:08:01.498Z info: ✅ Token decodificado: ID=6, datos={"id":6,"role":"Sistemas","iat":1744935886,"exp":1744939486}
+2025-04-18T01:08:01.964Z info: ✅ Usuario autenticado: ID=6, Correo=saavedracastrosandro@gmail.com, Tipo=1, Rol=Sistemas
+2025-04-18T01:08:02.266Z info: Usuario verificado: ID=6, Correo=saavedracastrosandro@gmail.com, Tipo=1
+2025-04-18T01:08:02.766Z info: Permisos verificados para usuario 6: 1
+2025-04-18T01:08:03.075Z info: 🛡️ authMiddleware ejecutado
+2025-04-18T01:08:03.076Z info: 🔐 Token recibido
+2025-04-18T01:08:03.077Z info: ✅ Token decodificado: ID=6, datos={"id":6,"role":"Sistemas","iat":1744935886,"exp":1744939486}
+2025-04-18T01:08:03.078Z info: 🛡️ authMiddleware ejecutado
+2025-04-18T01:08:03.078Z info: 🔐 Token recibido
+2025-04-18T01:08:03.079Z info: ✅ Token decodificado: ID=6, datos={"id":6,"role":"Sistemas","iat":1744935886,"exp":1744939486}
+2025-04-18T01:08:03.379Z info: ✅ Usuario autenticado: ID=6, Correo=saavedracastrosandro@gmail.com, Tipo=1, Rol=Sistemas
+2025-04-18T01:08:03.394Z info: ✅ Usuario autenticado: ID=6, Correo=saavedracastrosandro@gmail.com, Tipo=1, Rol=Sistemas
+2025-04-18T01:08:03.681Z info: Usuario verificado: ID=6, Correo=saavedracastrosandro@gmail.com, Tipo=1
+2025-04-18T01:08:03.702Z info: Usuario verificado: ID=6, Correo=saavedracastrosandro@gmail.com, Tipo=1
+2025-04-18T01:08:03.937Z info: 🛡️ authMiddleware ejecutado
+2025-04-18T01:08:03.937Z info: 🔐 Token recibido
+2025-04-18T01:08:03.938Z info: ✅ Token decodificado: ID=6, datos={"id":6,"role":"Sistemas","iat":1744935886,"exp":1744939486}
+2025-04-18T01:08:03.983Z info: Permisos verificados para usuario 6: 2
+2025-04-18T01:08:04.010Z info: Permisos verificados para usuario 6: 10
+2025-04-18T01:08:04.231Z info: ✅ Usuario autenticado: ID=6, Correo=saavedracastrosandro@gmail.com, Tipo=1, Rol=Sistemas
+2025-04-18T01:08:04.288Z info: 🛡️ authMiddleware ejecutado
+2025-04-18T01:08:04.288Z info: 🔐 Token recibido
+2025-04-18T01:08:04.290Z info: ✅ Token decodificado: ID=6, datos={"id":6,"role":"Sistemas","iat":1744935886,"exp":1744939486}
+2025-04-18T01:08:04.325Z info: 🛡️ authMiddleware ejecutado
+2025-04-18T01:08:04.326Z info: 🔐 Token recibido
+2025-04-18T01:08:04.326Z info: ✅ Token decodificado: ID=6, datos={"id":6,"role":"Sistemas","iat":1744935886,"exp":1744939486}
+2025-04-18T01:08:04.524Z info: Usuario verificado: ID=6, Correo=saavedracastrosandro@gmail.com, Tipo=1
+2025-04-18T01:08:04.591Z info: ✅ Usuario autenticado: ID=6, Correo=saavedracastrosandro@gmail.com, Tipo=1, Rol=Sistemas
+2025-04-18T01:08:04.635Z info: ✅ Usuario autenticado: ID=6, Correo=saavedracastrosandro@gmail.com, Tipo=1, Rol=Sistemas
+2025-04-18T01:08:04.816Z info: Permisos verificados para usuario 6: 3
+2025-04-18T01:08:04.893Z info: Usuario verificado: ID=6, Correo=saavedracastrosandro@gmail.com, Tipo=1
+2025-04-18T01:08:04.943Z info: Usuario verificado: ID=6, Correo=saavedracastrosandro@gmail.com, Tipo=1
+2025-04-18T01:08:05.113Z info: 🛡️ authMiddleware ejecutado
+2025-04-18T01:08:05.113Z info: 🔐 Token recibido
+2025-04-18T01:08:05.115Z info: ✅ Token decodificado: ID=6, datos={"id":6,"role":"Sistemas","iat":1744935886,"exp":1744939486}
+2025-04-18T01:08:05.202Z info: Permisos verificados para usuario 6: 2
+2025-04-18T01:08:05.251Z info: Permisos verificados para usuario 6: 10
+2025-04-18T01:08:05.408Z info: ✅ Usuario autenticado: ID=6, Correo=saavedracastrosandro@gmail.com, Tipo=1, Rol=Sistemas
+2025-04-18T01:08:05.511Z info: 🛡️ authMiddleware ejecutado
+2025-04-18T01:08:05.511Z info: 🔐 Token recibido
+2025-04-18T01:08:05.513Z info: ✅ Token decodificado: ID=6, datos={"id":6,"role":"Sistemas","iat":1744935886,"exp":1744939486}
+2025-04-18T01:08:05.566Z info: 🛡️ authMiddleware ejecutado
+2025-04-18T01:08:05.566Z info: 🔐 Token recibido
+2025-04-18T01:08:05.567Z info: ✅ Token decodificado: ID=6, datos={"id":6,"role":"Sistemas","iat":1744935886,"exp":1744939486}
+2025-04-18T01:08:05.701Z info: Usuario verificado: ID=6, Correo=saavedracastrosandro@gmail.com, Tipo=1
+2025-04-18T01:08:05.815Z info: ✅ Usuario autenticado: ID=6, Correo=saavedracastrosandro@gmail.com, Tipo=1, Rol=Sistemas
+2025-04-18T01:08:05.876Z info: ✅ Usuario autenticado: ID=6, Correo=saavedracastrosandro@gmail.com, Tipo=1, Rol=Sistemas
+2025-04-18T01:08:05.993Z info: Permisos verificados para usuario 6: 3
+2025-04-18T01:08:06.117Z info: Usuario verificado: ID=6, Correo=saavedracastrosandro@gmail.com, Tipo=1
+2025-04-18T01:08:06.184Z info: Usuario verificado: ID=6, Correo=saavedracastrosandro@gmail.com, Tipo=1
+2025-04-18T01:08:06.419Z info: Permisos verificados para usuario 6: 2
+2025-04-18T01:08:06.491Z info: Permisos verificados para usuario 6: 10
+2025-04-18T01:08:06.724Z info: 🛡️ authMiddleware ejecutado
+2025-04-18T01:08:06.725Z info: 🔐 Token recibido
+2025-04-18T01:08:06.726Z info: ✅ Token decodificado: ID=6, datos={"id":6,"role":"Sistemas","iat":1744935886,"exp":1744939486}
+2025-04-18T01:08:06.805Z info: 🛡️ authMiddleware ejecutado
+2025-04-18T01:08:06.806Z info: 🔐 Token recibido
+2025-04-18T01:08:06.808Z info: ✅ Token decodificado: ID=6, datos={"id":6,"role":"Sistemas","iat":1744935886,"exp":1744939486}
+2025-04-18T01:08:07.027Z info: ✅ Usuario autenticado: ID=6, Correo=saavedracastrosandro@gmail.com, Tipo=1, Rol=Sistemas
+2025-04-18T01:08:07.118Z info: ✅ Usuario autenticado: ID=6, Correo=saavedracastrosandro@gmail.com, Tipo=1, Rol=Sistemas
+2025-04-18T01:08:07.329Z info: Usuario verificado: ID=6, Correo=saavedracastrosandro@gmail.com, Tipo=1
+2025-04-18T01:08:07.428Z info: Usuario verificado: ID=6, Correo=saavedracastrosandro@gmail.com, Tipo=1
+2025-04-18T01:08:07.631Z info: Permisos verificados para usuario 6: 2
+2025-04-18T01:08:07.737Z info: Permisos verificados para usuario 6: 10
+2025-04-18T01:08:09.651Z info: 🛡️ authMiddleware ejecutado
+2025-04-18T01:08:09.651Z info: 🔐 Token recibido
+2025-04-18T01:08:09.652Z info: ✅ Token decodificado: ID=6, datos={"id":6,"role":"Sistemas","iat":1744935886,"exp":1744939486}
+2025-04-18T01:08:09.653Z info: 🛡️ authMiddleware ejecutado
+2025-04-18T01:08:09.653Z info: 🔐 Token recibido
+2025-04-18T01:08:09.654Z info: ✅ Token decodificado: ID=6, datos={"id":6,"role":"Sistemas","iat":1744935886,"exp":1744939486}
+2025-04-18T01:08:09.955Z info: ✅ Usuario autenticado: ID=6, Correo=saavedracastrosandro@gmail.com, Tipo=1, Rol=Sistemas
+2025-04-18T01:08:09.960Z info: ✅ Usuario autenticado: ID=6, Correo=saavedracastrosandro@gmail.com, Tipo=1, Rol=Sistemas
+2025-04-18T01:08:10.258Z info: Usuario verificado: ID=6, Correo=saavedracastrosandro@gmail.com, Tipo=1
+2025-04-18T01:08:10.268Z info: Usuario verificado: ID=6, Correo=saavedracastrosandro@gmail.com, Tipo=1
+2025-04-18T01:08:10.498Z info: 🛡️ authMiddleware ejecutado
+2025-04-18T01:08:10.499Z info: 🔐 Token recibido
+2025-04-18T01:08:10.499Z info: ✅ Token decodificado: ID=6, datos={"id":6,"role":"Sistemas","iat":1744935886,"exp":1744939486}
+2025-04-18T01:08:10.560Z info: Permisos verificados para usuario 6: 10
+2025-04-18T01:08:10.576Z info: Permisos verificados para usuario 6: 2
+2025-04-18T01:08:10.792Z info: ✅ Usuario autenticado: ID=6, Correo=saavedracastrosandro@gmail.com, Tipo=1, Rol=Sistemas
+2025-04-18T01:08:11.083Z info: Usuario verificado: ID=6, Correo=saavedracastrosandro@gmail.com, Tipo=1
+2025-04-18T01:08:11.377Z info: Permisos verificados para usuario 6: 3
+2025-04-18T01:08:11.671Z info: 🛡️ authMiddleware ejecutado
+2025-04-18T01:08:11.672Z info: 🔐 Token recibido
+2025-04-18T01:08:11.674Z info: ✅ Token decodificado: ID=6, datos={"id":6,"role":"Sistemas","iat":1744935886,"exp":1744939486}
+2025-04-18T01:08:11.966Z info: ✅ Usuario autenticado: ID=6, Correo=saavedracastrosandro@gmail.com, Tipo=1, Rol=Sistemas
+2025-04-18T01:08:12.258Z info: Usuario verificado: ID=6, Correo=saavedracastrosandro@gmail.com, Tipo=1
+2025-04-18T01:08:12.261Z info: 🛡️ authMiddleware ejecutado
+2025-04-18T01:08:12.261Z info: 🔐 Token recibido
+2025-04-18T01:08:12.262Z info: ✅ Token decodificado: ID=6, datos={"id":6,"role":"Sistemas","iat":1744935886,"exp":1744939486}
+2025-04-18T01:08:12.263Z info: 🛡️ authMiddleware ejecutado
+2025-04-18T01:08:12.263Z info: 🔐 Token recibido
+2025-04-18T01:08:12.264Z info: ✅ Token decodificado: ID=6, datos={"id":6,"role":"Sistemas","iat":1744935886,"exp":1744939486}
+2025-04-18T01:08:12.553Z info: Permisos verificados para usuario 6: 3
+2025-04-18T01:08:12.566Z info: ✅ Usuario autenticado: ID=6, Correo=saavedracastrosandro@gmail.com, Tipo=1, Rol=Sistemas
+2025-04-18T01:08:12.569Z info: ✅ Usuario autenticado: ID=6, Correo=saavedracastrosandro@gmail.com, Tipo=1, Rol=Sistemas
+2025-04-18T01:08:12.867Z info: Usuario verificado: ID=6, Correo=saavedracastrosandro@gmail.com, Tipo=1
+2025-04-18T01:08:12.880Z info: 🛡️ authMiddleware ejecutado
+2025-04-18T01:08:12.880Z info: 🔐 Token recibido
+2025-04-18T01:08:12.881Z info: ✅ Token decodificado: ID=6, datos={"id":6,"role":"Sistemas","iat":1744935886,"exp":1744939486}
+2025-04-18T01:08:13.170Z info: Permisos verificados para usuario 6: 2
+2025-04-18T01:08:13.189Z info: ✅ Usuario autenticado: ID=6, Correo=saavedracastrosandro@gmail.com, Tipo=1, Rol=Sistemas
+2025-04-18T01:08:13.253Z info: 🛡️ authMiddleware ejecutado
+2025-04-18T01:08:13.253Z info: 🔐 Token recibido
+2025-04-18T01:08:13.254Z info: ✅ Token decodificado: ID=6, datos={"id":6,"role":"Sistemas","iat":1744935886,"exp":1744939486}
+2025-04-18T01:08:13.256Z info: 🛡️ authMiddleware ejecutado
+2025-04-18T01:08:13.256Z info: 🔐 Token recibido
+2025-04-18T01:08:13.257Z info: ✅ Token decodificado: ID=6, datos={"id":6,"role":"Sistemas","iat":1744935886,"exp":1744939486}
+2025-04-18T01:08:13.484Z info: 🛡️ authMiddleware ejecutado
+2025-04-18T01:08:13.484Z info: 🔐 Token recibido
+2025-04-18T01:08:13.485Z info: ✅ Token decodificado: ID=6, datos={"id":6,"role":"Sistemas","iat":1744935886,"exp":1744939486}
+2025-04-18T01:08:13.547Z info: ✅ Usuario autenticado: ID=6, Correo=saavedracastrosandro@gmail.com, Tipo=1, Rol=Sistemas
+2025-04-18T01:08:13.550Z info: ✅ Usuario autenticado: ID=6, Correo=saavedracastrosandro@gmail.com, Tipo=1, Rol=Sistemas
+2025-04-18T01:08:13.788Z info: ✅ Usuario autenticado: ID=6, Correo=saavedracastrosandro@gmail.com, Tipo=1, Rol=Sistemas
+2025-04-18T01:08:13.843Z info: Usuario verificado: ID=6, Correo=saavedracastrosandro@gmail.com, Tipo=1
+2025-04-18T01:08:13.846Z info: Usuario verificado: ID=6, Correo=saavedracastrosandro@gmail.com, Tipo=1
+2025-04-18T01:08:14.091Z info: Usuario verificado: ID=6, Correo=saavedracastrosandro@gmail.com, Tipo=1
+2025-04-18T01:08:14.137Z info: Permisos verificados para usuario 6: 10
+2025-04-18T01:08:14.331Z info: Permisos verificados para usuario 6: 2
+2025-04-18T01:08:14.393Z info: Permisos verificados para usuario 6: 2
+2025-04-18T01:08:14.434Z info: 🛡️ authMiddleware ejecutado
+2025-04-18T01:08:14.434Z info: 🔐 Token recibido
+2025-04-18T01:08:14.435Z info: ✅ Token decodificado: ID=6, datos={"id":6,"role":"Sistemas","iat":1744935886,"exp":1744939486}
+2025-04-18T01:08:14.629Z info: 🛡️ authMiddleware ejecutado
+2025-04-18T01:08:14.630Z info: 🔐 Token recibido
+2025-04-18T01:08:14.631Z info: ✅ Token decodificado: ID=6, datos={"id":6,"role":"Sistemas","iat":1744935886,"exp":1744939486}
+2025-04-18T01:08:14.727Z info: ✅ Usuario autenticado: ID=6, Correo=saavedracastrosandro@gmail.com, Tipo=1, Rol=Sistemas
+2025-04-18T01:08:14.924Z info: ✅ Usuario autenticado: ID=6, Correo=saavedracastrosandro@gmail.com, Tipo=1, Rol=Sistemas
+2025-04-18T01:08:15.020Z info: Usuario verificado: ID=6, Correo=saavedracastrosandro@gmail.com, Tipo=1
+2025-04-18T01:08:15.217Z info: Usuario verificado: ID=6, Correo=saavedracastrosandro@gmail.com, Tipo=1
+2025-04-18T01:08:15.328Z info: Permisos verificados para usuario 6: 10
+2025-04-18T01:08:15.519Z info: Permisos verificados para usuario 6: 2
+2025-04-18T01:08:18.251Z info: 🛡️ authMiddleware ejecutado
+2025-04-18T01:08:18.251Z info: 🔐 Token recibido
+2025-04-18T01:08:18.252Z info: ✅ Token decodificado: ID=6, datos={"id":6,"role":"Sistemas","iat":1744935886,"exp":1744939486}
+2025-04-18T01:08:18.253Z info: 🛡️ authMiddleware ejecutado
+2025-04-18T01:08:18.253Z info: 🔐 Token recibido
+2025-04-18T01:08:18.254Z info: ✅ Token decodificado: ID=6, datos={"id":6,"role":"Sistemas","iat":1744935886,"exp":1744939486}
+2025-04-18T01:08:18.545Z info: ✅ Usuario autenticado: ID=6, Correo=saavedracastrosandro@gmail.com, Tipo=1, Rol=Sistemas
+2025-04-18T01:08:18.546Z info: ✅ Usuario autenticado: ID=6, Correo=saavedracastrosandro@gmail.com, Tipo=1, Rol=Sistemas
+2025-04-18T01:08:18.838Z info: Usuario verificado: ID=6, Correo=saavedracastrosandro@gmail.com, Tipo=1
+2025-04-18T01:08:18.843Z info: Usuario verificado: ID=6, Correo=saavedracastrosandro@gmail.com, Tipo=1
+2025-04-18T01:08:19.136Z info: Permisos verificados para usuario 6: 2
+2025-04-18T01:08:19.138Z info: Permisos verificados para usuario 6: 10
+2025-04-18T01:08:21.200Z info: 🛡️ authMiddleware ejecutado
+2025-04-18T01:08:21.200Z info: 🔐 Token recibido
+2025-04-18T01:08:21.201Z info: ✅ Token decodificado: ID=6, datos={"id":6,"role":"Sistemas","iat":1744935886,"exp":1744939486}
+2025-04-18T01:08:21.493Z info: ✅ Usuario autenticado: ID=6, Correo=saavedracastrosandro@gmail.com, Tipo=1, Rol=Sistemas
+2025-04-18T01:08:21.789Z info: Usuario verificado: ID=6, Correo=saavedracastrosandro@gmail.com, Tipo=1
+2025-04-18T01:08:22.083Z info: Permisos verificados para usuario 6: 3
+2025-04-18T01:08:22.378Z info: 🛡️ authMiddleware ejecutado
+2025-04-18T01:08:22.379Z info: 🔐 Token recibido
+2025-04-18T01:08:22.380Z info: ✅ Token decodificado: ID=6, datos={"id":6,"role":"Sistemas","iat":1744935886,"exp":1744939486}
+2025-04-18T01:08:22.533Z info: 🛡️ authMiddleware ejecutado
+2025-04-18T01:08:22.534Z info: 🔐 Token recibido
+2025-04-18T01:08:22.534Z info: ✅ Token decodificado: ID=6, datos={"id":6,"role":"Sistemas","iat":1744935886,"exp":1744939486}
+2025-04-18T01:08:22.535Z info: 🛡️ authMiddleware ejecutado
+2025-04-18T01:08:22.535Z info: 🔐 Token recibido
+2025-04-18T01:08:22.536Z info: ✅ Token decodificado: ID=6, datos={"id":6,"role":"Sistemas","iat":1744935886,"exp":1744939486}
+2025-04-18T01:08:22.672Z info: ✅ Usuario autenticado: ID=6, Correo=saavedracastrosandro@gmail.com, Tipo=1, Rol=Sistemas
+2025-04-18T01:08:22.826Z info: ✅ Usuario autenticado: ID=6, Correo=saavedracastrosandro@gmail.com, Tipo=1, Rol=Sistemas
+2025-04-18T01:08:22.837Z info: ✅ Usuario autenticado: ID=6, Correo=saavedracastrosandro@gmail.com, Tipo=1, Rol=Sistemas
+2025-04-18T01:08:22.966Z info: Usuario verificado: ID=6, Correo=saavedracastrosandro@gmail.com, Tipo=1
+2025-04-18T01:08:23.122Z info: 🛡️ authMiddleware ejecutado
+2025-04-18T01:08:23.122Z info: 🔐 Token recibido
+2025-04-18T01:08:23.123Z info: ✅ Token decodificado: ID=6, datos={"id":6,"role":"Sistemas","iat":1744935886,"exp":1744939486}
+2025-04-18T01:08:23.138Z info: Usuario verificado: ID=6, Correo=saavedracastrosandro@gmail.com, Tipo=1
+2025-04-18T01:08:23.259Z info: Permisos verificados para usuario 6: 3
+2025-04-18T01:08:23.416Z info: ✅ Usuario autenticado: ID=6, Correo=saavedracastrosandro@gmail.com, Tipo=1, Rol=Sistemas
+2025-04-18T01:08:23.443Z info: Permisos verificados para usuario 6: 2
+2025-04-18T01:08:23.749Z info: 🛡️ authMiddleware ejecutado
+2025-04-18T01:08:23.749Z info: 🔐 Token recibido
+2025-04-18T01:08:23.750Z info: ✅ Token decodificado: ID=6, datos={"id":6,"role":"Sistemas","iat":1744935886,"exp":1744939486}
+2025-04-18T01:08:24.052Z info: ✅ Usuario autenticado: ID=6, Correo=saavedracastrosandro@gmail.com, Tipo=1, Rol=Sistemas
+2025-04-18T01:08:24.356Z info: Usuario verificado: ID=6, Correo=saavedracastrosandro@gmail.com, Tipo=1
+2025-04-18T01:08:24.661Z info: Permisos verificados para usuario 6: 2
+2025-04-18T01:08:25.151Z info: 🛡️ authMiddleware ejecutado
+2025-04-18T01:08:25.152Z info: 🔐 Token recibido
+2025-04-18T01:08:25.153Z info: ✅ Token decodificado: ID=6, datos={"id":6,"role":"Sistemas","iat":1744935886,"exp":1744939486}
+2025-04-18T01:08:25.154Z info: 🛡️ authMiddleware ejecutado
+2025-04-18T01:08:25.154Z info: 🔐 Token recibido
+2025-04-18T01:08:25.154Z info: ✅ Token decodificado: ID=6, datos={"id":6,"role":"Sistemas","iat":1744935886,"exp":1744939486}
+2025-04-18T01:08:25.446Z info: ✅ Usuario autenticado: ID=6, Correo=saavedracastrosandro@gmail.com, Tipo=1, Rol=Sistemas
+2025-04-18T01:08:25.447Z info: ✅ Usuario autenticado: ID=6, Correo=saavedracastrosandro@gmail.com, Tipo=1, Rol=Sistemas
+2025-04-18T01:08:25.741Z info: Usuario verificado: ID=6, Correo=saavedracastrosandro@gmail.com, Tipo=1
+2025-04-18T01:08:25.743Z info: Usuario verificado: ID=6, Correo=saavedracastrosandro@gmail.com, Tipo=1
+2025-04-18T01:08:26.036Z info: Permisos verificados para usuario 6: 8
+2025-04-18T01:08:26.037Z info: Permisos verificados para usuario 6: 8
+2025-04-18T01:08:30.165Z info: 🛡️ authMiddleware ejecutado
+2025-04-18T01:08:30.165Z info: 🔐 Token recibido
+2025-04-18T01:08:30.166Z info: ✅ Token decodificado: ID=6, datos={"id":6,"role":"Sistemas","iat":1744935886,"exp":1744939486}
+2025-04-18T01:08:30.458Z info: ✅ Usuario autenticado: ID=6, Correo=saavedracastrosandro@gmail.com, Tipo=1, Rol=Sistemas
+2025-04-18T01:08:30.753Z info: Usuario verificado: ID=6, Correo=saavedracastrosandro@gmail.com, Tipo=1
+2025-04-18T01:08:31.048Z info: Permisos verificados para usuario 6: 8
+2025-04-18T01:08:35.157Z info: 🛡️ authMiddleware ejecutado
+2025-04-18T01:08:35.157Z info: 🔐 Token recibido
+2025-04-18T01:08:35.158Z info: ✅ Token decodificado: ID=6, datos={"id":6,"role":"Sistemas","iat":1744935886,"exp":1744939486}
+2025-04-18T01:08:35.450Z info: ✅ Usuario autenticado: ID=6, Correo=saavedracastrosandro@gmail.com, Tipo=1, Rol=Sistemas
+2025-04-18T01:08:35.744Z info: Usuario verificado: ID=6, Correo=saavedracastrosandro@gmail.com, Tipo=1
+2025-04-18T01:08:36.036Z info: Permisos verificados para usuario 6: 8
+2025-04-18T01:08:40.156Z info: 🛡️ authMiddleware ejecutado
+2025-04-18T01:08:40.157Z info: 🔐 Token recibido
+2025-04-18T01:08:40.158Z info: ✅ Token decodificado: ID=6, datos={"id":6,"role":"Sistemas","iat":1744935886,"exp":1744939486}
+2025-04-18T01:08:40.452Z info: ✅ Usuario autenticado: ID=6, Correo=saavedracastrosandro@gmail.com, Tipo=1, Rol=Sistemas
+2025-04-18T01:08:40.745Z info: Usuario verificado: ID=6, Correo=saavedracastrosandro@gmail.com, Tipo=1
+2025-04-18T01:08:41.039Z info: Permisos verificados para usuario 6: 8
+2025-04-18T01:08:45.163Z info: 🛡️ authMiddleware ejecutado
+2025-04-18T01:08:45.164Z info: 🔐 Token recibido
+2025-04-18T01:08:45.164Z info: ✅ Token decodificado: ID=6, datos={"id":6,"role":"Sistemas","iat":1744935886,"exp":1744939486}
+2025-04-18T01:08:45.458Z info: ✅ Usuario autenticado: ID=6, Correo=saavedracastrosandro@gmail.com, Tipo=1, Rol=Sistemas
+2025-04-18T01:08:45.750Z info: Usuario verificado: ID=6, Correo=saavedracastrosandro@gmail.com, Tipo=1
+2025-04-18T01:08:46.042Z info: Permisos verificados para usuario 6: 8
+2025-04-18T01:08:47.019Z info: Solicitud recibida: GET /api/news
+2025-04-18T01:08:47.023Z info: Solicitud recibida: GET /api/news
+2025-04-18T03:16:42.727Z error: Error al validar el token: jwt expired
+2025-04-18T03:16:42.730Z error: Error al validar el token: jwt expired
+2025-04-18T03:16:42.749Z info: Iniciando la obtención de imágenes...
+2025-04-18T03:16:46.139Z info: Iniciando la obtención de imágenes...
+2025-04-18T16:12:12.088Z info: Iniciando la obtención de imágenes...
+2025-04-18T16:12:15.310Z info: Iniciando la obtención de imágenes...
