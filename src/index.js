@@ -1,6 +1,7 @@
 const express = require("express");
 const cors = require("cors");
 const http = require("http");
+const compression = require("compression");
 const { Server } = require("socket.io");
 const authRoutes = require("./routes/authRoutes");
 const doorRoutes = require("./routes/doorRoutes");
@@ -12,7 +13,7 @@ const logger = require("./config/logger");
 const menuRoutes = require("./routes/menuRoutes");
 const dashboardRoutes = require("./routes/dashboardRoutes");
 const maintenanceRoutes = require("./routes/maintenanceRoutes");
-const { checkForUpdates } = require("./controllers/dashboardController"); // Importar checkForUpdates
+const { checkForUpdates } = require("./controllers/dashboardController");
 require("dotenv").config();
 
 const app = express();
@@ -26,6 +27,7 @@ const io = new Server(server, {
 });
 
 // Middleware
+app.use(compression());
 app.use(express.json());
 
 // Configuración de CORS

@@ -9240,3 +9240,820 @@
 2025-04-16T19:04:32.564Z info: ✅ Usuario autenticado: ID=4, Correo=jorgejesus_30@outlook.com, Tipo=1, Rol=Sistemas
 2025-04-16T19:04:32.922Z info: Usuario verificado: ID=4, Correo=jorgejesus_30@outlook.com, Tipo=1
 2025-04-16T19:04:33.208Z info: Permisos verificados para usuario 4: 7
+2025-04-20T14:48:53.237Z info: Cargando rutas...
+2025-04-20T14:48:53.241Z info: Rutas de movementRoutes cargadas.
+2025-04-20T14:48:53.241Z info: Rutas de authRoutes cargadas.
+2025-04-20T14:48:53.242Z info: Rutas de doorRoutes cargadas.
+2025-04-20T14:48:53.242Z info: Rutas de userRoutes cargadas.
+2025-04-20T14:48:53.243Z info: Rutas de menuRoutes cargadas.
+2025-04-20T14:48:53.244Z info: Rutas de visitRoutes cargadas.
+2025-04-20T14:48:53.244Z info: Rutas de reservationRoutes cargadas.
+2025-04-20T14:48:53.244Z info: Rutas de dashboardRoutes cargadas.
+2025-04-20T14:48:53.245Z info: Rutas de maintenanceRoutes cargadas.
+2025-04-20T14:48:53.254Z info: ✅ Server running on port 4000
+2025-04-20T14:49:47.502Z info: Permisos para usuario 4: Áreas Comunes,Cambio Contraseña,Configuración,Control de Ingresos y Salidas,Dashboard,Gestión de Ingreso,Gestión de Menús y Submenús,Gestión Visitas,Lista de Usuarios,Login,Recepción,Registrar Pedido,Registrar Usuarios,Reservas,Usuarios,Visitas Programadas
+2025-04-20T14:49:47.747Z info: 🛡️ authMiddleware ejecutado
+2025-04-20T14:49:47.749Z info: 🔐 Token recibido
+2025-04-20T14:49:47.751Z info: ✅ Token decodificado: ID=4, datos={"id":4,"role":"Sistemas","iat":1745160477,"exp":1745164077}
+2025-04-20T14:49:47.777Z info: 🛡️ authMiddleware ejecutado
+2025-04-20T14:49:47.778Z info: 🔐 Token recibido
+2025-04-20T14:49:47.781Z info: ✅ Token decodificado: ID=4, datos={"id":4,"role":"Sistemas","iat":1745160477,"exp":1745164077}
+2025-04-20T14:49:48.072Z info: Nuevo cliente conectado: 4Or9ZF82UIRNBj8aAAAC
+2025-04-20T14:49:48.155Z info: ✅ Usuario autenticado: ID=4, Correo=jorgejesus_30@outlook.com, Tipo=1, Rol=Sistemas
+2025-04-20T14:49:48.156Z info: Iniciando getUserRoles para userId: 4
+2025-04-20T14:49:48.467Z info: ✅ Usuario autenticado: ID=4, Correo=jorgejesus_30@outlook.com, Tipo=1, Rol=Sistemas
+2025-04-20T14:49:48.468Z info: Iniciando getDashboardData para userId: 4
+2025-04-20T14:49:48.468Z info: Conexión a la base de datos establecida
+2025-04-20T14:49:48.777Z info: Permisos para usuario 4: Áreas Comunes,Cambio Contraseña,Configuración,Control de Ingresos y Salidas,Dashboard,Gestión de Ingreso,Gestión de Menús y Submenús,Gestión Visitas,Lista de Usuarios,Login,Recepción,Registrar Pedido,Registrar Usuarios,Reservas,Usuarios,Visitas Programadas
+2025-04-20T14:49:49.093Z info: 🛡️ authMiddleware ejecutado
+2025-04-20T14:49:49.094Z info: 🔐 Token recibido
+2025-04-20T14:49:49.096Z info: ✅ Token decodificado: ID=4, datos={"id":4,"role":"Sistemas","iat":1745160477,"exp":1745164077}
+2025-04-20T14:49:49.101Z info: Cliente desconectado: 4Or9ZF82UIRNBj8aAAAC
+2025-04-20T14:49:49.110Z info: Nuevo cliente conectado: dNIy0WQA0oswsep9AAAE
+2025-04-20T14:49:49.438Z info: Tipos de usuario obtenidos: 1
+2025-04-20T14:49:49.473Z info: ✅ Usuario autenticado: ID=4, Correo=jorgejesus_30@outlook.com, Tipo=1, Rol=Sistemas
+2025-04-20T14:49:49.473Z info: Iniciando getUserRoles para userId: 4
+2025-04-20T14:49:49.767Z info: Permisos obtenidos: {"Deudores":{"visible":true,"order":1,"icon":"FaExclamationCircle"},"Cuenta Mancomunada":{"visible":true,"order":2,"icon":"FaInfoCircle"},"Noticias":{"visible":true,"order":3,"icon":"FaBell"},"Eventos":{"visible":true,"order":4,"icon":"FaCalendarAlt"},"Documentos":{"visible":true,"order":5,"icon":"FaFileDownload"},"Encargos":{"visible":true,"order":6,"icon":"FaBox"},"Reportar Problema":{"visible":true,"order":7,"icon":"FaExclamationCircle"}}
+2025-04-20T14:49:49.796Z info: Cliente desconectado: dNIy0WQA0oswsep9AAAE
+2025-04-20T14:49:49.808Z info: Nuevo cliente conectado: 6tbFPyCFVzQmt0XlAAAG
+2025-04-20T14:49:50.074Z info: Departamento obtenido: 101
+2025-04-20T14:49:50.386Z info: Deudas: 1 pagos, total S/ 150
+2025-04-20T14:49:50.689Z info: Cuenta mancomunada: {"bank":"Banco Continental","accountNumber":"1234-5678-9012-3456","cci":"002-123-456789012345-67","holder":"Consorcio Residencial Elant"}
+2025-04-20T14:49:50.968Z info: Cliente desconectado: 6tbFPyCFVzQmt0XlAAAG
+2025-04-20T14:49:51.001Z info: Iniciando la obtención de imágenes...
+2025-04-20T14:49:51.334Z info: Noticias obtenidas: 5
+2025-04-20T14:49:51.335Z info: Eventos obtenidos: 0
+2025-04-20T14:49:51.335Z info: Documentos obtenidos: 0
+2025-04-20T14:49:51.336Z info: Encargos obtenidos: 2
+2025-04-20T14:49:51.336Z info: Eventos de mantenimiento obtenidos: 5
+2025-04-20T14:49:51.342Z info: 🛡️ authMiddleware ejecutado
+2025-04-20T14:49:51.342Z info: 🔐 Token recibido
+2025-04-20T14:49:51.344Z info: ✅ Token decodificado: ID=4, datos={"id":4,"role":"Sistemas","iat":1745160477,"exp":1745164077}
+2025-04-20T14:49:51.650Z info: ✅ Usuario autenticado: ID=4, Correo=jorgejesus_30@outlook.com, Tipo=1, Rol=Sistemas
+2025-04-20T14:49:51.651Z info: Iniciando getDashboardData para userId: 4
+2025-04-20T14:49:51.651Z info: Conexión a la base de datos establecida
+2025-04-20T14:49:51.966Z info: Tipos de usuario obtenidos: 1
+2025-04-20T14:49:52.274Z info: Permisos obtenidos: {"Deudores":{"visible":true,"order":1,"icon":"FaExclamationCircle"},"Cuenta Mancomunada":{"visible":true,"order":2,"icon":"FaInfoCircle"},"Noticias":{"visible":true,"order":3,"icon":"FaBell"},"Eventos":{"visible":true,"order":4,"icon":"FaCalendarAlt"},"Documentos":{"visible":true,"order":5,"icon":"FaFileDownload"},"Encargos":{"visible":true,"order":6,"icon":"FaBox"},"Reportar Problema":{"visible":true,"order":7,"icon":"FaExclamationCircle"}}
+2025-04-20T14:49:52.581Z info: Departamento obtenido: 101
+2025-04-20T14:49:52.733Z info: Permisos para usuario 4: Áreas Comunes,Cambio Contraseña,Configuración,Control de Ingresos y Salidas,Dashboard,Gestión de Ingreso,Gestión de Menús y Submenús,Gestión Visitas,Lista de Usuarios,Login,Recepción,Registrar Pedido,Registrar Usuarios,Reservas,Usuarios,Visitas Programadas
+2025-04-20T14:49:52.742Z info: 🛡️ authMiddleware ejecutado
+2025-04-20T14:49:52.744Z info: 🔐 Token recibido
+2025-04-20T14:49:52.746Z info: ✅ Token decodificado: ID=4, datos={"id":4,"role":"Sistemas","iat":1745160592,"exp":1745164192}
+2025-04-20T14:49:52.781Z info: 🛡️ authMiddleware ejecutado
+2025-04-20T14:49:52.785Z info: 🔐 Token recibido
+2025-04-20T14:49:52.790Z info: ✅ Token decodificado: ID=4, datos={"id":4,"role":"Sistemas","iat":1745160592,"exp":1745164192}
+2025-04-20T14:49:52.795Z info: Nuevo cliente conectado: ZB3VUMEyb7P4767NAAAJ
+2025-04-20T14:49:52.895Z info: Deudas: 1 pagos, total S/ 150
+2025-04-20T14:49:52.896Z info: Cuenta mancomunada: {"bank":"Banco Continental","accountNumber":"1234-5678-9012-3456","cci":"002-123-456789012345-67","holder":"Consorcio Residencial Elant"}
+2025-04-20T14:49:53.056Z info: ✅ Usuario autenticado: ID=4, Correo=jorgejesus_30@outlook.com, Tipo=1, Rol=Sistemas
+2025-04-20T14:49:53.057Z info: Solicitud de menú para el usuario ID: 4
+2025-04-20T14:49:53.093Z info: ✅ Usuario autenticado: ID=4, Correo=jorgejesus_30@outlook.com, Tipo=1, Rol=Sistemas
+2025-04-20T14:49:53.094Z info: Iniciando getUserRoles para userId: 4
+2025-04-20T14:49:53.429Z info: Iniciando la obtención de imágenes...
+2025-04-20T14:49:53.432Z info: Noticias obtenidas: 5
+2025-04-20T14:49:53.432Z info: Eventos obtenidos: 0
+2025-04-20T14:49:53.433Z info: Documentos obtenidos: 0
+2025-04-20T14:49:53.433Z info: Encargos obtenidos: 2
+2025-04-20T14:49:53.433Z info: Eventos de mantenimiento obtenidos: 5
+2025-04-20T14:49:53.444Z info: 🛡️ authMiddleware ejecutado
+2025-04-20T14:49:53.445Z info: 🔐 Token recibido
+2025-04-20T14:49:53.450Z info: ✅ Token decodificado: ID=4, datos={"id":4,"role":"Sistemas","iat":1745160592,"exp":1745164192}
+2025-04-20T14:49:53.567Z info: 🛡️ authMiddleware ejecutado
+2025-04-20T14:49:53.567Z info: 🔐 Token recibido
+2025-04-20T14:49:53.571Z info: ✅ Token decodificado: ID=4, datos={"id":4,"role":"Sistemas","iat":1745160592,"exp":1745164192}
+2025-04-20T14:49:53.576Z info: Cliente desconectado: ZB3VUMEyb7P4767NAAAJ
+2025-04-20T14:49:53.585Z info: Nuevo cliente conectado: a48WdovvAWh0AjviAAAL
+2025-04-20T14:49:53.773Z info: ✅ Usuario autenticado: ID=4, Correo=jorgejesus_30@outlook.com, Tipo=1, Rol=Sistemas
+2025-04-20T14:49:53.773Z info: Iniciando getDashboardData para userId: 4
+2025-04-20T14:49:53.774Z info: Conexión a la base de datos establecida
+2025-04-20T14:49:53.883Z info: ✅ Usuario autenticado: ID=4, Correo=jorgejesus_30@outlook.com, Tipo=1, Rol=Sistemas
+2025-04-20T14:49:53.884Z info: Iniciando getUserRoles para userId: 4
+2025-04-20T14:49:54.075Z info: Tipos de usuario obtenidos: 1
+2025-04-20T14:49:54.222Z info: Cliente desconectado: a48WdovvAWh0AjviAAAL
+2025-04-20T14:49:54.230Z info: Nuevo cliente conectado: 3NxM8JS_XAbZIB7mAAAN
+2025-04-20T14:49:54.375Z info: Permisos obtenidos: {"Deudores":{"visible":true,"order":1,"icon":"FaExclamationCircle"},"Cuenta Mancomunada":{"visible":true,"order":2,"icon":"FaInfoCircle"},"Noticias":{"visible":true,"order":3,"icon":"FaBell"},"Eventos":{"visible":true,"order":4,"icon":"FaCalendarAlt"},"Documentos":{"visible":true,"order":5,"icon":"FaFileDownload"},"Encargos":{"visible":true,"order":6,"icon":"FaBox"},"Reportar Problema":{"visible":true,"order":7,"icon":"FaExclamationCircle"}}
+2025-04-20T14:49:54.677Z info: Departamento obtenido: 101
+2025-04-20T14:49:55.122Z info: Deudas: 1 pagos, total S/ 150
+2025-04-20T14:49:55.122Z info: Cuenta mancomunada: {"bank":"Banco Continental","accountNumber":"1234-5678-9012-3456","cci":"002-123-456789012345-67","holder":"Consorcio Residencial Elant"}
+2025-04-20T14:49:55.691Z info: Noticias obtenidas: 5
+2025-04-20T14:49:55.692Z info: Eventos obtenidos: 0
+2025-04-20T14:49:55.692Z info: Documentos obtenidos: 0
+2025-04-20T14:49:55.693Z info: Encargos obtenidos: 2
+2025-04-20T14:49:55.693Z info: Eventos de mantenimiento obtenidos: 5
+2025-04-20T14:49:55.715Z info: 🛡️ authMiddleware ejecutado
+2025-04-20T14:49:55.716Z info: 🔐 Token recibido
+2025-04-20T14:49:55.719Z info: ✅ Token decodificado: ID=4, datos={"id":4,"role":"Sistemas","iat":1745160592,"exp":1745164192}
+2025-04-20T14:49:56.041Z info: ✅ Usuario autenticado: ID=4, Correo=jorgejesus_30@outlook.com, Tipo=1, Rol=Sistemas
+2025-04-20T14:49:56.041Z info: Iniciando getDashboardData para userId: 4
+2025-04-20T14:49:56.042Z info: Conexión a la base de datos establecida
+2025-04-20T14:49:56.358Z info: Tipos de usuario obtenidos: 1
+2025-04-20T14:49:56.676Z info: Permisos obtenidos: {"Deudores":{"visible":true,"order":1,"icon":"FaExclamationCircle"},"Cuenta Mancomunada":{"visible":true,"order":2,"icon":"FaInfoCircle"},"Noticias":{"visible":true,"order":3,"icon":"FaBell"},"Eventos":{"visible":true,"order":4,"icon":"FaCalendarAlt"},"Documentos":{"visible":true,"order":5,"icon":"FaFileDownload"},"Encargos":{"visible":true,"order":6,"icon":"FaBox"},"Reportar Problema":{"visible":true,"order":7,"icon":"FaExclamationCircle"}}
+2025-04-20T14:49:56.995Z info: Departamento obtenido: 101
+2025-04-20T14:49:57.316Z info: Deudas: 1 pagos, total S/ 150
+2025-04-20T14:49:57.317Z info: Cuenta mancomunada: {"bank":"Banco Continental","accountNumber":"1234-5678-9012-3456","cci":"002-123-456789012345-67","holder":"Consorcio Residencial Elant"}
+2025-04-20T14:49:57.633Z info: Noticias obtenidas: 5
+2025-04-20T14:49:57.633Z info: Eventos obtenidos: 0
+2025-04-20T14:49:57.633Z info: Documentos obtenidos: 0
+2025-04-20T14:49:57.634Z info: Encargos obtenidos: 2
+2025-04-20T14:49:57.634Z info: Eventos de mantenimiento obtenidos: 5
+2025-04-20T14:56:02.808Z info: Cargando rutas...
+2025-04-20T14:56:02.816Z info: Rutas de movementRoutes cargadas.
+2025-04-20T14:56:02.817Z info: Rutas de authRoutes cargadas.
+2025-04-20T14:56:02.818Z info: Rutas de doorRoutes cargadas.
+2025-04-20T14:56:02.818Z info: Rutas de userRoutes cargadas.
+2025-04-20T14:56:02.819Z info: Rutas de menuRoutes cargadas.
+2025-04-20T14:56:02.820Z info: Rutas de visitRoutes cargadas.
+2025-04-20T14:56:02.821Z info: Rutas de reservationRoutes cargadas.
+2025-04-20T14:56:02.821Z info: Rutas de dashboardRoutes cargadas.
+2025-04-20T14:56:02.822Z info: Rutas de maintenanceRoutes cargadas.
+2025-04-20T14:56:02.832Z info: ✅ Server running on port 4000
+2025-04-20T14:56:08.482Z info: Nuevo cliente conectado: cy89gV2D2NQt6C-jAAAB
+2025-04-20T15:12:14.588Z info: Cargando rutas...
+2025-04-20T15:12:14.591Z info: Rutas de movementRoutes cargadas.
+2025-04-20T15:12:14.592Z info: Rutas de authRoutes cargadas.
+2025-04-20T15:12:14.592Z info: Rutas de doorRoutes cargadas.
+2025-04-20T15:12:14.593Z info: Rutas de userRoutes cargadas.
+2025-04-20T15:12:14.593Z info: Rutas de menuRoutes cargadas.
+2025-04-20T15:12:14.593Z info: Rutas de visitRoutes cargadas.
+2025-04-20T15:12:14.594Z info: Rutas de reservationRoutes cargadas.
+2025-04-20T15:12:14.594Z info: Rutas de dashboardRoutes cargadas.
+2025-04-20T15:12:14.595Z info: Rutas de maintenanceRoutes cargadas.
+2025-04-20T15:12:14.600Z info: ✅ Server running on port 4000
+2025-04-20T15:12:14.787Z info: Nuevo cliente conectado: 4y1VbSkLCh5gxsF9AAAB
+2025-04-20T15:13:22.887Z info: Cliente desconectado: 4y1VbSkLCh5gxsF9AAAB
+2025-04-20T15:13:25.542Z info: Permisos para usuario 4: Áreas Comunes,Cambio Contraseña,Configuración,Control de Ingresos y Salidas,Dashboard,Gestión de Ingreso,Gestión de Menús y Submenús,Gestión Visitas,Lista de Usuarios,Login,Recepción,Registrar Pedido,Registrar Usuarios,Reservas,Usuarios,Visitas Programadas
+2025-04-20T15:13:25.611Z info: 🛡️ authMiddleware ejecutado
+2025-04-20T15:13:25.612Z info: 🔐 Token recibido
+2025-04-20T15:13:25.614Z info: ✅ Token decodificado: ID=4, datos={"id":4,"role":"Sistemas","iat":1745160592,"exp":1745164192}
+2025-04-20T15:13:25.623Z info: 🛡️ authMiddleware ejecutado
+2025-04-20T15:13:25.623Z info: 🔐 Token recibido
+2025-04-20T15:13:25.627Z info: ✅ Token decodificado: ID=4, datos={"id":4,"role":"Sistemas","iat":1745160592,"exp":1745164192}
+2025-04-20T15:13:25.969Z info: Nuevo cliente conectado: OyHJdhbvW1T1VpV1AAAE
+2025-04-20T15:13:26.467Z info: ✅ Usuario autenticado: ID=4, Correo=jorgejesus_30@outlook.com, Tipo=1, Rol=Sistemas
+2025-04-20T15:13:26.468Z info: Iniciando getDashboardData para userId: 4
+2025-04-20T15:13:26.469Z info: Conexión a la base de datos establecida
+2025-04-20T15:13:26.736Z info: ✅ Usuario autenticado: ID=4, Correo=jorgejesus_30@outlook.com, Tipo=1, Rol=Sistemas
+2025-04-20T15:13:26.737Z info: Iniciando getUserRoles para userId: 4
+2025-04-20T15:13:26.776Z info: Permisos para usuario 4: Áreas Comunes,Cambio Contraseña,Configuración,Control de Ingresos y Salidas,Dashboard,Gestión de Ingreso,Gestión de Menús y Submenús,Gestión Visitas,Lista de Usuarios,Login,Recepción,Registrar Pedido,Registrar Usuarios,Reservas,Usuarios,Visitas Programadas
+2025-04-20T15:13:26.860Z info: Tipos de usuario obtenidos: 1
+2025-04-20T15:13:27.044Z info: 🛡️ authMiddleware ejecutado
+2025-04-20T15:13:27.045Z info: 🔐 Token recibido
+2025-04-20T15:13:27.048Z info: ✅ Token decodificado: ID=4, datos={"id":4,"role":"Sistemas","iat":1745160592,"exp":1745164192}
+2025-04-20T15:13:27.052Z info: Cliente desconectado: OyHJdhbvW1T1VpV1AAAE
+2025-04-20T15:13:27.061Z info: Nuevo cliente conectado: dPzayQx1_e54CEMMAAAG
+2025-04-20T15:13:27.157Z info: Permisos obtenidos: {"Deudores":{"visible":true,"order":1,"icon":"FaExclamationCircle"},"Cuenta Mancomunada":{"visible":true,"order":2,"icon":"FaInfoCircle"},"Noticias":{"visible":true,"order":3,"icon":"FaBell"},"Eventos":{"visible":true,"order":4,"icon":"FaCalendarAlt"},"Documentos":{"visible":true,"order":5,"icon":"FaFileDownload"},"Encargos":{"visible":true,"order":6,"icon":"FaBox"},"Reportar Problema":{"visible":true,"order":7,"icon":"FaExclamationCircle"}}
+2025-04-20T15:13:27.354Z info: ✅ Usuario autenticado: ID=4, Correo=jorgejesus_30@outlook.com, Tipo=1, Rol=Sistemas
+2025-04-20T15:13:27.354Z info: Iniciando getUserRoles para userId: 4
+2025-04-20T15:13:27.458Z info: Departamento obtenido: 101
+2025-04-20T15:13:27.660Z info: Cliente desconectado: dPzayQx1_e54CEMMAAAG
+2025-04-20T15:13:27.669Z info: Nuevo cliente conectado: BhcfZ2a0fNTo-r_tAAAI
+2025-04-20T15:13:27.756Z info: Deudas: 1 pagos, total S/ 150
+2025-04-20T15:13:28.055Z info: Cuenta mancomunada: {"bank":"Banco Continental","accountNumber":"1234-5678-9012-3456","cci":"002-123-456789012345-67","holder":"Consorcio Residencial Elant"}
+2025-04-20T15:13:28.682Z info: Noticias obtenidas: 6
+2025-04-20T15:13:28.683Z info: Eventos obtenidos: 0
+2025-04-20T15:13:28.683Z info: Documentos obtenidos: 0
+2025-04-20T15:13:28.684Z info: Encargos obtenidos: 2
+2025-04-20T15:13:28.684Z info: Eventos de mantenimiento obtenidos: 6
+2025-04-20T15:13:28.692Z info: 🛡️ authMiddleware ejecutado
+2025-04-20T15:13:28.692Z info: 🔐 Token recibido
+2025-04-20T15:13:28.696Z info: ✅ Token decodificado: ID=4, datos={"id":4,"role":"Sistemas","iat":1745160592,"exp":1745164192}
+2025-04-20T15:13:29.004Z info: ✅ Usuario autenticado: ID=4, Correo=jorgejesus_30@outlook.com, Tipo=1, Rol=Sistemas
+2025-04-20T15:13:29.004Z info: Iniciando getDashboardData para userId: 4
+2025-04-20T15:13:29.004Z info: Conexión a la base de datos establecida
+2025-04-20T15:13:29.311Z info: Tipos de usuario obtenidos: 1
+2025-04-20T15:13:29.622Z info: Permisos obtenidos: {"Deudores":{"visible":true,"order":1,"icon":"FaExclamationCircle"},"Cuenta Mancomunada":{"visible":true,"order":2,"icon":"FaInfoCircle"},"Noticias":{"visible":true,"order":3,"icon":"FaBell"},"Eventos":{"visible":true,"order":4,"icon":"FaCalendarAlt"},"Documentos":{"visible":true,"order":5,"icon":"FaFileDownload"},"Encargos":{"visible":true,"order":6,"icon":"FaBox"},"Reportar Problema":{"visible":true,"order":7,"icon":"FaExclamationCircle"}}
+2025-04-20T15:13:29.940Z info: Departamento obtenido: 101
+2025-04-20T15:13:30.256Z info: Deudas: 1 pagos, total S/ 150
+2025-04-20T15:13:30.256Z info: Cuenta mancomunada: {"bank":"Banco Continental","accountNumber":"1234-5678-9012-3456","cci":"002-123-456789012345-67","holder":"Consorcio Residencial Elant"}
+2025-04-20T15:13:30.771Z info: Noticias obtenidas: 6
+2025-04-20T15:13:30.771Z info: Eventos obtenidos: 0
+2025-04-20T15:13:30.771Z info: Documentos obtenidos: 0
+2025-04-20T15:13:30.772Z info: Encargos obtenidos: 2
+2025-04-20T15:13:30.772Z info: Eventos de mantenimiento obtenidos: 6
+2025-04-20T15:14:30.080Z info: Cliente desconectado: BhcfZ2a0fNTo-r_tAAAI
+2025-04-20T15:14:31.416Z info: Permisos para usuario 4: Áreas Comunes,Cambio Contraseña,Configuración,Control de Ingresos y Salidas,Dashboard,Gestión de Ingreso,Gestión de Menús y Submenús,Gestión Visitas,Lista de Usuarios,Login,Recepción,Registrar Pedido,Registrar Usuarios,Reservas,Usuarios,Visitas Programadas
+2025-04-20T15:14:31.468Z info: 🛡️ authMiddleware ejecutado
+2025-04-20T15:14:31.470Z info: 🔐 Token recibido
+2025-04-20T15:14:31.475Z info: ✅ Token decodificado: ID=4, datos={"id":4,"role":"Sistemas","iat":1745160592,"exp":1745164192}
+2025-04-20T15:14:31.482Z info: 🛡️ authMiddleware ejecutado
+2025-04-20T15:14:31.490Z info: 🔐 Token recibido
+2025-04-20T15:14:31.493Z info: ✅ Token decodificado: ID=4, datos={"id":4,"role":"Sistemas","iat":1745160592,"exp":1745164192}
+2025-04-20T15:14:31.829Z info: Nuevo cliente conectado: nkHcAQJ1PqtDVksJAAAL
+2025-04-20T15:14:32.018Z info: ✅ Usuario autenticado: ID=4, Correo=jorgejesus_30@outlook.com, Tipo=1, Rol=Sistemas
+2025-04-20T15:14:32.018Z info: Iniciando getUserRoles para userId: 4
+2025-04-20T15:14:32.316Z info: ✅ Usuario autenticado: ID=4, Correo=jorgejesus_30@outlook.com, Tipo=1, Rol=Sistemas
+2025-04-20T15:14:32.316Z info: Iniciando getDashboardData para userId: 4
+2025-04-20T15:14:32.316Z info: Conexión a la base de datos establecida
+2025-04-20T15:14:32.610Z info: Permisos para usuario 4: Áreas Comunes,Cambio Contraseña,Configuración,Control de Ingresos y Salidas,Dashboard,Gestión de Ingreso,Gestión de Menús y Submenús,Gestión Visitas,Lista de Usuarios,Login,Recepción,Registrar Pedido,Registrar Usuarios,Reservas,Usuarios,Visitas Programadas
+2025-04-20T15:14:32.906Z info: 🛡️ authMiddleware ejecutado
+2025-04-20T15:14:32.911Z info: 🔐 Token recibido
+2025-04-20T15:14:32.914Z info: ✅ Token decodificado: ID=4, datos={"id":4,"role":"Sistemas","iat":1745160592,"exp":1745164192}
+2025-04-20T15:14:32.916Z info: Cliente desconectado: nkHcAQJ1PqtDVksJAAAL
+2025-04-20T15:14:32.924Z info: Nuevo cliente conectado: W2HFhO8nD5Gm-j2CAAAN
+2025-04-20T15:14:33.138Z info: Tipos de usuario obtenidos: 1
+2025-04-20T15:14:33.220Z info: ✅ Usuario autenticado: ID=4, Correo=jorgejesus_30@outlook.com, Tipo=1, Rol=Sistemas
+2025-04-20T15:14:33.220Z info: Iniciando getUserRoles para userId: 4
+2025-04-20T15:14:33.439Z info: Permisos obtenidos: {"Deudores":{"visible":true,"order":1,"icon":"FaExclamationCircle"},"Cuenta Mancomunada":{"visible":true,"order":2,"icon":"FaInfoCircle"},"Noticias":{"visible":true,"order":3,"icon":"FaBell"},"Eventos":{"visible":true,"order":4,"icon":"FaCalendarAlt"},"Documentos":{"visible":true,"order":5,"icon":"FaFileDownload"},"Encargos":{"visible":true,"order":6,"icon":"FaBox"},"Reportar Problema":{"visible":true,"order":7,"icon":"FaExclamationCircle"}}
+2025-04-20T15:14:33.520Z info: Cliente desconectado: W2HFhO8nD5Gm-j2CAAAN
+2025-04-20T15:14:33.530Z info: Nuevo cliente conectado: 9qJLrui0CLnG6ShnAAAP
+2025-04-20T15:14:33.738Z info: Departamento obtenido: 101
+2025-04-20T15:14:34.041Z info: Deudas: 1 pagos, total S/ 150
+2025-04-20T15:14:34.042Z info: Cuenta mancomunada: {"bank":"Banco Continental","accountNumber":"1234-5678-9012-3456","cci":"002-123-456789012345-67","holder":"Consorcio Residencial Elant"}
+2025-04-20T15:14:34.825Z info: Noticias obtenidas: 6
+2025-04-20T15:14:34.825Z info: Eventos obtenidos: 0
+2025-04-20T15:14:34.826Z info: Documentos obtenidos: 0
+2025-04-20T15:14:34.826Z info: Encargos obtenidos: 2
+2025-04-20T15:14:34.826Z info: Eventos de mantenimiento obtenidos: 6
+2025-04-20T15:14:34.830Z info: 🛡️ authMiddleware ejecutado
+2025-04-20T15:14:34.831Z info: 🔐 Token recibido
+2025-04-20T15:14:34.834Z info: ✅ Token decodificado: ID=4, datos={"id":4,"role":"Sistemas","iat":1745160592,"exp":1745164192}
+2025-04-20T15:14:35.135Z info: ✅ Usuario autenticado: ID=4, Correo=jorgejesus_30@outlook.com, Tipo=1, Rol=Sistemas
+2025-04-20T15:14:35.136Z info: Iniciando getDashboardData para userId: 4
+2025-04-20T15:14:35.136Z info: Conexión a la base de datos establecida
+2025-04-20T15:14:35.433Z info: Tipos de usuario obtenidos: 1
+2025-04-20T15:14:35.732Z info: Permisos obtenidos: {"Deudores":{"visible":true,"order":1,"icon":"FaExclamationCircle"},"Cuenta Mancomunada":{"visible":true,"order":2,"icon":"FaInfoCircle"},"Noticias":{"visible":true,"order":3,"icon":"FaBell"},"Eventos":{"visible":true,"order":4,"icon":"FaCalendarAlt"},"Documentos":{"visible":true,"order":5,"icon":"FaFileDownload"},"Encargos":{"visible":true,"order":6,"icon":"FaBox"},"Reportar Problema":{"visible":true,"order":7,"icon":"FaExclamationCircle"}}
+2025-04-20T15:14:36.030Z info: Departamento obtenido: 101
+2025-04-20T15:14:36.326Z info: Deudas: 1 pagos, total S/ 150
+2025-04-20T15:14:36.327Z info: Cuenta mancomunada: {"bank":"Banco Continental","accountNumber":"1234-5678-9012-3456","cci":"002-123-456789012345-67","holder":"Consorcio Residencial Elant"}
+2025-04-20T15:14:36.845Z info: Noticias obtenidas: 6
+2025-04-20T15:14:36.846Z info: Eventos obtenidos: 0
+2025-04-20T15:14:36.847Z info: Documentos obtenidos: 0
+2025-04-20T15:14:36.847Z info: Encargos obtenidos: 2
+2025-04-20T15:14:36.847Z info: Eventos de mantenimiento obtenidos: 6
+2025-04-20T15:14:37.207Z info: Cliente desconectado: 9qJLrui0CLnG6ShnAAAP
+2025-04-20T15:14:38.049Z info: Permisos para usuario 4: Áreas Comunes,Cambio Contraseña,Configuración,Control de Ingresos y Salidas,Dashboard,Gestión de Ingreso,Gestión de Menús y Submenús,Gestión Visitas,Lista de Usuarios,Login,Recepción,Registrar Pedido,Registrar Usuarios,Reservas,Usuarios,Visitas Programadas
+2025-04-20T15:14:38.096Z info: 🛡️ authMiddleware ejecutado
+2025-04-20T15:14:38.099Z info: 🔐 Token recibido
+2025-04-20T15:14:38.102Z info: ✅ Token decodificado: ID=4, datos={"id":4,"role":"Sistemas","iat":1745160592,"exp":1745164192}
+2025-04-20T15:14:38.105Z info: 🛡️ authMiddleware ejecutado
+2025-04-20T15:14:38.109Z info: 🔐 Token recibido
+2025-04-20T15:14:38.112Z info: ✅ Token decodificado: ID=4, datos={"id":4,"role":"Sistemas","iat":1745160592,"exp":1745164192}
+2025-04-20T15:14:38.147Z info: Nuevo cliente conectado: EN_hEcP3iizyBFvaAAAS
+2025-04-20T15:14:38.407Z info: ✅ Usuario autenticado: ID=4, Correo=jorgejesus_30@outlook.com, Tipo=1, Rol=Sistemas
+2025-04-20T15:14:38.408Z info: Iniciando getUserRoles para userId: 4
+2025-04-20T15:14:38.420Z info: ✅ Usuario autenticado: ID=4, Correo=jorgejesus_30@outlook.com, Tipo=1, Rol=Sistemas
+2025-04-20T15:14:38.421Z info: Iniciando getDashboardData para userId: 4
+2025-04-20T15:14:38.421Z info: Conexión a la base de datos establecida
+2025-04-20T15:14:38.678Z info: Permisos para usuario 4: Áreas Comunes,Cambio Contraseña,Configuración,Control de Ingresos y Salidas,Dashboard,Gestión de Ingreso,Gestión de Menús y Submenús,Gestión Visitas,Lista de Usuarios,Login,Recepción,Registrar Pedido,Registrar Usuarios,Reservas,Usuarios,Visitas Programadas
+2025-04-20T15:14:38.712Z info: 🛡️ authMiddleware ejecutado
+2025-04-20T15:14:38.713Z info: 🔐 Token recibido
+2025-04-20T15:14:38.715Z info: ✅ Token decodificado: ID=4, datos={"id":4,"role":"Sistemas","iat":1745160592,"exp":1745164192}
+2025-04-20T15:14:38.717Z info: Cliente desconectado: EN_hEcP3iizyBFvaAAAS
+2025-04-20T15:14:38.723Z info: Tipos de usuario obtenidos: 1
+2025-04-20T15:14:38.727Z info: Nuevo cliente conectado: lYU1o09dZtmLxTBTAAAU
+2025-04-20T15:14:39.018Z info: ✅ Usuario autenticado: ID=4, Correo=jorgejesus_30@outlook.com, Tipo=1, Rol=Sistemas
+2025-04-20T15:14:39.019Z info: Iniciando getUserRoles para userId: 4
+2025-04-20T15:14:39.025Z info: Permisos obtenidos: {"Deudores":{"visible":true,"order":1,"icon":"FaExclamationCircle"},"Cuenta Mancomunada":{"visible":true,"order":2,"icon":"FaInfoCircle"},"Noticias":{"visible":true,"order":3,"icon":"FaBell"},"Eventos":{"visible":true,"order":4,"icon":"FaCalendarAlt"},"Documentos":{"visible":true,"order":5,"icon":"FaFileDownload"},"Encargos":{"visible":true,"order":6,"icon":"FaBox"},"Reportar Problema":{"visible":true,"order":7,"icon":"FaExclamationCircle"}}
+2025-04-20T15:14:39.333Z info: Departamento obtenido: 101
+2025-04-20T15:14:39.335Z info: Cliente desconectado: lYU1o09dZtmLxTBTAAAU
+2025-04-20T15:14:39.344Z info: Nuevo cliente conectado: zXA3nPnjzA0oSXztAAAW
+2025-04-20T15:14:39.635Z info: Deudas: 1 pagos, total S/ 150
+2025-04-20T15:14:39.635Z info: Cuenta mancomunada: {"bank":"Banco Continental","accountNumber":"1234-5678-9012-3456","cci":"002-123-456789012345-67","holder":"Consorcio Residencial Elant"}
+2025-04-20T15:14:39.948Z info: Noticias obtenidas: 6
+2025-04-20T15:14:39.948Z info: Eventos obtenidos: 0
+2025-04-20T15:14:39.948Z info: Documentos obtenidos: 0
+2025-04-20T15:14:39.949Z info: Encargos obtenidos: 2
+2025-04-20T15:14:39.949Z info: Eventos de mantenimiento obtenidos: 6
+2025-04-20T15:14:39.953Z info: 🛡️ authMiddleware ejecutado
+2025-04-20T15:14:39.955Z info: 🔐 Token recibido
+2025-04-20T15:14:39.958Z info: ✅ Token decodificado: ID=4, datos={"id":4,"role":"Sistemas","iat":1745160592,"exp":1745164192}
+2025-04-20T15:14:40.271Z info: ✅ Usuario autenticado: ID=4, Correo=jorgejesus_30@outlook.com, Tipo=1, Rol=Sistemas
+2025-04-20T15:14:40.271Z info: Iniciando getDashboardData para userId: 4
+2025-04-20T15:14:40.271Z info: Conexión a la base de datos establecida
+2025-04-20T15:14:40.586Z info: Tipos de usuario obtenidos: 1
+2025-04-20T15:14:40.910Z info: Permisos obtenidos: {"Deudores":{"visible":true,"order":1,"icon":"FaExclamationCircle"},"Cuenta Mancomunada":{"visible":true,"order":2,"icon":"FaInfoCircle"},"Noticias":{"visible":true,"order":3,"icon":"FaBell"},"Eventos":{"visible":true,"order":4,"icon":"FaCalendarAlt"},"Documentos":{"visible":true,"order":5,"icon":"FaFileDownload"},"Encargos":{"visible":true,"order":6,"icon":"FaBox"},"Reportar Problema":{"visible":true,"order":7,"icon":"FaExclamationCircle"}}
+2025-04-20T15:14:41.227Z info: Departamento obtenido: 101
+2025-04-20T15:14:41.542Z info: Deudas: 1 pagos, total S/ 150
+2025-04-20T15:14:41.542Z info: Cuenta mancomunada: {"bank":"Banco Continental","accountNumber":"1234-5678-9012-3456","cci":"002-123-456789012345-67","holder":"Consorcio Residencial Elant"}
+2025-04-20T15:14:41.855Z info: Noticias obtenidas: 6
+2025-04-20T15:14:41.855Z info: Eventos obtenidos: 0
+2025-04-20T15:14:41.855Z info: Documentos obtenidos: 0
+2025-04-20T15:14:41.856Z info: Encargos obtenidos: 2
+2025-04-20T15:14:41.856Z info: Eventos de mantenimiento obtenidos: 6
+2025-04-20T15:16:00.349Z info: Cliente desconectado: zXA3nPnjzA0oSXztAAAW
+2025-04-20T15:16:01.452Z info: Permisos para usuario 4: Áreas Comunes,Cambio Contraseña,Configuración,Control de Ingresos y Salidas,Dashboard,Gestión de Ingreso,Gestión de Menús y Submenús,Gestión Visitas,Lista de Usuarios,Login,Recepción,Registrar Pedido,Registrar Usuarios,Reservas,Usuarios,Visitas Programadas
+2025-04-20T15:16:01.498Z info: 🛡️ authMiddleware ejecutado
+2025-04-20T15:16:01.499Z info: 🔐 Token recibido
+2025-04-20T15:16:01.502Z info: ✅ Token decodificado: ID=4, datos={"id":4,"role":"Sistemas","iat":1745160592,"exp":1745164192}
+2025-04-20T15:16:01.504Z info: 🛡️ authMiddleware ejecutado
+2025-04-20T15:16:01.505Z info: 🔐 Token recibido
+2025-04-20T15:16:01.508Z info: ✅ Token decodificado: ID=4, datos={"id":4,"role":"Sistemas","iat":1745160592,"exp":1745164192}
+2025-04-20T15:16:01.804Z info: Nuevo cliente conectado: cHDQdsrSC2CPUlw_AAAZ
+2025-04-20T15:16:02.081Z info: ✅ Usuario autenticado: ID=4, Correo=jorgejesus_30@outlook.com, Tipo=1, Rol=Sistemas
+2025-04-20T15:16:02.081Z info: Iniciando getUserRoles para userId: 4
+2025-04-20T15:16:02.393Z info: ✅ Usuario autenticado: ID=4, Correo=jorgejesus_30@outlook.com, Tipo=1, Rol=Sistemas
+2025-04-20T15:16:02.393Z info: Iniciando getDashboardData para userId: 4
+2025-04-20T15:16:02.394Z info: Conexión a la base de datos establecida
+2025-04-20T15:16:02.704Z info: Permisos para usuario 4: Áreas Comunes,Cambio Contraseña,Configuración,Control de Ingresos y Salidas,Dashboard,Gestión de Ingreso,Gestión de Menús y Submenús,Gestión Visitas,Lista de Usuarios,Login,Recepción,Registrar Pedido,Registrar Usuarios,Reservas,Usuarios,Visitas Programadas
+2025-04-20T15:16:03.009Z info: Tipos de usuario obtenidos: 1
+2025-04-20T15:16:03.016Z info: 🛡️ authMiddleware ejecutado
+2025-04-20T15:16:03.017Z info: 🔐 Token recibido
+2025-04-20T15:16:03.019Z info: ✅ Token decodificado: ID=4, datos={"id":4,"role":"Sistemas","iat":1745160592,"exp":1745164192}
+2025-04-20T15:16:03.021Z info: Cliente desconectado: cHDQdsrSC2CPUlw_AAAZ
+2025-04-20T15:16:03.030Z info: Nuevo cliente conectado: WBequKOvDw_Ux1j7AAAb
+2025-04-20T15:16:03.306Z info: Permisos obtenidos: {"Deudores":{"visible":true,"order":1,"icon":"FaExclamationCircle"},"Cuenta Mancomunada":{"visible":true,"order":2,"icon":"FaInfoCircle"},"Noticias":{"visible":true,"order":3,"icon":"FaBell"},"Eventos":{"visible":true,"order":4,"icon":"FaCalendarAlt"},"Documentos":{"visible":true,"order":5,"icon":"FaFileDownload"},"Encargos":{"visible":true,"order":6,"icon":"FaBox"},"Reportar Problema":{"visible":true,"order":7,"icon":"FaExclamationCircle"}}
+2025-04-20T15:16:03.332Z info: ✅ Usuario autenticado: ID=4, Correo=jorgejesus_30@outlook.com, Tipo=1, Rol=Sistemas
+2025-04-20T15:16:03.333Z info: Iniciando getUserRoles para userId: 4
+2025-04-20T15:16:03.603Z info: Departamento obtenido: 101
+2025-04-20T15:16:03.651Z info: Cliente desconectado: WBequKOvDw_Ux1j7AAAb
+2025-04-20T15:16:03.660Z info: Nuevo cliente conectado: K9kz54SIpZRuNCAsAAAd
+2025-04-20T15:16:03.900Z info: Deudas: 1 pagos, total S/ 150
+2025-04-20T15:16:03.900Z info: Cuenta mancomunada: {"bank":"Banco Continental","accountNumber":"1234-5678-9012-3456","cci":"002-123-456789012345-67","holder":"Consorcio Residencial Elant"}
+2025-04-20T15:16:04.694Z info: Noticias obtenidas: 6
+2025-04-20T15:16:04.694Z info: Eventos obtenidos: 0
+2025-04-20T15:16:04.695Z info: Documentos obtenidos: 0
+2025-04-20T15:16:04.695Z info: Encargos obtenidos: 2
+2025-04-20T15:16:04.695Z info: Eventos de mantenimiento obtenidos: 6
+2025-04-20T15:16:04.699Z info: 🛡️ authMiddleware ejecutado
+2025-04-20T15:16:04.700Z info: 🔐 Token recibido
+2025-04-20T15:16:04.703Z info: ✅ Token decodificado: ID=4, datos={"id":4,"role":"Sistemas","iat":1745160592,"exp":1745164192}
+2025-04-20T15:16:05.004Z info: ✅ Usuario autenticado: ID=4, Correo=jorgejesus_30@outlook.com, Tipo=1, Rol=Sistemas
+2025-04-20T15:16:05.005Z info: Iniciando getDashboardData para userId: 4
+2025-04-20T15:16:05.006Z info: Conexión a la base de datos establecida
+2025-04-20T15:16:05.302Z info: Tipos de usuario obtenidos: 1
+2025-04-20T15:16:05.599Z info: Permisos obtenidos: {"Deudores":{"visible":true,"order":1,"icon":"FaExclamationCircle"},"Cuenta Mancomunada":{"visible":true,"order":2,"icon":"FaInfoCircle"},"Noticias":{"visible":true,"order":3,"icon":"FaBell"},"Eventos":{"visible":true,"order":4,"icon":"FaCalendarAlt"},"Documentos":{"visible":true,"order":5,"icon":"FaFileDownload"},"Encargos":{"visible":true,"order":6,"icon":"FaBox"},"Reportar Problema":{"visible":true,"order":7,"icon":"FaExclamationCircle"}}
+2025-04-20T15:16:05.895Z info: Departamento obtenido: 101
+2025-04-20T15:16:06.192Z info: Deudas: 1 pagos, total S/ 150
+2025-04-20T15:16:06.192Z info: Cuenta mancomunada: {"bank":"Banco Continental","accountNumber":"1234-5678-9012-3456","cci":"002-123-456789012345-67","holder":"Consorcio Residencial Elant"}
+2025-04-20T15:16:06.717Z info: Noticias obtenidas: 6
+2025-04-20T15:16:06.717Z info: Eventos obtenidos: 0
+2025-04-20T15:16:06.718Z info: Documentos obtenidos: 0
+2025-04-20T15:16:06.718Z info: Encargos obtenidos: 2
+2025-04-20T15:16:06.718Z info: Eventos de mantenimiento obtenidos: 6
+2025-04-20T15:16:09.538Z info: Cliente desconectado: K9kz54SIpZRuNCAsAAAd
+2025-04-20T15:16:10.359Z info: Permisos para usuario 4: Áreas Comunes,Cambio Contraseña,Configuración,Control de Ingresos y Salidas,Dashboard,Gestión de Ingreso,Gestión de Menús y Submenús,Gestión Visitas,Lista de Usuarios,Login,Recepción,Registrar Pedido,Registrar Usuarios,Reservas,Usuarios,Visitas Programadas
+2025-04-20T15:16:10.413Z info: 🛡️ authMiddleware ejecutado
+2025-04-20T15:16:10.414Z info: 🔐 Token recibido
+2025-04-20T15:16:10.417Z info: ✅ Token decodificado: ID=4, datos={"id":4,"role":"Sistemas","iat":1745160592,"exp":1745164192}
+2025-04-20T15:16:10.704Z info: 🛡️ authMiddleware ejecutado
+2025-04-20T15:16:10.704Z info: 🔐 Token recibido
+2025-04-20T15:16:10.706Z info: ✅ Token decodificado: ID=4, datos={"id":4,"role":"Sistemas","iat":1745160592,"exp":1745164192}
+2025-04-20T15:16:10.722Z info: Nuevo cliente conectado: J751JP6xBFrDIAzKAAAg
+2025-04-20T15:16:10.744Z info: ✅ Usuario autenticado: ID=4, Correo=jorgejesus_30@outlook.com, Tipo=1, Rol=Sistemas
+2025-04-20T15:16:10.744Z info: Iniciando getUserRoles para userId: 4
+2025-04-20T15:16:11.003Z info: Permisos para usuario 4: Áreas Comunes,Cambio Contraseña,Configuración,Control de Ingresos y Salidas,Dashboard,Gestión de Ingreso,Gestión de Menús y Submenús,Gestión Visitas,Lista de Usuarios,Login,Recepción,Registrar Pedido,Registrar Usuarios,Reservas,Usuarios,Visitas Programadas
+2025-04-20T15:16:11.017Z info: ✅ Usuario autenticado: ID=4, Correo=jorgejesus_30@outlook.com, Tipo=1, Rol=Sistemas
+2025-04-20T15:16:11.017Z info: Iniciando getDashboardData para userId: 4
+2025-04-20T15:16:11.018Z info: Conexión a la base de datos establecida
+2025-04-20T15:16:11.066Z info: 🛡️ authMiddleware ejecutado
+2025-04-20T15:16:11.067Z info: 🔐 Token recibido
+2025-04-20T15:16:11.070Z info: ✅ Token decodificado: ID=4, datos={"id":4,"role":"Sistemas","iat":1745160592,"exp":1745164192}
+2025-04-20T15:16:11.080Z info: Cliente desconectado: J751JP6xBFrDIAzKAAAg
+2025-04-20T15:16:11.090Z info: Nuevo cliente conectado: qOzy4ed4QjLIXSjqAAAi
+2025-04-20T15:16:11.335Z info: Tipos de usuario obtenidos: 1
+2025-04-20T15:16:11.388Z info: ✅ Usuario autenticado: ID=4, Correo=jorgejesus_30@outlook.com, Tipo=1, Rol=Sistemas
+2025-04-20T15:16:11.389Z info: Iniciando getUserRoles para userId: 4
+2025-04-20T15:16:11.646Z info: Permisos obtenidos: {"Deudores":{"visible":true,"order":1,"icon":"FaExclamationCircle"},"Cuenta Mancomunada":{"visible":true,"order":2,"icon":"FaInfoCircle"},"Noticias":{"visible":true,"order":3,"icon":"FaBell"},"Eventos":{"visible":true,"order":4,"icon":"FaCalendarAlt"},"Documentos":{"visible":true,"order":5,"icon":"FaFileDownload"},"Encargos":{"visible":true,"order":6,"icon":"FaBox"},"Reportar Problema":{"visible":true,"order":7,"icon":"FaExclamationCircle"}}
+2025-04-20T15:16:11.709Z info: Cliente desconectado: qOzy4ed4QjLIXSjqAAAi
+2025-04-20T15:16:11.718Z info: Nuevo cliente conectado: E1X0scl008u8QQxGAAAk
+2025-04-20T15:16:11.956Z info: Departamento obtenido: 101
+2025-04-20T15:16:12.269Z info: Deudas: 1 pagos, total S/ 150
+2025-04-20T15:16:12.269Z info: Cuenta mancomunada: {"bank":"Banco Continental","accountNumber":"1234-5678-9012-3456","cci":"002-123-456789012345-67","holder":"Consorcio Residencial Elant"}
+2025-04-20T15:16:12.589Z info: Noticias obtenidas: 6
+2025-04-20T15:16:12.590Z info: Eventos obtenidos: 0
+2025-04-20T15:16:12.590Z info: Documentos obtenidos: 0
+2025-04-20T15:16:12.590Z info: Encargos obtenidos: 2
+2025-04-20T15:16:12.590Z info: Eventos de mantenimiento obtenidos: 6
+2025-04-20T15:16:12.595Z info: 🛡️ authMiddleware ejecutado
+2025-04-20T15:16:12.596Z info: 🔐 Token recibido
+2025-04-20T15:16:12.599Z info: ✅ Token decodificado: ID=4, datos={"id":4,"role":"Sistemas","iat":1745160592,"exp":1745164192}
+2025-04-20T15:16:12.916Z info: ✅ Usuario autenticado: ID=4, Correo=jorgejesus_30@outlook.com, Tipo=1, Rol=Sistemas
+2025-04-20T15:16:12.916Z info: Iniciando getDashboardData para userId: 4
+2025-04-20T15:16:12.916Z info: Conexión a la base de datos establecida
+2025-04-20T15:16:13.233Z info: Tipos de usuario obtenidos: 1
+2025-04-20T15:16:13.551Z info: Permisos obtenidos: {"Deudores":{"visible":true,"order":1,"icon":"FaExclamationCircle"},"Cuenta Mancomunada":{"visible":true,"order":2,"icon":"FaInfoCircle"},"Noticias":{"visible":true,"order":3,"icon":"FaBell"},"Eventos":{"visible":true,"order":4,"icon":"FaCalendarAlt"},"Documentos":{"visible":true,"order":5,"icon":"FaFileDownload"},"Encargos":{"visible":true,"order":6,"icon":"FaBox"},"Reportar Problema":{"visible":true,"order":7,"icon":"FaExclamationCircle"}}
+2025-04-20T15:16:13.867Z info: Departamento obtenido: 101
+2025-04-20T15:16:14.185Z info: Deudas: 1 pagos, total S/ 150
+2025-04-20T15:16:14.185Z info: Cuenta mancomunada: {"bank":"Banco Continental","accountNumber":"1234-5678-9012-3456","cci":"002-123-456789012345-67","holder":"Consorcio Residencial Elant"}
+2025-04-20T15:16:14.505Z info: Noticias obtenidas: 6
+2025-04-20T15:16:14.505Z info: Eventos obtenidos: 0
+2025-04-20T15:16:14.506Z info: Documentos obtenidos: 0
+2025-04-20T15:16:14.506Z info: Encargos obtenidos: 2
+2025-04-20T15:16:14.506Z info: Eventos de mantenimiento obtenidos: 6
+2025-04-20T15:16:14.558Z info: Cliente desconectado: E1X0scl008u8QQxGAAAk
+2025-04-20T15:16:15.376Z info: Permisos para usuario 4: Áreas Comunes,Cambio Contraseña,Configuración,Control de Ingresos y Salidas,Dashboard,Gestión de Ingreso,Gestión de Menús y Submenús,Gestión Visitas,Lista de Usuarios,Login,Recepción,Registrar Pedido,Registrar Usuarios,Reservas,Usuarios,Visitas Programadas
+2025-04-20T15:16:15.746Z info: 🛡️ authMiddleware ejecutado
+2025-04-20T15:16:15.748Z info: 🔐 Token recibido
+2025-04-20T15:16:15.751Z info: ✅ Token decodificado: ID=4, datos={"id":4,"role":"Sistemas","iat":1745160592,"exp":1745164192}
+2025-04-20T15:16:15.754Z info: 🛡️ authMiddleware ejecutado
+2025-04-20T15:16:15.754Z info: 🔐 Token recibido
+2025-04-20T15:16:15.756Z info: ✅ Token decodificado: ID=4, datos={"id":4,"role":"Sistemas","iat":1745160592,"exp":1745164192}
+2025-04-20T15:16:15.757Z info: Nuevo cliente conectado: a66kUdnU7deRNYDvAAAn
+2025-04-20T15:16:16.027Z info: Permisos para usuario 4: Áreas Comunes,Cambio Contraseña,Configuración,Control de Ingresos y Salidas,Dashboard,Gestión de Ingreso,Gestión de Menús y Submenús,Gestión Visitas,Lista de Usuarios,Login,Recepción,Registrar Pedido,Registrar Usuarios,Reservas,Usuarios,Visitas Programadas
+2025-04-20T15:16:16.068Z info: ✅ Usuario autenticado: ID=4, Correo=jorgejesus_30@outlook.com, Tipo=1, Rol=Sistemas
+2025-04-20T15:16:16.069Z info: Iniciando getUserRoles para userId: 4
+2025-04-20T15:16:16.072Z info: ✅ Usuario autenticado: ID=4, Correo=jorgejesus_30@outlook.com, Tipo=1, Rol=Sistemas
+2025-04-20T15:16:16.073Z info: Iniciando getDashboardData para userId: 4
+2025-04-20T15:16:16.073Z info: Conexión a la base de datos establecida
+2025-04-20T15:16:16.390Z info: 🛡️ authMiddleware ejecutado
+2025-04-20T15:16:16.391Z info: 🔐 Token recibido
+2025-04-20T15:16:16.394Z info: ✅ Token decodificado: ID=4, datos={"id":4,"role":"Sistemas","iat":1745160592,"exp":1745164192}
+2025-04-20T15:16:16.397Z info: Tipos de usuario obtenidos: 1
+2025-04-20T15:16:16.397Z info: Cliente desconectado: a66kUdnU7deRNYDvAAAn
+2025-04-20T15:16:16.407Z info: Nuevo cliente conectado: kGKHc9FRBUt-laLHAAAp
+2025-04-20T15:16:16.738Z info: Permisos obtenidos: {"Deudores":{"visible":true,"order":1,"icon":"FaExclamationCircle"},"Cuenta Mancomunada":{"visible":true,"order":2,"icon":"FaInfoCircle"},"Noticias":{"visible":true,"order":3,"icon":"FaBell"},"Eventos":{"visible":true,"order":4,"icon":"FaCalendarAlt"},"Documentos":{"visible":true,"order":5,"icon":"FaFileDownload"},"Encargos":{"visible":true,"order":6,"icon":"FaBox"},"Reportar Problema":{"visible":true,"order":7,"icon":"FaExclamationCircle"}}
+2025-04-20T15:16:16.742Z info: ✅ Usuario autenticado: ID=4, Correo=jorgejesus_30@outlook.com, Tipo=1, Rol=Sistemas
+2025-04-20T15:16:16.742Z info: Iniciando getUserRoles para userId: 4
+2025-04-20T15:16:17.052Z info: Departamento obtenido: 101
+2025-04-20T15:16:17.063Z info: Cliente desconectado: kGKHc9FRBUt-laLHAAAp
+2025-04-20T15:16:17.076Z info: Nuevo cliente conectado: XRfKRzrOGoDeCAphAAAr
+2025-04-20T15:16:17.362Z info: Deudas: 1 pagos, total S/ 150
+2025-04-20T15:16:17.363Z info: Cuenta mancomunada: {"bank":"Banco Continental","accountNumber":"1234-5678-9012-3456","cci":"002-123-456789012345-67","holder":"Consorcio Residencial Elant"}
+2025-04-20T15:16:17.680Z info: Noticias obtenidas: 6
+2025-04-20T15:16:17.680Z info: Eventos obtenidos: 0
+2025-04-20T15:16:17.680Z info: Documentos obtenidos: 0
+2025-04-20T15:16:17.681Z info: Encargos obtenidos: 2
+2025-04-20T15:16:17.681Z info: Eventos de mantenimiento obtenidos: 6
+2025-04-20T15:16:17.685Z info: 🛡️ authMiddleware ejecutado
+2025-04-20T15:16:17.686Z info: 🔐 Token recibido
+2025-04-20T15:16:17.689Z info: ✅ Token decodificado: ID=4, datos={"id":4,"role":"Sistemas","iat":1745160592,"exp":1745164192}
+2025-04-20T15:16:18.008Z info: ✅ Usuario autenticado: ID=4, Correo=jorgejesus_30@outlook.com, Tipo=1, Rol=Sistemas
+2025-04-20T15:16:18.008Z info: Iniciando getDashboardData para userId: 4
+2025-04-20T15:16:18.008Z info: Conexión a la base de datos establecida
+2025-04-20T15:16:18.328Z info: Tipos de usuario obtenidos: 1
+2025-04-20T15:16:18.647Z info: Permisos obtenidos: {"Deudores":{"visible":true,"order":1,"icon":"FaExclamationCircle"},"Cuenta Mancomunada":{"visible":true,"order":2,"icon":"FaInfoCircle"},"Noticias":{"visible":true,"order":3,"icon":"FaBell"},"Eventos":{"visible":true,"order":4,"icon":"FaCalendarAlt"},"Documentos":{"visible":true,"order":5,"icon":"FaFileDownload"},"Encargos":{"visible":true,"order":6,"icon":"FaBox"},"Reportar Problema":{"visible":true,"order":7,"icon":"FaExclamationCircle"}}
+2025-04-20T15:16:18.963Z info: Departamento obtenido: 101
+2025-04-20T15:16:19.284Z info: Deudas: 1 pagos, total S/ 150
+2025-04-20T15:16:19.288Z info: Cuenta mancomunada: {"bank":"Banco Continental","accountNumber":"1234-5678-9012-3456","cci":"002-123-456789012345-67","holder":"Consorcio Residencial Elant"}
+2025-04-20T15:16:19.608Z info: Noticias obtenidas: 6
+2025-04-20T15:16:19.609Z info: Eventos obtenidos: 0
+2025-04-20T15:16:19.609Z info: Documentos obtenidos: 0
+2025-04-20T15:16:19.609Z info: Encargos obtenidos: 2
+2025-04-20T15:16:19.610Z info: Eventos de mantenimiento obtenidos: 6
+2025-04-20T16:06:28.240Z info: Cliente desconectado: XRfKRzrOGoDeCAphAAAr
+2025-04-20T16:06:28.582Z info: Nuevo cliente conectado: uxYu7z3ztZYTXmSvAAAt
+2025-04-20T16:06:28.586Z info: 🛡️ authMiddleware ejecutado
+2025-04-20T16:06:28.587Z info: 🔐 Token recibido
+2025-04-20T16:06:28.600Z error: ❌ Error al decodificar token:
+2025-04-20T16:06:28.649Z info: 🛡️ authMiddleware ejecutado
+2025-04-20T16:06:28.651Z info: 🔐 Token recibido
+2025-04-20T16:06:28.655Z error: ❌ Error al decodificar token:
+2025-04-20T16:06:28.717Z info: Cliente desconectado: uxYu7z3ztZYTXmSvAAAt
+2025-04-20T16:06:29.074Z info: Iniciando la obtención de imágenes...
+2025-04-20T16:06:35.101Z info: Iniciando la obtención de imágenes...
+2025-04-20T16:06:38.556Z info: Iniciando la obtención de imágenes...
+2025-04-20T16:06:40.750Z info: Iniciando la obtención de imágenes...
+2025-04-20T16:06:42.270Z info: Iniciando la obtención de imágenes...
+2025-04-20T16:06:43.618Z info: Iniciando la obtención de imágenes...
+2025-04-20T16:06:44.690Z info: Iniciando la obtención de imágenes...
+2025-04-20T16:06:45.573Z info: Iniciando la obtención de imágenes...
+2025-04-20T16:06:46.455Z info: Iniciando la obtención de imágenes...
+2025-04-20T16:06:47.323Z info: Iniciando la obtención de imágenes...
+2025-04-20T16:06:48.075Z info: Iniciando la obtención de imágenes...
+2025-04-20T16:06:48.789Z info: Iniciando la obtención de imágenes...
+2025-04-20T16:06:49.398Z info: Iniciando la obtención de imágenes...
+2025-04-20T16:06:49.755Z info: Iniciando la obtención de imágenes...
+2025-04-20T16:06:49.788Z info: Iniciando la obtención de imágenes...
+2025-04-20T16:06:49.789Z info: Iniciando la obtención de imágenes...
+2025-04-20T16:06:49.970Z info: Iniciando la obtención de imágenes...
+2025-04-20T16:06:49.971Z info: Iniciando la obtención de imágenes...
+2025-04-20T16:06:49.975Z info: Iniciando la obtención de imágenes...
+2025-04-20T16:06:50.596Z info: Iniciando la obtención de imágenes...
+2025-04-20T16:06:51.122Z info: Iniciando la obtención de imágenes...
+2025-04-20T16:06:51.583Z info: Iniciando la obtención de imágenes...
+2025-04-20T16:06:52.203Z info: Iniciando la obtención de imágenes...
+2025-04-20T16:06:52.832Z info: Iniciando la obtención de imágenes...
+2025-04-20T16:06:53.638Z info: Iniciando la obtención de imágenes...
+2025-04-20T16:06:53.749Z info: Iniciando la obtención de imágenes...
+2025-04-20T16:06:53.750Z info: Iniciando la obtención de imágenes...
+2025-04-20T16:06:53.752Z info: Iniciando la obtención de imágenes...
+2025-04-20T16:06:53.807Z info: Iniciando la obtención de imágenes...
+2025-04-20T16:06:54.447Z info: Iniciando la obtención de imágenes...
+2025-04-20T16:06:54.758Z info: Iniciando la obtención de imágenes...
+2025-04-20T16:06:54.814Z info: Iniciando la obtención de imágenes...
+2025-04-20T16:06:54.816Z info: Iniciando la obtención de imágenes...
+2025-04-20T16:06:54.853Z info: Iniciando la obtención de imágenes...
+2025-04-20T16:06:55.131Z info: Iniciando la obtención de imágenes...
+2025-04-20T16:06:55.638Z info: Iniciando la obtención de imágenes...
+2025-04-20T16:06:56.002Z info: Iniciando la obtención de imágenes...
+2025-04-20T16:06:56.003Z info: Iniciando la obtención de imágenes...
+2025-04-20T16:06:56.004Z info: Iniciando la obtención de imágenes...
+2025-04-20T16:06:56.011Z info: Iniciando la obtención de imágenes...
+2025-04-20T16:06:56.301Z info: Iniciando la obtención de imágenes...
+2025-04-20T16:06:56.811Z info: Iniciando la obtención de imágenes...
+2025-04-20T16:06:56.984Z info: Iniciando la obtención de imágenes...
+2025-04-20T16:06:57.081Z info: Iniciando la obtención de imágenes...
+2025-04-20T16:06:57.121Z info: Iniciando la obtención de imágenes...
+2025-04-20T16:06:57.782Z info: Iniciando la obtención de imágenes...
+2025-04-20T16:06:58.254Z info: Iniciando la obtención de imágenes...
+2025-04-20T16:06:58.326Z info: Iniciando la obtención de imágenes...
+2025-04-20T16:06:58.776Z info: Iniciando la obtención de imágenes...
+2025-04-20T16:06:58.789Z info: Iniciando la obtención de imágenes...
+2025-04-20T16:06:59.349Z info: Iniciando la obtención de imágenes...
+2025-04-20T16:06:59.351Z info: Iniciando la obtención de imágenes...
+2025-04-20T16:06:59.551Z info: Iniciando la obtención de imágenes...
+2025-04-20T16:06:59.877Z info: Iniciando la obtención de imágenes...
+2025-04-20T16:07:00.415Z info: Iniciando la obtención de imágenes...
+2025-04-20T16:07:00.504Z info: Iniciando la obtención de imágenes...
+2025-04-20T16:07:00.552Z info: Iniciando la obtención de imágenes...
+2025-04-20T16:07:00.716Z info: Iniciando la obtención de imágenes...
+2025-04-20T16:07:00.728Z info: Iniciando la obtención de imágenes...
+2025-04-20T16:07:01.384Z info: Iniciando la obtención de imágenes...
+2025-04-20T16:07:01.488Z info: Iniciando la obtención de imágenes...
+2025-04-20T16:07:02.054Z info: Iniciando la obtención de imágenes...
+2025-04-20T16:07:02.124Z info: Iniciando la obtención de imágenes...
+2025-04-20T16:07:02.194Z info: Iniciando la obtención de imágenes...
+2025-04-20T16:07:02.198Z info: Iniciando la obtención de imágenes...
+2025-04-20T16:07:02.218Z info: Iniciando la obtención de imágenes...
+2025-04-20T16:07:02.650Z info: Iniciando la obtención de imágenes...
+2025-04-20T16:07:02.952Z info: Iniciando la obtención de imágenes...
+2025-04-20T16:07:03.039Z info: Iniciando la obtención de imágenes...
+2025-04-20T16:07:03.263Z info: Iniciando la obtención de imágenes...
+2025-04-20T16:07:03.336Z info: Iniciando la obtención de imágenes...
+2025-04-20T16:07:03.353Z info: Iniciando la obtención de imágenes...
+2025-04-20T16:07:03.509Z info: Iniciando la obtención de imágenes...
+2025-04-20T16:07:03.719Z info: Iniciando la obtención de imágenes...
+2025-04-20T16:07:03.876Z info: Iniciando la obtención de imágenes...
+2025-04-20T16:07:04.510Z info: Iniciando la obtención de imágenes...
+2025-04-20T16:07:04.642Z info: Iniciando la obtención de imágenes...
+2025-04-20T16:07:04.669Z info: Iniciando la obtención de imágenes...
+2025-04-20T16:07:04.807Z info: Iniciando la obtención de imágenes...
+2025-04-20T16:07:04.852Z info: Iniciando la obtención de imágenes...
+2025-04-20T16:07:05.467Z info: Iniciando la obtención de imágenes...
+2025-04-20T16:07:05.529Z info: Iniciando la obtención de imágenes...
+2025-04-20T16:07:05.537Z info: Iniciando la obtención de imágenes...
+2025-04-20T16:07:06.002Z info: Iniciando la obtención de imágenes...
+2025-04-20T16:07:06.012Z info: Iniciando la obtención de imágenes...
+2025-04-20T16:07:06.282Z info: Iniciando la obtención de imágenes...
+2025-04-20T16:07:06.331Z info: Iniciando la obtención de imágenes...
+2025-04-20T16:07:06.413Z info: Iniciando la obtención de imágenes...
+2025-04-20T16:07:06.955Z info: Iniciando la obtención de imágenes...
+2025-04-20T16:07:06.964Z info: Iniciando la obtención de imágenes...
+2025-04-20T16:07:07.109Z info: Iniciando la obtención de imágenes...
+2025-04-20T16:07:07.296Z info: Iniciando la obtención de imágenes...
+2025-04-20T16:21:23.849Z info: Cargando rutas...
+2025-04-20T16:21:23.854Z info: Rutas de movementRoutes cargadas.
+2025-04-20T16:21:23.855Z info: Rutas de authRoutes cargadas.
+2025-04-20T16:21:23.856Z info: Rutas de doorRoutes cargadas.
+2025-04-20T16:21:23.856Z info: Rutas de userRoutes cargadas.
+2025-04-20T16:21:23.857Z info: Rutas de menuRoutes cargadas.
+2025-04-20T16:21:23.857Z info: Rutas de visitRoutes cargadas.
+2025-04-20T16:21:23.858Z info: Rutas de reservationRoutes cargadas.
+2025-04-20T16:21:23.858Z info: Rutas de dashboardRoutes cargadas.
+2025-04-20T16:21:23.860Z info: Rutas de maintenanceRoutes cargadas.
+2025-04-20T16:21:23.867Z info: ✅ Server running on port 4000
+2025-04-20T16:21:32.271Z info: Iniciando la obtención de imágenes...
+2025-04-20T16:21:34.812Z info: Iniciando la obtención de imágenes...
+2025-04-20T16:21:36.644Z info: Permisos para usuario 4: Áreas Comunes,Cambio Contraseña,Configuración,Control de Ingresos y Salidas,Dashboard,Gestión de Ingreso,Gestión de Menús y Submenús,Gestión Visitas,Lista de Usuarios,Login,Recepción,Registrar Pedido,Registrar Usuarios,Reservas,Usuarios,Visitas Programadas
+2025-04-20T16:21:36.968Z info: Nuevo cliente conectado: RAqVHNoGANE7TgEMAAAC
+2025-04-20T16:21:36.973Z info: 🛡️ authMiddleware ejecutado
+2025-04-20T16:21:36.974Z info: 🔐 Token recibido
+2025-04-20T16:21:36.984Z info: ✅ Token decodificado: ID=4, datos={"id":4,"role":"Sistemas","iat":1745166096,"exp":1745169696}
+2025-04-20T16:21:37.333Z info: ✅ Usuario autenticado: ID=4, Correo=jorgejesus_30@outlook.com, Tipo=1, Rol=Sistemas
+2025-04-20T16:21:37.335Z info: Iniciando getUserRoles para userId: 4
+2025-04-20T16:21:37.346Z info: 🛡️ authMiddleware ejecutado
+2025-04-20T16:21:37.347Z info: 🔐 Token recibido
+2025-04-20T16:21:37.352Z info: ✅ Token decodificado: ID=4, datos={"id":4,"role":"Sistemas","iat":1745166096,"exp":1745169696}
+2025-04-20T16:21:37.356Z info: 🛡️ authMiddleware ejecutado
+2025-04-20T16:21:37.357Z info: 🔐 Token recibido
+2025-04-20T16:21:37.366Z info: ✅ Token decodificado: ID=4, datos={"id":4,"role":"Sistemas","iat":1745166096,"exp":1745169696}
+2025-04-20T16:21:37.686Z info: ✅ Usuario autenticado: ID=4, Correo=jorgejesus_30@outlook.com, Tipo=1, Rol=Sistemas
+2025-04-20T16:21:37.687Z info: Iniciando getDashboardData para userId: 4
+2025-04-20T16:21:37.687Z info: Conexión a la base de datos establecida
+2025-04-20T16:21:37.708Z info: 🛡️ authMiddleware ejecutado
+2025-04-20T16:21:37.708Z info: 🔐 Token recibido
+2025-04-20T16:21:37.716Z info: ✅ Token decodificado: ID=4, datos={"id":4,"role":"Sistemas","iat":1745166096,"exp":1745169696}
+2025-04-20T16:21:37.719Z info: Cliente desconectado: RAqVHNoGANE7TgEMAAAC
+2025-04-20T16:21:37.727Z info: Nuevo cliente conectado: G5a3tYpz_iL9hlhOAAAE
+2025-04-20T16:21:37.983Z info: ✅ Usuario autenticado: ID=4, Correo=jorgejesus_30@outlook.com, Tipo=1, Rol=Sistemas
+2025-04-20T16:21:37.984Z info: Solicitud de menú para el usuario ID: 4
+2025-04-20T16:21:38.012Z info: Tiempo de ejecución del SP: 324 ms
+2025-04-20T16:21:38.013Z error: Error al obtener datos del dashboard para userId 4: Cannot read properties of undefined (reading '0')
+2025-04-20T16:21:38.018Z info: 🛡️ authMiddleware ejecutado
+2025-04-20T16:21:38.019Z info: 🔐 Token recibido
+2025-04-20T16:21:38.022Z info: ✅ Token decodificado: ID=4, datos={"id":4,"role":"Sistemas","iat":1745166096,"exp":1745169696}
+2025-04-20T16:21:38.289Z info: ✅ Usuario autenticado: ID=4, Correo=jorgejesus_30@outlook.com, Tipo=1, Rol=Sistemas
+2025-04-20T16:21:38.289Z info: Iniciando getUserRoles para userId: 4
+2025-04-20T16:21:38.594Z info: ✅ Usuario autenticado: ID=4, Correo=jorgejesus_30@outlook.com, Tipo=1, Rol=Sistemas
+2025-04-20T16:21:38.597Z info: Iniciando getDashboardData para userId: 4
+2025-04-20T16:21:38.598Z info: Conexión a la base de datos establecida
+2025-04-20T16:21:38.659Z info: Nuevo cliente conectado: 83U9zuGhVUTsQv7EAAAG
+2025-04-20T16:21:38.668Z info: Cliente desconectado: G5a3tYpz_iL9hlhOAAAE
+2025-04-20T16:21:38.907Z info: Tiempo de ejecución del SP: 309 ms
+2025-04-20T16:21:38.908Z error: Error al obtener datos del dashboard para userId 4: Cannot read properties of undefined (reading '0')
+2025-04-20T16:21:47.150Z info: Cliente desconectado: 83U9zuGhVUTsQv7EAAAG
+2025-04-20T16:21:48.602Z info: Permisos para usuario 4: Áreas Comunes,Cambio Contraseña,Configuración,Control de Ingresos y Salidas,Dashboard,Gestión de Ingreso,Gestión de Menús y Submenús,Gestión Visitas,Lista de Usuarios,Login,Recepción,Registrar Pedido,Registrar Usuarios,Reservas,Usuarios,Visitas Programadas
+2025-04-20T16:21:48.724Z info: 🛡️ authMiddleware ejecutado
+2025-04-20T16:21:48.728Z info: 🔐 Token recibido
+2025-04-20T16:21:48.731Z info: ✅ Token decodificado: ID=4, datos={"id":4,"role":"Sistemas","iat":1745166096,"exp":1745169696}
+2025-04-20T16:21:48.734Z info: 🛡️ authMiddleware ejecutado
+2025-04-20T16:21:48.735Z info: 🔐 Token recibido
+2025-04-20T16:21:48.739Z info: ✅ Token decodificado: ID=4, datos={"id":4,"role":"Sistemas","iat":1745166096,"exp":1745169696}
+2025-04-20T16:21:49.010Z info: Nuevo cliente conectado: 0YpfcH2OjIBBVwoFAAAJ
+2025-04-20T16:21:49.041Z info: ✅ Usuario autenticado: ID=4, Correo=jorgejesus_30@outlook.com, Tipo=1, Rol=Sistemas
+2025-04-20T16:21:49.045Z info: Iniciando getUserRoles para userId: 4
+2025-04-20T16:21:49.050Z info: ✅ Usuario autenticado: ID=4, Correo=jorgejesus_30@outlook.com, Tipo=1, Rol=Sistemas
+2025-04-20T16:21:49.051Z info: Iniciando getDashboardData para userId: 4
+2025-04-20T16:21:49.051Z info: Conexión a la base de datos establecida
+2025-04-20T16:21:49.349Z info: Permisos para usuario 4: Áreas Comunes,Cambio Contraseña,Configuración,Control de Ingresos y Salidas,Dashboard,Gestión de Ingreso,Gestión de Menús y Submenús,Gestión Visitas,Lista de Usuarios,Login,Recepción,Registrar Pedido,Registrar Usuarios,Reservas,Usuarios,Visitas Programadas
+2025-04-20T16:21:49.361Z info: 🛡️ authMiddleware ejecutado
+2025-04-20T16:21:49.361Z info: 🔐 Token recibido
+2025-04-20T16:21:49.367Z info: ✅ Token decodificado: ID=4, datos={"id":4,"role":"Sistemas","iat":1745166096,"exp":1745169696}
+2025-04-20T16:21:49.388Z info: Cliente desconectado: 0YpfcH2OjIBBVwoFAAAJ
+2025-04-20T16:21:49.400Z info: Nuevo cliente conectado: 5ZS3rPen9537bjiPAAAL
+2025-04-20T16:21:49.558Z info: Tiempo de ejecución del SP: 506 ms
+2025-04-20T16:21:49.559Z error: Error al obtener datos del dashboard para userId 4: Cannot read properties of undefined (reading '0')
+2025-04-20T16:21:49.563Z info: 🛡️ authMiddleware ejecutado
+2025-04-20T16:21:49.563Z info: 🔐 Token recibido
+2025-04-20T16:21:49.566Z info: ✅ Token decodificado: ID=4, datos={"id":4,"role":"Sistemas","iat":1745166096,"exp":1745169696}
+2025-04-20T16:21:49.676Z info: ✅ Usuario autenticado: ID=4, Correo=jorgejesus_30@outlook.com, Tipo=1, Rol=Sistemas
+2025-04-20T16:21:49.678Z info: Iniciando getUserRoles para userId: 4
+2025-04-20T16:21:49.883Z info: ✅ Usuario autenticado: ID=4, Correo=jorgejesus_30@outlook.com, Tipo=1, Rol=Sistemas
+2025-04-20T16:21:49.883Z info: Iniciando getDashboardData para userId: 4
+2025-04-20T16:21:49.884Z info: Conexión a la base de datos establecida
+2025-04-20T16:21:49.991Z info: Cliente desconectado: 5ZS3rPen9537bjiPAAAL
+2025-04-20T16:21:50.001Z info: Nuevo cliente conectado: 3nkEBWklO1hjbi09AAAN
+2025-04-20T16:21:50.199Z info: Tiempo de ejecución del SP: 315 ms
+2025-04-20T16:21:50.200Z error: Error al obtener datos del dashboard para userId 4: Cannot read properties of undefined (reading '0')
+2025-04-20T16:28:37.113Z info: Cargando rutas...
+2025-04-20T16:28:37.118Z info: Rutas de movementRoutes cargadas.
+2025-04-20T16:28:37.118Z info: Rutas de authRoutes cargadas.
+2025-04-20T16:28:37.119Z info: Rutas de doorRoutes cargadas.
+2025-04-20T16:28:37.120Z info: Rutas de userRoutes cargadas.
+2025-04-20T16:28:37.120Z info: Rutas de menuRoutes cargadas.
+2025-04-20T16:28:37.121Z info: Rutas de visitRoutes cargadas.
+2025-04-20T16:28:37.121Z info: Rutas de reservationRoutes cargadas.
+2025-04-20T16:28:37.122Z info: Rutas de dashboardRoutes cargadas.
+2025-04-20T16:28:37.123Z info: Rutas de maintenanceRoutes cargadas.
+2025-04-20T16:28:37.131Z info: ✅ Server running on port 4000
+2025-04-20T16:28:37.499Z info: Nuevo cliente conectado: D4injODNt_4z3KqqAAAB
+2025-04-20T16:28:41.963Z info: Cliente desconectado: D4injODNt_4z3KqqAAAB
+2025-04-20T16:28:43.558Z info: Permisos para usuario 4: Áreas Comunes,Cambio Contraseña,Configuración,Control de Ingresos y Salidas,Dashboard,Gestión de Ingreso,Gestión de Menús y Submenús,Gestión Visitas,Lista de Usuarios,Login,Recepción,Registrar Pedido,Registrar Usuarios,Reservas,Usuarios,Visitas Programadas
+2025-04-20T16:28:43.709Z info: Iniciando la obtención de imágenes...
+2025-04-20T16:28:43.861Z info: 🛡️ authMiddleware ejecutado
+2025-04-20T16:28:43.861Z info: 🔐 Token recibido
+2025-04-20T16:28:43.864Z info: ✅ Token decodificado: ID=4, datos={"id":4,"role":"Sistemas","iat":1745166096,"exp":1745169696}
+2025-04-20T16:28:44.162Z info: 🛡️ authMiddleware ejecutado
+2025-04-20T16:28:44.163Z info: 🔐 Token recibido
+2025-04-20T16:28:44.164Z info: ✅ Token decodificado: ID=4, datos={"id":4,"role":"Sistemas","iat":1745166096,"exp":1745169696}
+2025-04-20T16:28:44.167Z info: Nuevo cliente conectado: 1Oz0vYCTcT9mTJ0PAAAE
+2025-04-20T16:28:44.184Z info: ✅ Usuario autenticado: ID=4, Correo=jorgejesus_30@outlook.com, Tipo=1, Rol=Sistemas
+2025-04-20T16:28:44.185Z info: Iniciando getUserRoles para userId: 4
+2025-04-20T16:28:44.499Z info: Permisos para usuario 4: Áreas Comunes,Cambio Contraseña,Configuración,Control de Ingresos y Salidas,Dashboard,Gestión de Ingreso,Gestión de Menús y Submenús,Gestión Visitas,Lista de Usuarios,Login,Recepción,Registrar Pedido,Registrar Usuarios,Reservas,Usuarios,Visitas Programadas
+2025-04-20T16:28:44.805Z info: ✅ Usuario autenticado: ID=4, Correo=jorgejesus_30@outlook.com, Tipo=1, Rol=Sistemas
+2025-04-20T16:28:44.806Z info: Iniciando getDashboardData para userId: 4
+2025-04-20T16:28:44.807Z info: Conexión a la base de datos establecida
+2025-04-20T16:28:45.121Z info: 🛡️ authMiddleware ejecutado
+2025-04-20T16:28:45.122Z info: 🔐 Token recibido
+2025-04-20T16:28:45.125Z info: ✅ Token decodificado: ID=4, datos={"id":4,"role":"Sistemas","iat":1745166096,"exp":1745169696}
+2025-04-20T16:28:45.129Z info: Cliente desconectado: 1Oz0vYCTcT9mTJ0PAAAE
+2025-04-20T16:28:45.138Z info: Nuevo cliente conectado: dlyGuEFqGkNfttp_AAAG
+2025-04-20T16:28:45.155Z info: Tiempo de ejecución del SP: 348 ms
+2025-04-20T16:28:45.157Z error: Error al obtener datos del dashboard para userId 4: Cannot read properties of undefined (reading '0')
+2025-04-20T16:28:45.165Z info: 🛡️ authMiddleware ejecutado
+2025-04-20T16:28:45.166Z info: 🔐 Token recibido
+2025-04-20T16:28:45.168Z info: ✅ Token decodificado: ID=4, datos={"id":4,"role":"Sistemas","iat":1745166096,"exp":1745169696}
+2025-04-20T16:28:45.434Z info: ✅ Usuario autenticado: ID=4, Correo=jorgejesus_30@outlook.com, Tipo=1, Rol=Sistemas
+2025-04-20T16:28:45.435Z info: Iniciando getUserRoles para userId: 4
+2025-04-20T16:28:45.471Z info: ✅ Usuario autenticado: ID=4, Correo=jorgejesus_30@outlook.com, Tipo=1, Rol=Sistemas
+2025-04-20T16:28:45.471Z info: Iniciando getDashboardData para userId: 4
+2025-04-20T16:28:45.472Z info: Conexión a la base de datos establecida
+2025-04-20T16:28:45.771Z info: Cliente desconectado: dlyGuEFqGkNfttp_AAAG
+2025-04-20T16:28:45.782Z info: Tiempo de ejecución del SP: 310 ms
+2025-04-20T16:28:45.783Z error: Error al obtener datos del dashboard para userId 4: Cannot read properties of undefined (reading '0')
+2025-04-20T16:28:45.787Z info: Nuevo cliente conectado: TRuHnBmnUy7uJlqkAAAI
+2025-04-20T16:28:46.123Z info: Iniciando la obtención de imágenes...
+2025-04-20T16:41:48.507Z info: Cargando rutas...
+2025-04-20T16:41:48.510Z info: Rutas de movementRoutes cargadas.
+2025-04-20T16:41:48.511Z info: Rutas de authRoutes cargadas.
+2025-04-20T16:41:48.511Z info: Rutas de doorRoutes cargadas.
+2025-04-20T16:41:48.512Z info: Rutas de userRoutes cargadas.
+2025-04-20T16:41:48.512Z info: Rutas de menuRoutes cargadas.
+2025-04-20T16:41:48.513Z info: Rutas de visitRoutes cargadas.
+2025-04-20T16:41:48.514Z info: Rutas de reservationRoutes cargadas.
+2025-04-20T16:41:48.514Z info: Rutas de dashboardRoutes cargadas.
+2025-04-20T16:41:48.515Z info: Rutas de maintenanceRoutes cargadas.
+2025-04-20T16:41:48.523Z info: ✅ Server running on port 4000
+2025-04-20T16:41:54.498Z info: Nuevo cliente conectado: tF0N9_ePH31hzeKwAAAB
+2025-04-20T16:42:00.584Z info: Cliente desconectado: tF0N9_ePH31hzeKwAAAB
+2025-04-20T16:42:03.101Z info: Permisos para usuario 4: Áreas Comunes,Cambio Contraseña,Configuración,Control de Ingresos y Salidas,Dashboard,Gestión de Ingreso,Gestión de Menús y Submenús,Gestión Visitas,Lista de Usuarios,Login,Recepción,Registrar Pedido,Registrar Usuarios,Reservas,Usuarios,Visitas Programadas
+2025-04-20T16:42:03.208Z info: 🛡️ authMiddleware ejecutado
+2025-04-20T16:42:03.209Z info: 🔐 Token recibido
+2025-04-20T16:42:03.213Z info: ✅ Token decodificado: ID=4, datos={"id":4,"role":"Sistemas","iat":1745166096,"exp":1745169696}
+2025-04-20T16:42:03.217Z info: 🛡️ authMiddleware ejecutado
+2025-04-20T16:42:03.217Z info: 🔐 Token recibido
+2025-04-20T16:42:03.220Z info: ✅ Token decodificado: ID=4, datos={"id":4,"role":"Sistemas","iat":1745166096,"exp":1745169696}
+2025-04-20T16:42:03.513Z info: Nuevo cliente conectado: _O1LvCTNryaIZH6jAAAE
+2025-04-20T16:42:03.720Z info: ✅ Usuario autenticado: ID=4, Correo=jorgejesus_30@outlook.com, Tipo=1, Rol=Sistemas
+2025-04-20T16:42:03.721Z info: Iniciando getUserRoles para userId: 4
+2025-04-20T16:42:04.021Z info: ✅ Usuario autenticado: ID=4, Correo=jorgejesus_30@outlook.com, Tipo=1, Rol=Sistemas
+2025-04-20T16:42:04.022Z info: Iniciando getDashboardData para userId: 4
+2025-04-20T16:42:04.022Z info: Conexión a la base de datos establecida
+2025-04-20T16:42:04.022Z info: Ejecutando sp_GetDashboardData
+2025-04-20T16:42:04.323Z info: Permisos para usuario 4: Áreas Comunes,Cambio Contraseña,Configuración,Control de Ingresos y Salidas,Dashboard,Gestión de Ingreso,Gestión de Menús y Submenús,Gestión Visitas,Lista de Usuarios,Login,Recepción,Registrar Pedido,Registrar Usuarios,Reservas,Usuarios,Visitas Programadas
+2025-04-20T16:42:04.873Z info: 🛡️ authMiddleware ejecutado
+2025-04-20T16:42:04.873Z info: 🔐 Token recibido
+2025-04-20T16:42:04.876Z info: ✅ Token decodificado: ID=4, datos={"id":4,"role":"Sistemas","iat":1745166096,"exp":1745169696}
+2025-04-20T16:42:04.879Z info: Cliente desconectado: _O1LvCTNryaIZH6jAAAE
+2025-04-20T16:42:04.886Z info: SP ejecutado. Número de recordsets: 8
+2025-04-20T16:42:04.886Z info: Tiempo de ejecución del SP: 864 ms
+2025-04-20T16:42:04.886Z warn: No se encontraron datos de summary
+2025-04-20T16:42:04.887Z error: Error al obtener datos del dashboard para userId 4: Cannot read properties of undefined (reading '0')
+2025-04-20T16:42:04.895Z info: 🛡️ authMiddleware ejecutado
+2025-04-20T16:42:04.895Z info: 🔐 Token recibido
+2025-04-20T16:42:04.899Z info: ✅ Token decodificado: ID=4, datos={"id":4,"role":"Sistemas","iat":1745166096,"exp":1745169696}
+2025-04-20T16:42:04.929Z info: Nuevo cliente conectado: nwZ7fKb7-51rRZAeAAAG
+2025-04-20T16:42:05.176Z info: ✅ Usuario autenticado: ID=4, Correo=jorgejesus_30@outlook.com, Tipo=1, Rol=Sistemas
+2025-04-20T16:42:05.177Z info: Iniciando getUserRoles para userId: 4
+2025-04-20T16:42:05.196Z info: ✅ Usuario autenticado: ID=4, Correo=jorgejesus_30@outlook.com, Tipo=1, Rol=Sistemas
+2025-04-20T16:42:05.197Z info: Iniciando getDashboardData para userId: 4
+2025-04-20T16:42:05.197Z info: Conexión a la base de datos establecida
+2025-04-20T16:42:05.198Z info: Ejecutando sp_GetDashboardData
+2025-04-20T16:42:05.480Z info: Cliente desconectado: nwZ7fKb7-51rRZAeAAAG
+2025-04-20T16:42:05.489Z info: Nuevo cliente conectado: AuQ6qkjnsgmsvaNOAAAI
+2025-04-20T16:42:05.500Z info: SP ejecutado. Número de recordsets: 8
+2025-04-20T16:42:05.500Z info: Tiempo de ejecución del SP: 302 ms
+2025-04-20T16:42:05.500Z warn: No se encontraron datos de summary
+2025-04-20T16:42:05.501Z error: Error al obtener datos del dashboard para userId 4: Cannot read properties of undefined (reading '0')
+2025-04-20T16:42:13.163Z info: Cliente desconectado: AuQ6qkjnsgmsvaNOAAAI
+2025-04-20T16:42:14.449Z info: Permisos para usuario 4: Áreas Comunes,Cambio Contraseña,Configuración,Control de Ingresos y Salidas,Dashboard,Gestión de Ingreso,Gestión de Menús y Submenús,Gestión Visitas,Lista de Usuarios,Login,Recepción,Registrar Pedido,Registrar Usuarios,Reservas,Usuarios,Visitas Programadas
+2025-04-20T16:42:14.505Z info: 🛡️ authMiddleware ejecutado
+2025-04-20T16:42:14.507Z info: 🔐 Token recibido
+2025-04-20T16:42:14.517Z info: ✅ Token decodificado: ID=4, datos={"id":4,"role":"Sistemas","iat":1745166096,"exp":1745169696}
+2025-04-20T16:42:14.520Z info: 🛡️ authMiddleware ejecutado
+2025-04-20T16:42:14.524Z info: 🔐 Token recibido
+2025-04-20T16:42:14.532Z info: ✅ Token decodificado: ID=4, datos={"id":4,"role":"Sistemas","iat":1745166096,"exp":1745169696}
+2025-04-20T16:42:14.815Z info: ✅ Usuario autenticado: ID=4, Correo=jorgejesus_30@outlook.com, Tipo=1, Rol=Sistemas
+2025-04-20T16:42:14.816Z info: Iniciando getUserRoles para userId: 4
+2025-04-20T16:42:14.835Z info: ✅ Usuario autenticado: ID=4, Correo=jorgejesus_30@outlook.com, Tipo=1, Rol=Sistemas
+2025-04-20T16:42:14.835Z info: Iniciando getDashboardData para userId: 4
+2025-04-20T16:42:14.835Z info: Conexión a la base de datos establecida
+2025-04-20T16:42:14.836Z info: Ejecutando sp_GetDashboardData
+2025-04-20T16:42:14.882Z info: Nuevo cliente conectado: kK88hy6y57dzyKPEAAAL
+2025-04-20T16:42:15.051Z info: Permisos para usuario 4: Áreas Comunes,Cambio Contraseña,Configuración,Control de Ingresos y Salidas,Dashboard,Gestión de Ingreso,Gestión de Menús y Submenús,Gestión Visitas,Lista de Usuarios,Login,Recepción,Registrar Pedido,Registrar Usuarios,Reservas,Usuarios,Visitas Programadas
+2025-04-20T16:42:15.144Z info: SP ejecutado. Número de recordsets: 8
+2025-04-20T16:42:15.144Z info: Tiempo de ejecución del SP: 308 ms
+2025-04-20T16:42:15.145Z warn: No se encontraron datos de summary
+2025-04-20T16:42:15.146Z error: Error al obtener datos del dashboard para userId 4: Cannot read properties of undefined (reading '0')
+2025-04-20T16:42:15.153Z info: 🛡️ authMiddleware ejecutado
+2025-04-20T16:42:15.157Z info: 🔐 Token recibido
+2025-04-20T16:42:15.161Z info: ✅ Token decodificado: ID=4, datos={"id":4,"role":"Sistemas","iat":1745166096,"exp":1745169696}
+2025-04-20T16:42:15.165Z info: 🛡️ authMiddleware ejecutado
+2025-04-20T16:42:15.166Z info: 🔐 Token recibido
+2025-04-20T16:42:15.168Z info: ✅ Token decodificado: ID=4, datos={"id":4,"role":"Sistemas","iat":1745166096,"exp":1745169696}
+2025-04-20T16:42:15.173Z info: Cliente desconectado: kK88hy6y57dzyKPEAAAL
+2025-04-20T16:42:15.186Z info: Nuevo cliente conectado: 37R3eBSGJGxZuXEDAAAN
+2025-04-20T16:42:15.462Z info: ✅ Usuario autenticado: ID=4, Correo=jorgejesus_30@outlook.com, Tipo=1, Rol=Sistemas
+2025-04-20T16:42:15.462Z info: Iniciando getDashboardData para userId: 4
+2025-04-20T16:42:15.463Z info: Conexión a la base de datos establecida
+2025-04-20T16:42:15.463Z info: Ejecutando sp_GetDashboardData
+2025-04-20T16:42:15.477Z info: ✅ Usuario autenticado: ID=4, Correo=jorgejesus_30@outlook.com, Tipo=1, Rol=Sistemas
+2025-04-20T16:42:15.478Z info: Iniciando getUserRoles para userId: 4
+2025-04-20T16:42:15.767Z info: SP ejecutado. Número de recordsets: 8
+2025-04-20T16:42:15.768Z info: Tiempo de ejecución del SP: 304 ms
+2025-04-20T16:42:15.768Z warn: No se encontraron datos de summary
+2025-04-20T16:42:15.769Z error: Error al obtener datos del dashboard para userId 4: Cannot read properties of undefined (reading '0')
+2025-04-20T16:42:15.789Z info: Cliente desconectado: 37R3eBSGJGxZuXEDAAAN
+2025-04-20T16:42:15.803Z info: Nuevo cliente conectado: yASJaLZwH8dO8ZGZAAAP
+2025-04-20T16:51:01.468Z info: Cargando rutas...
+2025-04-20T16:51:01.473Z info: Rutas de movementRoutes cargadas.
+2025-04-20T16:51:01.474Z info: Rutas de authRoutes cargadas.
+2025-04-20T16:51:01.475Z info: Rutas de doorRoutes cargadas.
+2025-04-20T16:51:01.476Z info: Rutas de userRoutes cargadas.
+2025-04-20T16:51:01.477Z info: Rutas de menuRoutes cargadas.
+2025-04-20T16:51:01.477Z info: Rutas de visitRoutes cargadas.
+2025-04-20T16:51:01.478Z info: Rutas de reservationRoutes cargadas.
+2025-04-20T16:51:01.478Z info: Rutas de dashboardRoutes cargadas.
+2025-04-20T16:51:01.479Z info: Rutas de maintenanceRoutes cargadas.
+2025-04-20T16:51:01.489Z info: ✅ Server running on port 4000
+2025-04-20T16:51:01.715Z info: Nuevo cliente conectado: _nmZRbw1KS40OFdqAAAB
+2025-04-20T16:51:02.639Z info: Cliente desconectado: _nmZRbw1KS40OFdqAAAB
+2025-04-20T16:51:05.930Z info: Permisos para usuario 4: Áreas Comunes,Cambio Contraseña,Configuración,Control de Ingresos y Salidas,Dashboard,Gestión de Ingreso,Gestión de Menús y Submenús,Gestión Visitas,Lista de Usuarios,Login,Recepción,Registrar Pedido,Registrar Usuarios,Reservas,Usuarios,Visitas Programadas
+2025-04-20T16:51:06.004Z info: 🛡️ authMiddleware ejecutado
+2025-04-20T16:51:06.004Z info: 🔐 Token recibido
+2025-04-20T16:51:06.007Z info: ✅ Token decodificado: ID=4, datos={"id":4,"role":"Sistemas","iat":1745166096,"exp":1745169696}
+2025-04-20T16:51:06.010Z info: 🛡️ authMiddleware ejecutado
+2025-04-20T16:51:06.011Z info: 🔐 Token recibido
+2025-04-20T16:51:06.013Z info: ✅ Token decodificado: ID=4, datos={"id":4,"role":"Sistemas","iat":1745166096,"exp":1745169696}
+2025-04-20T16:51:06.303Z info: Nuevo cliente conectado: YUbfWd4YPiAJSE2OAAAE
+2025-04-20T16:51:06.572Z info: ✅ Usuario autenticado: ID=4, Correo=jorgejesus_30@outlook.com, Tipo=1, Rol=Sistemas
+2025-04-20T16:51:06.573Z info: Iniciando getUserRoles para userId: 4
+2025-04-20T16:51:06.889Z info: ✅ Usuario autenticado: ID=4, Correo=jorgejesus_30@outlook.com, Tipo=1, Rol=Sistemas
+2025-04-20T16:51:06.890Z info: Iniciando getDashboardData para userId: 4
+2025-04-20T16:51:06.890Z info: Conexión a la base de datos establecida
+2025-04-20T16:51:06.891Z info: Ejecutando sp_GetDashboardData
+2025-04-20T16:51:07.206Z info: Permisos para usuario 4: Áreas Comunes,Cambio Contraseña,Configuración,Control de Ingresos y Salidas,Dashboard,Gestión de Ingreso,Gestión de Menús y Submenús,Gestión Visitas,Lista de Usuarios,Login,Recepción,Registrar Pedido,Registrar Usuarios,Reservas,Usuarios,Visitas Programadas
+2025-04-20T16:51:07.338Z info: 🛡️ authMiddleware ejecutado
+2025-04-20T16:51:07.339Z info: 🔐 Token recibido
+2025-04-20T16:51:07.342Z info: ✅ Token decodificado: ID=4, datos={"id":4,"role":"Sistemas","iat":1745166096,"exp":1745169696}
+2025-04-20T16:51:07.345Z info: Cliente desconectado: YUbfWd4YPiAJSE2OAAAE
+2025-04-20T16:51:07.355Z info: Nuevo cliente conectado: vaFCp6FAOYFgOAqqAAAG
+2025-04-20T16:51:07.529Z info: SP ejecutado. Número de recordsets: 8
+2025-04-20T16:51:07.530Z info: Tiempo de ejecución del SP: 638 ms
+2025-04-20T16:51:07.530Z warn: El recordset de summary está vacío o no contiene datos
+2025-04-20T16:51:07.531Z error: Error al obtener datos del dashboard para userId 4: Cannot read properties of undefined (reading '0')
+2025-04-20T16:51:07.536Z info: 🛡️ authMiddleware ejecutado
+2025-04-20T16:51:07.536Z info: 🔐 Token recibido
+2025-04-20T16:51:07.539Z info: ✅ Token decodificado: ID=4, datos={"id":4,"role":"Sistemas","iat":1745166096,"exp":1745169696}
+2025-04-20T16:51:07.663Z info: ✅ Usuario autenticado: ID=4, Correo=jorgejesus_30@outlook.com, Tipo=1, Rol=Sistemas
+2025-04-20T16:51:07.663Z info: Iniciando getUserRoles para userId: 4
+2025-04-20T16:51:07.856Z info: ✅ Usuario autenticado: ID=4, Correo=jorgejesus_30@outlook.com, Tipo=1, Rol=Sistemas
+2025-04-20T16:51:07.857Z info: Iniciando getDashboardData para userId: 4
+2025-04-20T16:51:07.857Z info: Conexión a la base de datos establecida
+2025-04-20T16:51:07.857Z info: Ejecutando sp_GetDashboardData
+2025-04-20T16:51:07.984Z info: Cliente desconectado: vaFCp6FAOYFgOAqqAAAG
+2025-04-20T16:51:07.996Z info: Nuevo cliente conectado: fDVLUIRyvu-oujE0AAAI
+2025-04-20T16:51:08.176Z info: SP ejecutado. Número de recordsets: 8
+2025-04-20T16:51:08.177Z info: Tiempo de ejecución del SP: 319 ms
+2025-04-20T16:51:08.177Z warn: El recordset de summary está vacío o no contiene datos
+2025-04-20T16:51:08.178Z error: Error al obtener datos del dashboard para userId 4: Cannot read properties of undefined (reading '0')
