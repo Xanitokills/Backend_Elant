@@ -17,6 +17,13 @@ BEGIN
     FROM MAE_USUARIO_ROL 
     WHERE ID_USUARIO = @UserId;
 
+    -- Log de roles para depuración
+    IF NOT EXISTS (SELECT 1 FROM @UserRoles)
+    BEGIN
+        INSERT INTO MAE_CAMBIO_LOG (TIPO, FECHA_CAMBIO, PROCESADO)
+        VALUES ('debug_no_roles', GETDATE(), 0);
+    END
+
     -- 2. Obtener permisos
     DECLARE @Permissions TABLE (
         NOMBRE_ELEMENTO VARCHAR(50),
@@ -28,7 +35,7 @@ BEGIN
     INSERT INTO @Permissions (NOMBRE_ELEMENTO, VISIBLE, ORDEN, ICONO)
     SELECT 
         e.NOMBRE_ELEMENTO,
-        MAX(CAST(p.VISIBLE AS INT)) AS VISIBLE,
+        CAST(MAX(CAST(p.VISIBLE AS INT)) AS BIT) AS VISIBLE,
         e.ORDEN,
         e.ICONO
     FROM MAE_PERMISOS_DASHBOARD p
@@ -37,11 +44,25 @@ BEGIN
         AND e.ESTADO = 1
     GROUP BY e.NOMBRE_ELEMENTO, e.ORDEN, e.ICONO;
 
+    -- Log si no se encontraron permisos
+    IF NOT EXISTS (SELECT 1 FROM @Permissions)
+    BEGIN
+        INSERT INTO MAE_CAMBIO_LOG (TIPO, FECHA_CAMBIO, PROCESADO)
+        VALUES ('debug_no_permissions', GETDATE(), 0);
+    END
+
     -- 3. Obtener departamento
     DECLARE @NroDpto INT;
     SELECT @NroDpto = NRO_DPTO
     FROM MAE_USUARIO_DEPARTAMENTO
     WHERE ID_USUARIO = @UserId AND ESTADO = 1;
+
+    -- Depuración: Registrar si no se encontró departamento
+    IF @NroDpto IS NULL
+    BEGIN
+        INSERT INTO MAE_CAMBIO_LOG (TIPO, FECHA_CAMBIO, PROCESADO)
+        VALUES ('debug_no_department', GETDATE(), 0);
+    END
 
     -- 4. Obtener deudas
     DECLARE @PendingPayments INT = 0;
@@ -195,9 +216,9 @@ BEGIN
 
     -- Devolver resultados
     SELECT 
-        @PendingPayments AS pendingPayments,
-        @TotalDebt AS totalDebt,
-        @HasDebt AS hasDebt;
+        ISNULL(@PendingPayments, 0) AS pendingPayments,
+        ISNULL(@TotalDebt, 0) AS totalDebt,
+        ISNULL(@HasDebt, 0) AS hasDebt;
 
     SELECT * FROM @AccountInfo;
 

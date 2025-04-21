@@ -29,7 +29,7 @@ VALUES ('Masculino'), ('Femenino');
 -- INSERTAR ELEMENTOS DASHBOARD
 INSERT INTO MAE_ELEMENTOS_DASHBOARD (NOMBRE_ELEMENTO, DESCRIPCION, ORDEN, ICONO, ESTADO)
 VALUES 
-    ('Deudores', 'Ver pagos pendientes', 1, 'FaExclamationCircle', 1),
+    ('Deudas', 'Ver pagos pendientes', 1, 'FaExclamationCircle', 1),
     ('Cuenta Mancomunada', 'Información de cuenta', 2, 'FaInfoCircle', 1),
     ('Noticias', 'Noticias del edificio', 3, 'FaBell', 1),
     ('Eventos', 'Eventos próximos', 4, 'FaCalendarAlt', 1),

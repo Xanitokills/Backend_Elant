@@ -46,7 +46,7 @@ const getDashboardData = async (req, res) => {
 
     // Validar estructura de resultados
     if (!result.recordsets || result.recordsets.length !== 8) {
-      logger.error(`Estructura de resultados inválida. Recordsets: ${result.recordsets?.length}`);
+      logger.error(`Estructura de resultados inválida. Recordsets: ${result.recordsets?.length || 0}`);
       throw new Error(
         `Estructura de resultados inválida. Se esperaban 8 recordsets, se recibieron ${
           result.recordsets?.length || 0
@@ -56,53 +56,71 @@ const getDashboardData = async (req, res) => {
 
     // Procesar los resultados del SP
     const [
-      { recordset: summary }, // pendingPayments, totalDebt, hasDebt
-      { recordset: accountInfo }, // accountInfo
-      { recordset: permissionsRaw }, // permissions
-      { recordset: news }, // news
-      { recordset: events }, // events
-      { recordset: documents }, // documents
-      { recordset: encargos }, // encargos
-      { recordset: maintenanceEvents }, // maintenanceEvents
+      summaryRaw, // pendingPayments, totalDebt, hasDebt
+      accountInfoRaw, // accountInfo
+      permissionsRaw, // permissions
+      newsRaw, // news
+      eventsRaw, // events
+      documentsRaw, // documents
+      encargosRaw, // encargos
+      maintenanceEventsRaw, // maintenanceEvents
     ] = result.recordsets;
+
+    // Log detallado de permissionsRaw para depuración
+    logger.info("permissionsRaw:", JSON.stringify(permissionsRaw, null, 2));
 
     // Validar summary
     let pendingPayments = 0;
     let totalDebt = 0;
     let hasDebt = false;
 
-    if (!summary || summary.length === 0) {
+    if (!summaryRaw || summaryRaw.length === 0) {
       logger.warn("El recordset de summary está vacío o no contiene datos");
-    } else if (!summary[0]) {
-      logger.warn("No se encontraron datos válidos en summary[0]");
     } else {
-      pendingPayments = summary[0].pendingPayments ?? 0;
-      totalDebt = summary[0].totalDebt ?? 0;
-      hasDebt = summary[0].hasDebt ?? false;
+      const summary = summaryRaw[0] || {};
+      pendingPayments = summary.pendingPayments ?? 0;
+      totalDebt = summary.totalDebt ?? 0;
+      hasDebt = summary.hasDebt ?? false;
     }
 
     // Validar accountInfo
-    const account = accountInfo[0] || null;
+    const account = accountInfoRaw && accountInfoRaw.length > 0 ? accountInfoRaw[0] : null;
 
     // Validar permisos
-    if (!permissionsRaw || permissionsRaw.length === 0) {
-      logger.warn("No se encontraron permisos");
-    }
-    const permissions = permissionsRaw.reduce(
-      (acc, { NOMBRE_ELEMENTO, VISIBLE, ORDEN, ICONO }) => {
-        acc[NOMBRE_ELEMENTO] = { visible: VISIBLE === 1, order: ORDEN, icon: ICONO };
-        return acc;
-      },
-      {}
-    );
+    const permissions = permissionsRaw?.length > 0
+      ? permissionsRaw.reduce(
+          (acc, { NOMBRE_ELEMENTO, VISIBLE, ORDEN, ICONO }) => {
+            // Convertir VISIBLE a booleano explícitamente
+            const isVisible = VISIBLE === 1 || VISIBLE === "1" || VISIBLE === true;
+            acc[NOMBRE_ELEMENTO] = {
+              visible: isVisible,
+              order: ORDEN ?? 0,
+              icon: ICONO ?? null,
+            };
+            logger.info(`Procesando permiso: ${NOMBRE_ELEMENTO}, VISIBLE: ${VISIBLE}, isVisible: ${isVisible}`);
+            return acc;
+          },
+          {}
+        )
+      : {};
+
+    // Log del objeto permissions resultante
+    logger.info("permissions procesado:", JSON.stringify(permissions, null, 2));
+
+    // Estructurar los demás datos con validaciones
+    const news = newsRaw || [];
+    const events = eventsRaw || [];
+    const documents = documentsRaw || [];
+    const encargos = encargosRaw || [];
+    const maintenanceEvents = maintenanceEventsRaw || [];
 
     // Log de datos obtenidos
     logger.info(
       `Datos obtenidos: pendingPayments=${pendingPayments}, totalDebt=${totalDebt}, hasDebt=${hasDebt}, news=${
-        news?.length || 0
-      }, events=${events?.length || 0}, documents=${documents?.length || 0}, encargos=${
-        encargos?.length || 0
-      }, maintenanceEvents=${maintenanceEvents?.length || 0}`
+        news.length
+      }, events=${events.length}, documents=${documents.length}, encargos=${
+        encargos.length
+      }, maintenanceEvents=${maintenanceEvents.length}`
     );
 
     // Estructurar la respuesta
@@ -111,11 +129,11 @@ const getDashboardData = async (req, res) => {
       totalDebt,
       hasDebt,
       accountInfo: account,
-      news: news || [],
-      events: events || [],
-      maintenanceEvents: maintenanceEvents || [],
-      documents: documents || [],
-      encargos: encargos || [],
+      news,
+      events,
+      maintenanceEvents,
+      documents,
+      encargos,
       permissions,
     };
 
@@ -198,6 +216,10 @@ const emitUpdate = async (type, data, io) => {
         return;
     }
 
+    // Invalidar caché para forzar datos frescos
+    cache.flushAll();
+    logger.info("Caché invalidado tras actualización");
+
     // Emitir actualización a todos los clientes
     io.emit("dashboardUpdate", updateData);
     logger.info(`Actualización emitida para ${type}: ${JSON.stringify(updateData)}`);
@@ -206,7 +228,6 @@ const emitUpdate = async (type, data, io) => {
   }
 };
 
-// Función para verificar cambios en la tabla auxiliar
 const checkForUpdates = async (io) => {
   try {
     const pool = await poolPromise;
