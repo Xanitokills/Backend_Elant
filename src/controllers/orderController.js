@@ -41,19 +41,10 @@ const getAllOrders = async (req, res) => {
 
   try {
     const pool = await poolPromise;
-    const result = await pool.request().query(`
-      SELECT 
-        ID_ENCARGO,
-        NRO_DPTO,
-        DESCRIPCION,
-        FECHA_RECEPCION,
-        FECHA_ENTREGA,
-        ID_USUARIO_RECEPCION,
-        ID_USUARIO_ENTREGA,
-        ESTADO
-      FROM MAE_ENCARGO
-      ORDER BY FECHA_RECEPCION DESC
-    `);
+    const result = await pool
+      .request()
+      .execute("sp_GetAllOrders");
+    logger.info(`Encargos obtenidos: ${result.recordset.length} registros`);
     res.status(200).json(result.recordset);
   } catch (error) {
     logger.error(`Error al obtener encargos: ${error.message}`);

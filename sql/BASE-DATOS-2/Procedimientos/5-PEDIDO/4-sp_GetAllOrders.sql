@@ -1,0 +1,30 @@
+-- Procedimiento para obtener todos los encargos
+CREATE OR ALTER PROCEDURE sp_GetAllOrders
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    SELECT 
+        e.ID_ENCARGO,
+        e.NRO_DPTO,
+        e.DESCRIPCION,
+        e.FECHA_RECEPCION,
+        e.FECHA_ENTREGA,
+        e.ID_USUARIO_RECEPCION,
+        ur.NOMBRES + ' ' + ur.APELLIDOS AS RECEPCIONISTA,
+        e.ID_USUARIO_ENTREGA,
+        ue.NOMBRES + ' ' + ue.APELLIDOS AS ENTREGADO_A,
+        e.ESTADO,
+        STUFF((
+            SELECT ', ' + (u.NOMBRES + ' ' + u.APELLIDOS)
+            FROM MAE_USUARIO u
+            JOIN MAE_USUARIO_DEPARTAMENTO ud ON u.ID_USUARIO = ud.ID_USUARIO
+            WHERE ud.NRO_DPTO = e.NRO_DPTO AND ud.ESTADO = 1
+            FOR XML PATH('')
+        ), 1, 2, '') AS USUARIOS_ASOCIADOS
+    FROM MAE_ENCARGO e
+    LEFT JOIN MAE_USUARIO ur ON e.ID_USUARIO_RECEPCION = ur.ID_USUARIO
+    LEFT JOIN MAE_USUARIO ue ON e.ID_USUARIO_ENTREGA = ue.ID_USUARIO
+    ORDER BY e.ESTADO DESC, e.FECHA_RECEPCION DESC;
+END;
+GO
