@@ -5,26 +5,43 @@ const logger = require("../config/logger");
 const searchUsers = async (req, res) => {
   try {
     const { criteria, query } = req.query;
+    console.log("🔍 Params recibidos:", { criteria, query });
 
     if (!criteria || !["name", "dni", "department"].includes(criteria)) {
+      console.log("❌ Criterio inválido");
       return res.status(400).json({ message: "Criterio de búsqueda inválido" });
     }
+
     if (criteria !== "department" && (!query || query.trim().length < 3)) {
+      console.log("❌ Consulta demasiado corta");
       return res.status(400).json({ message: "La consulta debe tener al menos 3 caracteres" });
     }
+
     if (criteria === "department" && (!query || isNaN(query))) {
+      console.log("❌ Departamento inválido");
       return res.status(400).json({ message: "El número de departamento debe ser válido" });
     }
 
+    console.log("✅ Conectando a base de datos...");
     const pool = await poolPromise;
+    console.log("✅ Conectado al pool");
+
     const result = await pool
       .request()
       .input("Criteria", sql.VarChar, criteria)
       .input("Query", sql.VarChar, query || "")
       .execute("sp_SearchUsersForOrder");
 
-    // Procesar resultados
-    let responseData = result.recordset[0] ? JSON.parse(result.recordset[0][Object.keys(result.recordset[0])[0]]) : [];
+    console.log("✅ Resultado de SQL recibido");
+
+    const raw = result.recordset?.[0];
+    console.log("🧾 Raw recordset:", raw);
+
+    const firstKey = Object.keys(raw)[0];
+    console.log("🔑 Nombre de la columna con JSON:", firstKey);
+
+    let responseData = raw ? JSON.parse(raw[firstKey]) : [];
+    console.log("📦 Data parseada:", responseData);
 
     // Si es búsqueda por departamento, ajustar formato
     if (criteria === "department" && responseData.length > 0) {
@@ -34,12 +51,14 @@ const searchUsers = async (req, res) => {
       }));
     }
 
+    console.log("✅ Enviando respuesta final");
     res.status(200).json(responseData);
   } catch (err) {
-    logger.error(`Error en searchUsers: ${err.message}`);
+    console.error("🔥 Error en searchUsers:", err.message);
     res.status(500).json({ message: "Error del servidor", error: err.message });
   }
 };
+
 
 const getAllOrders = async (req, res) => {
   try {

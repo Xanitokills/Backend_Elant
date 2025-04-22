@@ -61,7 +61,7 @@ app.use("/api", dashboardRoutes);
 logger.info("Rutas de dashboardRoutes cargadas.");
 app.use("/api", maintenanceRoutes);
 logger.info("Rutas de maintenanceRoutes cargadas.");
-app.use("/api", orderRoutes);
+app.use("/api", orderRoutes(io)); // ¡Cambio aquí: pasar io!
 logger.info("Rutas de orderRoutes cargadas.");
 
 // Middleware para depurar solicitudes
