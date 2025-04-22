@@ -4,9 +4,30 @@ const { searchUsers, getAllOrders, registerOrder, markOrderDelivered } = require
 const authMiddleware = require("../middleware/authMiddleware");
 
 module.exports = (io) => {
-  router.get("/search", authMiddleware, searchUsers);
-  router.get("/", authMiddleware, getAllOrders);
-  router.post("/", authMiddleware, (req, res) => registerOrder(req, res, io));
-  router.put("/:idEncargo/deliver", authMiddleware, (req, res) => markOrderDelivered(req, res, io));
+  router.get("/search", authMiddleware, (req, res) => {
+    console.log("Recibida solicitud GET /api/orders/search");
+    searchUsers(req, res);
+  });
+
+  router.get("/orders", authMiddleware, (req, res) => {
+    console.log("Recibida solicitud GET /api/orders");
+    getAllOrders(req, res);
+  });
+
+  router.post("/orders", authMiddleware, (req, res) => {
+    console.log("Recibida solicitud POST /api/orders");
+    registerOrder(req, res, io);
+  });
+
+  router.put("/orders/:idEncargo/deliver", authMiddleware, (req, res) => {
+    console.log(`Recibida solicitud PUT /api/orders/${req.params.idEncargo}/deliver`);
+    markOrderDelivered(req, res, io);
+  });
+
+  router.get("/test", (req, res) => {
+    console.log("Recibida solicitud GET /api/orders/test");
+    res.status(200).json({ message: "Ruta de prueba funcionando", data: [{ id: 1, name: "Test" }] });
+  });
+
   return router;
 };

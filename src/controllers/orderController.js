@@ -1,75 +1,74 @@
 const sql = require("mssql");
-const logger = require("../config/logger");
 const { poolPromise } = require("../config/db");
+const logger = require("../config/logger");
 
 const searchUsers = async (req, res) => {
-  const { criteria, query } = req.query;
-  const userId = req.user?.id;
-
-  if (!userId) {
-    logger.error("Usuario no autenticado");
-    return res.status(401).json({ message: "Usuario no autenticado" });
-  }
-
-  if (!criteria || !["name", "dni", "department"].includes(criteria)) {
-    return res.status(400).json({ message: "Criterio de búsqueda inválido" });
-  }
-
   try {
+    const { criteria, query } = req.query;
+
+    if (!criteria || !["name", "dni", "department"].includes(criteria)) {
+      return res.status(400).json({ message: "Criterio de búsqueda inválido" });
+    }
+    if (criteria !== "department" && (!query || query.trim().length < 3)) {
+      return res.status(400).json({ message: "La consulta debe tener al menos 3 caracteres" });
+    }
+    if (criteria === "department" && (!query || isNaN(query))) {
+      return res.status(400).json({ message: "El número de departamento debe ser válido" });
+    }
+
     const pool = await poolPromise;
     const result = await pool
       .request()
-      .input("UserId", sql.Int, userId)
-      .input("Criteria", sql.VarChar(20), criteria)
-      .input("Query", sql.VarChar(100), query || "")
+      .input("Criteria", sql.VarChar, criteria)
+      .input("Query", sql.VarChar, query || "")
       .execute("sp_SearchUsersForOrder");
 
-    res.status(200).json(result.recordset);
-  } catch (error) {
-    logger.error(`Error al buscar usuarios: ${error.message}`);
-    res.status(500).json({ message: "Error al buscar usuarios", error: error.message });
+    // Procesar resultados
+    let responseData = result.recordset[0] ? JSON.parse(result.recordset[0][Object.keys(result.recordset[0])[0]]) : [];
+
+    // Si es búsqueda por departamento, ajustar formato
+    if (criteria === "department" && responseData.length > 0) {
+      responseData = responseData.map(dept => ({
+        NRO_DPTO: dept.NRO_DPTO,
+        USUARIOS: dept.USUARIOS
+      }));
+    }
+
+    res.status(200).json(responseData);
+  } catch (err) {
+    logger.error(`Error en searchUsers: ${err.message}`);
+    res.status(500).json({ message: "Error del servidor", error: err.message });
   }
 };
 
 const getAllOrders = async (req, res) => {
-  const userId = req.user?.id;
-
-  if (!userId) {
-    logger.error("Usuario no autenticado");
-    return res.status(401).json({ message: "Usuario no autenticado" });
-  }
-
   try {
     const pool = await poolPromise;
-    const result = await pool
-      .request()
-      .execute("sp_GetAllOrders");
-    logger.info(`Encargos obtenidos: ${result.recordset.length} registros`);
+    const result = await pool.request().execute("sp_GetAllOrders");
     res.status(200).json(result.recordset);
-  } catch (error) {
-    logger.error(`Error al obtener encargos: ${error.message}`);
-    res.status(500).json({ message: "Error al obtener encargos", error: error.message });
+  } catch (err) {
+    logger.error(`Error en getAllOrders: ${err.message}`);
+    res.status(500).json({ message: "Error del servidor", error: err.message });
   }
 };
 
 const registerOrder = async (req, res, io) => {
-  const { description, userId, department, receptionistId } = req.body;
-  const authUserId = req.user?.id;
-
-  if (!authUserId) {
-    logger.error("Usuario no autenticado");
-    return res.status(401).json({ message: "Usuario no autenticado" });
-  }
-
-  if (!description || (!userId && !department)) {
-    return res.status(400).json({ message: "Descripción y destinatario son requeridos" });
-  }
-
   try {
+    const { description, userId, department } = req.body;
+    const authUserId = req.user.ID_USUARIO;
+    const receptionistId = req.user.ID_USUARIO;
+
+    if (!description || description.trim().length < 5) {
+      return res.status(400).json({ message: "La descripción debe tener al menos 5 caracteres" });
+    }
+    if (!userId && !department) {
+      return res.status(400).json({ message: "Debe especificar un usuario o departamento" });
+    }
+
     const pool = await poolPromise;
     const result = await pool
       .request()
-      .input("Description", sql.VarChar(255), description)
+      .input("Description", sql.VarChar, description.trim())
       .input("UserId", sql.Int, userId || null)
       .input("Department", sql.Int, department || null)
       .input("ReceptionistId", sql.Int, receptionistId)
@@ -78,73 +77,68 @@ const registerOrder = async (req, res, io) => {
 
     const affectedUsers = result.recordset;
 
-    // Emitir actualización WebSocket
-    const updateData = {
-      encargos: affectedUsers.map((user) => ({
-        ID_ENCARGO: user.ID_ENCARGO,
-        descripcion: description,
-        fechaRecepcion: user.FECHA_RECEPCION,
-      })),
-    };
-
     affectedUsers.forEach((user) => {
-      io.to(`user_${user.ID_USUARIO}`).emit("dashboardUpdate", updateData);
+      io.to(`user_${user.ID_USUARIO}`).emit("newOrder", {
+        ID_ENCARGO: user.ID_ENCARGO,
+        FECHA_RECEPCION: user.FECHA_RECEPCION,
+        DESCRIPCION: description,
+      });
     });
 
-    logger.info(`Encargo registrado por userId: ${authUserId}, afectados: ${affectedUsers.length} usuarios`);
-
-    res.status(201).json({ message: "Encargo registrado correctamente" });
-  } catch (error) {
-    logger.error(`Error al registrar encargo: ${error.message}`);
-    res.status(500).json({ message: "Error al registrar encargo", error: error.message });
+    res.status(200).json({
+      message: "Encargo registrado exitosamente",
+      affectedUsers,
+    });
+  } catch (err) {
+    logger.error(`Error en registerOrder: ${err.message}`);
+    res.status(500).json({ message: err.message || "Error del servidor", error: err.message });
   }
 };
 
 const markOrderDelivered = async (req, res, io) => {
-  const { idEncargo } = req.params;
-  const { userId } = req.body;
-  const authUserId = req.user?.id;
-
-  if (!authUserId) {
-    logger.error("Usuario no autenticado");
-    return res.status(401).json({ message: "Usuario no autenticado" });
-  }
-
-  if (!userId) {
-    return res.status(400).json({ message: "ID de usuario requerido" });
-  }
-
   try {
+    const { idEncargo } = req.params;
+    const { userId } = req.body;
+    const authUserId = req.user.ID_USUARIO;
+
+    if (!idEncargo || isNaN(idEncargo)) {
+      return res.status(400).json({ message: "ID de encargo inválido" });
+    }
+    if (!userId || isNaN(userId)) {
+      return res.status(400).json({ message: "ID de usuario inválido" });
+    }
+
     const pool = await poolPromise;
     const result = await pool
       .request()
-      .input("OrderId", sql.Int, idEncargo)
+      .input("OrderId", sql.Int, parseInt(idEncargo))
       .input("UserId", sql.Int, userId)
       .input("AuthUserId", sql.Int, authUserId)
       .execute("sp_MarkOrderDelivered");
 
     const affectedUsers = result.recordset;
 
-    // Emitir actualización WebSocket
-    const updateData = {
-      encargos: affectedUsers.map((user) => ({
-        ID_ENCARGO: user.ID_ENCARGO,
-        descripcion: user.DESCRIPCION,
-        fechaRecepcion: user.FECHA_RECEPCION,
-      })),
-    };
-
     affectedUsers.forEach((user) => {
-      io.to(`user_${user.ID_USUARIO}`).emit("dashboardUpdate", updateData);
+      io.to(`user_${user.ID_USUARIO}`).emit("orderDelivered", {
+        ID_ENCARGO: user.ID_ENCARGO,
+        DESCRIPCION: user.DESCRIPCION,
+        FECHA_RECEPCION: user.FECHA_RECEPCION,
+      });
     });
 
-    logger.info(`Encargo ${idEncargo} marcado como entregado por userId: ${authUserId}`);
-
-    res.status(200).json({ message: "Encargo marcado como entregado" });
-  } catch (error) {
-    logger.error(`Error al marcar encargo como entregado: ${error.message}`);
-    res.status(500).json({ message: "Error al marcar encargo como entregado", error: error.message });
+    res.status(200).json({
+      message: "Encargo marcado como entregado",
+      affectedUsers,
+    });
+  } catch (err) {
+    logger.error(`Error en markOrderDelivered: ${err.message}`);
+    res.status(500).json({ message: err.message || "Error del servidor", error: err.message });
   }
 };
 
-module.exports = { searchUsers, getAllOrders, registerOrder, markOrderDelivered };
+module.exports = {
+  searchUsers,
+  getAllOrders,
+  registerOrder,
+  markOrderDelivered,
+};

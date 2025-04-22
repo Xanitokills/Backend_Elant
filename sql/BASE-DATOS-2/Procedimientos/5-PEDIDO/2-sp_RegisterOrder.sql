@@ -55,7 +55,7 @@ BEGIN
                 THROW 50005, 'No se encontraron usuarios en el departamento especificado', 1;
             END
 
-            -- Insertar el encargo para el departamento (ID_USUARIO_ENTREGA = NULL)
+            -- Insertar el encargo para el departamento
             INSERT INTO MAE_ENCARGO (
                 NRO_DPTO,
                 DESCRIPCION,
