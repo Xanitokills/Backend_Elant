@@ -23,7 +23,6 @@ const generateToken = (userId, roles) => {
   });
 };
 
-// Función para obtener los permisos del usuario
 const getUserPermissions = async (userId) => {
   try {
     const pool = await poolPromise;
@@ -33,11 +32,15 @@ const getUserPermissions = async (userId) => {
         SELECT 
             'Menú' AS Tipo,
             m.ID_MENU AS ID,
-            m.NOMBRE AS Permiso,
+            m.NOMBRE AS Nombre,
             m.URL AS URL,
+            m.ICONO AS Icono,
             m.ORDEN AS Orden,
-            NULL AS ID_MENU_PADRE,
-            NULL AS NOMBRE_MENU_PADRE
+            NULL AS ID_SUBMENU,
+            NULL AS SUBMENU_NOMBRE,
+            NULL AS SUBMENU_URL,
+            NULL AS SUBMENU_ICONO,
+            NULL AS SUBMENU_ORDEN
         FROM MAE_ROL_MENU rm
         JOIN MAE_MENU m ON rm.ID_MENU = m.ID_MENU
         JOIN MAE_USUARIO_ROL ur ON ur.ID_ROL = rm.ID_ROL
@@ -45,20 +48,67 @@ const getUserPermissions = async (userId) => {
         UNION ALL
         SELECT 
             'Submenú' AS Tipo,
-            s.ID_SUBMENU AS ID,
-            s.NOMBRE AS Permiso,
-            s.URL AS URL,
-            s.ORDEN AS Orden,
-            s.ID_MENU AS ID_MENU_PADRE,
-            m.NOMBRE AS NOMBRE_MENU_PADRE
+            s.ID_MENU AS ID,
+            m.NOMBRE AS Nombre,
+            m.URL AS URL,
+            m.ICONO AS Icono,
+            m.ORDEN AS Orden,
+            s.ID_SUBMENU AS ID_SUBMENU,
+            s.NOMBRE AS SUBMENU_NOMBRE,
+            s.URL AS SUBMENU_URL,
+            s.ICONO AS SUBMENU_ICONO,
+            s.ORDEN AS SUBMENU_ORDEN
         FROM MAE_ROL_SUBMENU rs
         JOIN MAE_SUBMENU s ON rs.ID_SUBMENU = s.ID_SUBMENU
-        JOIN MAE_USUARIO_ROL ur ON ur.ID_ROL = rs.ID_ROL
         JOIN MAE_MENU m ON s.ID_MENU = m.ID_MENU
+        JOIN MAE_USUARIO_ROL ur ON ur.ID_ROL = rs.ID_ROL
         WHERE ur.ID_USUARIO = @userId AND s.ESTADO = 1 AND m.ESTADO = 1
-        ORDER BY Tipo DESC, Orden ASC
+        ORDER BY Orden ASC, Tipo DESC, SUBMENU_ORDEN ASC
       `);
-    const permissions = result.recordset;
+
+    const rows = result.recordset;
+
+    // Agrupar menús y submenús
+    const menusMap = new Map();
+
+    // Primera pasada: añadir todos los menús
+    rows.forEach(row => {
+      if (row.Tipo === 'Menú') {
+        menusMap.set(row.ID, {
+          id: row.ID,
+          nombre: row.Nombre,
+          url: row.URL,
+          icono: row.Icono,
+          orden: row.Orden,
+          submenus: []
+        });
+      }
+    });
+
+    // Segunda pasada: añadir submenús
+    rows.forEach(row => {
+      if (row.Tipo === 'Submenú') {
+        if (menusMap.has(row.ID)) {
+          menusMap.get(row.ID).submenus.push({
+            id: row.ID_SUBMENU,
+            nombre: row.SUBMENU_NOMBRE,
+            url: row.SUBMENU_URL,
+            icono: row.SUBMENU_ICONO,
+            orden: row.SUBMENU_ORDEN
+          });
+        } else {
+          logger.warn(`Submenú ${row.SUBMENU_NOMBRE} (ID_SUBMENU: ${row.ID_SUBMENU}) no tiene menú padre con ID_MENU: ${row.ID}`);
+        }
+      }
+    });
+
+    // Convertir a array y ordenar
+    const permissions = Array.from(menusMap.values());
+    permissions.sort((a, b) => a.orden - b.orden);
+    permissions.forEach(menu => {
+      menu.submenus.sort((a, b) => a.orden - b.orden);
+    });
+
     logger.info(`Permisos para usuario ${userId}: ${JSON.stringify(permissions)}`);
     return permissions;
   } catch (error) {
@@ -66,6 +116,8 @@ const getUserPermissions = async (userId) => {
     return [];
   }
 };
+
+
 // Endpoint de login
 const login = async (req, res) => {
   const { dni, password } = req.body;
