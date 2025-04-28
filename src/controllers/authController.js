@@ -7,104 +7,152 @@ const logger = require("../config/logger");
 const sql = require("mssql"); // <-- ESTA ES LA LÍNEA FALTANTE
 
 
-// Función para validar el formato del correo
-const validateEmail = (email) => {
-  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-  return emailRegex.test(email);
+// Función para validar el formato del DNI
+const validateDNI = (dni) => {
+  const dniRegex = /^[a-zA-Z0-9]{1,12}$/;
+  return dniRegex.test(dni);
 };
 
 // Función para generar un token JWT
-const generateToken = (userId, role) => {
+const generateToken = (userId, roles) => {
   if (!process.env.JWT_SECRET) {
     throw new Error("JWT_SECRET no está definido en las variables de entorno");
   }
-  return jwt.sign({ id: userId, role: role }, process.env.JWT_SECRET, {
+  return jwt.sign({ id: userId, roles }, process.env.JWT_SECRET, {
     expiresIn: "1h",
   });
 };
 
+// Función para obtener los permisos del usuario
 const getUserPermissions = async (userId) => {
   try {
     const pool = await poolPromise;
     const result = await pool.request()
       .input("userId", sql.Int, userId)
       .query(`
-        SELECT DISTINCT m.NOMBRE AS permiso
+        SELECT 
+            'Menú' AS Tipo,
+            m.ID_MENU AS ID,
+            m.NOMBRE AS Permiso,
+            m.URL AS URL,
+            m.ORDEN AS Orden,
+            NULL AS ID_MENU_PADRE,
+            NULL AS NOMBRE_MENU_PADRE
         FROM MAE_ROL_MENU rm
         JOIN MAE_MENU m ON rm.ID_MENU = m.ID_MENU
-        JOIN MAE_USUARIO u ON u.ID_TIPO_USUARIO = rm.ID_TIPO_USUARIO
-        WHERE u.ID_USUARIO = @userId AND m.ESTADO = 1
-        UNION
-        SELECT DISTINCT s.NOMBRE AS permiso
+        JOIN MAE_USUARIO_ROL ur ON ur.ID_ROL = rm.ID_ROL
+        WHERE ur.ID_USUARIO = @userId AND m.ESTADO = 1
+        UNION ALL
+        SELECT 
+            'Submenú' AS Tipo,
+            s.ID_SUBMENU AS ID,
+            s.NOMBRE AS Permiso,
+            s.URL AS URL,
+            s.ORDEN AS Orden,
+            s.ID_MENU AS ID_MENU_PADRE,
+            m.NOMBRE AS NOMBRE_MENU_PADRE
         FROM MAE_ROL_SUBMENU rs
         JOIN MAE_SUBMENU s ON rs.ID_SUBMENU = s.ID_SUBMENU
-        JOIN MAE_USUARIO u ON u.ID_TIPO_USUARIO = rs.ID_TIPO_USUARIO
-        WHERE u.ID_USUARIO = @userId AND s.ESTADO = 1
+        JOIN MAE_USUARIO_ROL ur ON ur.ID_ROL = rs.ID_ROL
+        JOIN MAE_MENU m ON s.ID_MENU = m.ID_MENU
+        WHERE ur.ID_USUARIO = @userId AND s.ESTADO = 1 AND m.ESTADO = 1
+        ORDER BY Tipo DESC, Orden ASC
       `);
-    const permissions = result.recordset.map((p) => p.permiso);
-    logger.info(`Permisos para usuario ${userId}: ${permissions}`);
+    const permissions = result.recordset;
+    logger.info(`Permisos para usuario ${userId}: ${JSON.stringify(permissions)}`);
     return permissions;
   } catch (error) {
-    logger.error("Error al obtener permisos:", error);
+    logger.error(`Error al obtener permisos para usuario ${userId}: ${error.message}`);
     return [];
   }
 };
-
 // Endpoint de login
 const login = async (req, res) => {
-  const { email, password } = req.body;
+  const { dni, password } = req.body;
 
-  if (!email || !password) {
-    return res.status(400).json({ message: "Correo y contraseña son requeridos" });
+  // Validar campos requeridos
+  if (!dni || !password) {
+    logger.warn("DNI o contraseña no proporcionados");
+    return res.status(400).json({ message: "DNI y contraseña son requeridos" });
   }
 
-  if (!validateEmail(email)) {
-    return res.status(400).json({ message: "Formato de correo inválido" });
+  // Validar formato de DNI
+  if (!validateDNI(dni)) {
+    logger.warn(`Formato de DNI inválido: ${dni}`);
+    return res.status(400).json({ message: "Formato de DNI inválido (máximo 12 caracteres alfanuméricos)" });
   }
 
   try {
     const pool = await poolPromise;
     const result = await pool.request()
-      .input("correo", email)
+      .input("dni", sql.VarChar(12), dni)
       .query(`
-        SELECT u.ID_USUARIO, u.CORREO, u.CONTRASENA_HASH, u.ID_TIPO_USUARIO, u.NOMBRES, u.APELLIDOS, t.DETALLE_USUARIO, u.PRIMER_INICIO
-        FROM MAE_USUARIO u
-        LEFT JOIN MAE_TIPO_USUARIO t ON u.ID_TIPO_USUARIO = t.ID_TIPO_USUARIO
-        WHERE u.CORREO = @correo AND u.ESTADO = 1
+        SELECT 
+          p.ID_PERSONA, 
+          p.NOMBRES, 
+          p.APELLIDOS, 
+          u.ID_USUARIO, 
+          u.CONTRASENA_HASH, 
+          u.PRIMER_INICIO
+        FROM MAE_PERSONA p
+        JOIN MAE_USUARIO u ON p.ID_PERSONA = u.ID_PERSONA
+        WHERE p.DNI = @dni AND p.ESTADO = 1 AND u.ESTADO = 1
       `);
 
     const user = result.recordset[0];
 
+    // Verificar si el usuario existe
     if (!user) {
+      logger.warn(`Usuario no encontrado para DNI: ${dni}`);
       return res.status(401).json({ message: "Credenciales inválidas" });
     }
 
+    // Verificar la contraseña
     const isMatch = await bcrypt.compare(password, user.CONTRASENA_HASH);
     if (!isMatch) {
+      logger.warn(`Contraseña incorrecta para DNI: ${dni}`);
       return res.status(401).json({ message: "Credenciales inválidas" });
     }
 
-    const role = user.DETALLE_USUARIO || "Usuario";
-    const token = generateToken(user.ID_USUARIO, role);
+    // Obtener roles del usuario
+    const rolesResult = await pool.request()
+      .input("userId", sql.Int, user.ID_USUARIO)
+      .query(`
+        SELECT t.ID_ROL, t.DETALLE_USUARIO
+        FROM MAE_USUARIO_ROL ur
+        JOIN MAE_TIPO_USUARIO t ON ur.ID_ROL = t.ID_ROL
+        WHERE ur.ID_USUARIO = @userId AND t.ESTADO = 1
+      `);
+    const roles = rolesResult.recordset.map((r) => r.DETALLE_USUARIO);
+
+    // Generar token JWT
+    const token = generateToken(user.ID_USUARIO, roles);
+
+    // Obtener permisos
     const permissions = await getUserPermissions(user.ID_USUARIO);
 
+    logger.info(`Inicio de sesión exitoso para DNI: ${dni}, ID_USUARIO: ${user.ID_USUARIO}`);
+    // Respuesta
     res.status(200).json({
       token,
-      role,
+      roles,
       userName: `${user.NOMBRES} ${user.APELLIDOS}`,
       primerInicio: user.PRIMER_INICIO === 1,
       user: {
         id: user.ID_USUARIO,
+        personaId: user.ID_PERSONA,
         name: `${user.NOMBRES} ${user.APELLIDOS}`,
-        role: role,
+        roles,
       },
       permissions,
     });
   } catch (error) {
-    logger.error("Error al iniciar sesión:", error);
+    logger.error(`Error al iniciar sesión para DNI: ${dni}: ${error.message}`);
     res.status(500).json({ message: "Error del servidor", error: error.message });
   }
 };
+
+
 
 // Endpoint de validación de token
 const validate = async (req, res) => {
@@ -128,10 +176,15 @@ const validate = async (req, res) => {
     const result = await pool.request()
       .input("id", sql.Int, userId)
       .query(`
-        SELECT u.ID_USUARIO, u.NOMBRES, u.APELLIDOS, t.DETALLE_USUARIO
+        SELECT 
+          u.ID_USUARIO, 
+          p.ID_PERSONA, 
+          p.NOMBRES, 
+          p.APELLIDOS, 
+          u.PRIMER_INICIO
         FROM MAE_USUARIO u
-        LEFT JOIN MAE_TIPO_USUARIO t ON u.ID_TIPO_USUARIO = t.ID_TIPO_USUARIO
-        WHERE u.ID_USUARIO = @id AND u.ESTADO = 1
+        JOIN MAE_PERSONA p ON u.ID_PERSONA = p.ID_PERSONA
+        WHERE u.ID_USUARIO = @id AND u.ESTADO = 1 AND p.ESTADO = 1
       `);
 
     const user = result.recordset[0];
@@ -139,16 +192,31 @@ const validate = async (req, res) => {
       return res.status(401).json({ message: "Usuario no encontrado" });
     }
 
-    const permissions = await getUserPermissions(userId);
+    // Obtener roles del usuario
+    const rolesResult = await pool.request()
+      .input("userId", sql.Int, user.ID_USUARIO)
+      .query(`
+        SELECT t.ID_ROL, t.DETALLE_USUARIO
+        FROM MAE_USUARIO_ROL ur
+        JOIN MAE_TIPO_USUARIO t ON ur.ID_ROL = t.ID_ROL
+        WHERE ur.ID_USUARIO = @userId AND t.ESTADO = 1
+      `);
+    const roles = rolesResult.recordset.map((r) => r.DETALLE_USUARIO);
+
+    // Obtener permisos
+    const permissions = await getUserPermissions(user.ID_USUARIO);
 
     res.status(200).json({
       message: "Sesión válida",
       user: {
         id: user.ID_USUARIO,
+        personaId: user.ID_PERSONA,
         name: `${user.NOMBRES} ${user.APELLIDOS}`,
+        roles,
       },
       userName: `${user.NOMBRES} ${user.APELLIDOS}`,
-      role: user.DETALLE_USUARIO || "Usuario",
+      roles, // Array de roles, ej: ["Administrador", "Comité"]
+      primerInicio: user.PRIMER_INICIO === 1,
       permissions,
     });
   } catch (error) {
@@ -164,6 +232,7 @@ const validate = async (req, res) => {
 };
 
 
+//ESTO NO HE MODIFICADO !!!!!!!!!!!
 // Endpoint de registro
 const register = async (req, res) => {
   const {
@@ -292,9 +361,6 @@ const register = async (req, res) => {
       .json({ message: "Error del servidor", error: error.message });
   }
 };
-
-
-
 // Endpoint para listar todos los usuarios
 const getAllUsers = async (req, res) => {
   try {
@@ -330,7 +396,6 @@ const getAllUsers = async (req, res) => {
       .json({ message: "Error del servidor", error: error.message });
   }
 };
-
 // Endpoint para listar todos los movimientos (ingresos y salidas)
 const getAllMovements = async (req, res) => {
   try {
@@ -361,7 +426,6 @@ const getAllMovements = async (req, res) => {
       .json({ message: "Error del servidor", error: error.message });
   }
 };
-
 const updateUser = async (req, res) => {
   const { id } = req.params; // ID del usuario a actualizar (de la URL)
   const {
@@ -491,11 +555,6 @@ const updateUser = async (req, res) => {
       .json({ message: "Error del servidor", error: error.message });
   }
 };
-
-module.exports = {
-  updateUser,
-};
-
 // Endpoint para eliminar un usuario (cambio lógico de estado)
 const deleteUser = async (req, res) => {
   const { id } = req.params;
@@ -529,7 +588,6 @@ const deleteUser = async (req, res) => {
       .json({ message: "Error del servidor", error: error.message });
   }
 };
-
 const uploadImage = async (req, res) => {
   if (!req.file) {
     logger.warn("No se ha enviado ninguna imagen.");
@@ -580,7 +638,6 @@ const uploadImage = async (req, res) => {
       .json({ message: "Error al subir la imagen.", error: error.message });
   }
 };
-
 const getLoginImages = async (req, res) => {
   try {
     logger.info("Iniciando la obtención de imágenes...");
@@ -614,7 +671,6 @@ const getLoginImages = async (req, res) => {
       .json({ message: "Error al obtener las imágenes", error: error.message });
   }
 };
-
 const deleteLoginImage = async (req, res) => {
   const { imageId } = req.params;
 
@@ -646,7 +702,6 @@ const deleteLoginImage = async (req, res) => {
       .json({ message: "Error al eliminar la imagen", error: error.message });
   }
 };
-
 const changeAuthenticatedUserPassword = async (req, res) => {
   const userId = req.user?.id;
   const { currentPassword, newPassword } = req.body;
