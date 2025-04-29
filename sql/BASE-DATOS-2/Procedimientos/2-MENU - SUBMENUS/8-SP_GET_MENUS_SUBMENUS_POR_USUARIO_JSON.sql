@@ -4,12 +4,10 @@ AS
 BEGIN
     SET NOCOUNT ON;
 
-    -- Obtener los ID_TIPO_USUARIO del usuario
-    DECLARE @TIPOS_USUARIO TABLE (ID_TIPO_USUARIO INT);
-    INSERT INTO @TIPOS_USUARIO (ID_TIPO_USUARIO)
-    SELECT ID_TIPO_USUARIO FROM MAE_USUARIO WHERE ID_USUARIO = @ID_USUARIO
-    UNION
-    SELECT ID_TIPO_USUARIO FROM MAE_USUARIO_ROL WHERE ID_USUARIO = @ID_USUARIO;
+    -- Obtener los ID_ROL del usuario
+    DECLARE @ROLES TABLE (ID_ROL INT);
+    INSERT INTO @ROLES (ID_ROL)
+    SELECT ID_ROL FROM MAE_USUARIO_ROL WHERE ID_USUARIO = @ID_USUARIO;
 
     -- CTE para obtener menús accesibles por el usuario
     WITH MenusAccesibles AS (
@@ -23,7 +21,7 @@ BEGIN
         FROM MAE_MENU m
         JOIN MAE_ROL_MENU rm ON rm.ID_MENU = m.ID_MENU
         WHERE m.ESTADO = 1
-          AND rm.ID_TIPO_USUARIO IN (SELECT ID_TIPO_USUARIO FROM @TIPOS_USUARIO)
+          AND rm.ID_ROL IN (SELECT ID_ROL FROM @ROLES)
           AND (
               -- Incluir menús con URL no nula
               m.URL IS NOT NULL
@@ -34,35 +32,35 @@ BEGIN
                   JOIN MAE_ROL_SUBMENU rs ON rs.ID_SUBMENU = sm.ID_SUBMENU
                   WHERE sm.ID_MENU = m.ID_MENU
                     AND sm.ESTADO = 1
-                    AND rs.ID_TIPO_USUARIO IN (SELECT ID_TIPO_USUARIO FROM @TIPOS_USUARIO)
+                    AND rs.ID_ROL IN (SELECT ID_ROL FROM @ROLES)
               )
           )
     )
 
     -- Seleccionar menús con submenús permitidos (o sin submenús) como JSON
     SELECT 
-        m.ID_MENU,
-        m.MENU_NOMBRE,
-        m.MENU_ICONO,
-        m.MENU_URL,
-        m.MENU_ORDEN,
-        m.MENU_ESTADO,
+        m.ID_MENU AS id,
+        m.MENU_NOMBRE AS nombre,
+        m.MENU_ICONO AS icono,
+        m.MENU_URL AS url,
+        m.MENU_ORDEN AS orden,
+        m.MENU_ESTADO AS estado,
         (
             SELECT
-                sm.ID_SUBMENU,
-                sm.NOMBRE AS SUBMENU_NOMBRE,
-                sm.ICONO AS SUBMENU_ICONO,
-                sm.URL AS SUBMENU_URL,
-                sm.ORDEN AS SUBMENU_ORDEN,
-                sm.ESTADO AS SUBMENU_ESTADO
+                sm.ID_SUBMENU AS id,
+                sm.NOMBRE AS nombre,
+                sm.ICONO AS icono,
+                sm.URL AS url,
+                sm.ORDEN AS orden,
+                sm.ESTADO AS estado
             FROM MAE_SUBMENU sm
             JOIN MAE_ROL_SUBMENU rs ON rs.ID_SUBMENU = sm.ID_SUBMENU
             WHERE sm.ID_MENU = m.ID_MENU
               AND sm.ESTADO = 1
-              AND rs.ID_TIPO_USUARIO IN (SELECT ID_TIPO_USUARIO FROM @TIPOS_USUARIO)
+              AND rs.ID_ROL IN (SELECT ID_ROL FROM @ROLES)
             ORDER BY sm.ORDEN ASC
             FOR JSON PATH
-        ) AS SUBMENUS
+        ) AS submenus
     FROM MenusAccesibles m
     ORDER BY m.MENU_ORDEN
     FOR JSON PATH;
