@@ -154,10 +154,10 @@ const getTiposUsuario = async (req, res) => {
     const result = await pool
       .request()
       .query(
-        "SELECT ID_TIPO_USUARIO, DETALLE_USUARIO, ESTADO FROM MAE_TIPO_USUARIO"
+        "SELECT ID_ROL, DETALLE_USUARIO, ESTADO FROM MAE_TIPO_USUARIO"
       );
     const tiposUsuario = result.recordset.map((row) => ({
-      ID_TIPO_USUARIO: row.ID_TIPO_USUARIO,
+      ID_ROL: row.ID_ROL,
       DETALLE_USUARIO: row.DETALLE_USUARIO,
       ESTADO: row.ESTADO,
     }));
@@ -177,7 +177,7 @@ const assignMenuToRole = async (req, res) => {
     const pool = await poolPromise;
     await pool
       .request()
-      .input("ID_TIPO_USUARIO", sql.Int, idTipoUsuario)
+      .input("ID_ROL", sql.Int, idTipoUsuario)
       .input("ID_MENU", sql.Int, idMenu)
       .execute("SP_INSERTAR_ROL_MENU");
     res.json({ message: "Menú asignado correctamente", refreshSidebar: true });
@@ -195,7 +195,7 @@ const removeMenuFromRole = async (req, res) => {
     const pool = await poolPromise;
     await pool
       .request()
-      .input("ID_TIPO_USUARIO", sql.Int, idTipoUsuario)
+      .input("ID_ROL", sql.Int, idTipoUsuario)
       .input("ID_MENU", sql.Int, idMenu)
       .execute("SP_ELIMINAR_ROL_MENU");
     res.json({
@@ -217,7 +217,7 @@ const assignSubmenuToRole = async (req, res) => {
     const pool = await poolPromise;
     await pool
       .request()
-      .input("ID_TIPO_USUARIO", sql.Int, idTipoUsuario)
+      .input("ID_ROL", sql.Int, idTipoUsuario)
       .input("ID_SUBMENU", sql.Int, idSubmenu)
       .execute("SP_INSERTAR_ROL_SUBMENU");
     res.json({
@@ -238,7 +238,7 @@ const removeSubmenuFromRole = async (req, res) => {
     const pool = await poolPromise;
     await pool
       .request()
-      .input("ID_TIPO_USUARIO", sql.Int, idTipoUsuario)
+      .input("ID_ROL", sql.Int, idTipoUsuario)
       .input("ID_SUBMENU", sql.Int, idSubmenu)
       .execute("SP_ELIMINAR_ROL_SUBMENU");
     res.json({
@@ -260,15 +260,16 @@ const getMenuSubmenuAssignments = async (req, res) => {
     const pool = await poolPromise;
     const result = await pool
       .request()
-      .input("ID_TIPO_USUARIO", sql.Int, idTipoUsuario).query(`
+      .input("ID_ROL", sql.Int, idTipoUsuario)
+      .query(`
         SELECT 
           rm.ID_MENU AS ASSIGNED_MENU_ID,
           rs.ID_SUBMENU AS ASSIGNED_SUBMENU_ID
         FROM MAE_ROL_MENU rm
         FULL OUTER JOIN MAE_ROL_SUBMENU rs
-          ON rm.ID_TIPO_USUARIO = rs.ID_TIPO_USUARIO
-        WHERE rm.ID_TIPO_USUARIO = @ID_TIPO_USUARIO 
-          OR rs.ID_TIPO_USUARIO = @ID_TIPO_USUARIO
+          ON rm.ID_ROL = rs.ID_ROL
+        WHERE rm.ID_ROL = @ID_ROL 
+          OR rs.ID_ROL = @ID_ROL
       `);
 
     const assignments = {
