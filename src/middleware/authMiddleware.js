@@ -3,12 +3,17 @@ const { poolPromise } = require("../config/db");
 const logger = require("../config/logger");
 
 const authMiddleware = async (req, res, next) => {
-  const token = req.header("Authorization")?.replace("Bearer ", "");
-
   logger.info("🛡️ authMiddleware ejecutado");
 
+  const authHeader = req.header("Authorization");
+  if (!authHeader) {
+    logger.warn("🚫 No se proporcionó token de autorización");
+    return res.status(401).json({ message: "No token provided" });
+  }
+
+  const token = authHeader.replace("Bearer ", "");
   if (!token) {
-    logger.warn("🚫 No se proporcionó token");
+    logger.warn("🚫 Token vacío o mal formado");
     return res.status(401).json({ message: "No token provided" });
   }
 
@@ -19,43 +24,45 @@ const authMiddleware = async (req, res, next) => {
     decoded = jwt.verify(token, process.env.JWT_SECRET);
     logger.info(`✅ Token decodificado: ID=${decoded.id}, datos=${JSON.stringify(decoded)}`);
   } catch (err) {
-    logger.error("❌ Error al decodificar token:", err.message);
+    logger.error(`❌ Error al decodificar token: ${err.message}`, { stack: err.stack });
     return res.status(401).json({ message: "Token inválido o expirado" });
   }
 
   try {
     const pool = await poolPromise;
+    logger.debug("🔌 Conexión a la base de datos establecida");
 
     const result = await pool.request()
       .input("id", decoded.id)
       .query(`
-        SELECT u.ID_USUARIO, u.NOMBRES, u.CORREO, u.ID_TIPO_USUARIO, t.DETALLE_USUARIO AS role
+        SELECT u.ID_USUARIO, u.USUARIO AS NOMBRES, p.CORREO, ur.ID_ROL, t.DETALLE_USUARIO AS role
         FROM MAE_USUARIO u
-        JOIN MAE_TIPO_USUARIO t ON u.ID_TIPO_USUARIO = t.ID_TIPO_USUARIO
+        LEFT JOIN MAE_PERSONA p ON u.ID_PERSONA = p.ID_PERSONA
+        LEFT JOIN MAE_USUARIO_ROL ur ON u.ID_USUARIO = ur.ID_USUARIO
+        LEFT JOIN MAE_TIPO_USUARIO t ON ur.ID_ROL = t.ID_ROL
         WHERE u.ID_USUARIO = @id AND u.ESTADO = 1
       `);
 
-    logger.debug("🔍 Resultado del query de usuario:", result.recordset);
+    logger.debug(`🔍 Resultado del query de usuario: ${JSON.stringify(result.recordset, null, 2)}`);
 
-    const user = result.recordset[0];
-
-    if (!user) {
+    if (!result.recordset || result.recordset.length === 0) {
       logger.error(`❌ Usuario no encontrado con ID: ${decoded.id}`);
-      return res.status(401).json({ message: "Invalid or expired token" });
+      return res.status(401).json({ message: "Usuario no encontrado o inactivo" });
     }
 
+    const user = result.recordset[0];
     req.user = {
       id: user.ID_USUARIO,
-      email: user.CORREO,
-      role: user.role,
-      type: user.ID_TIPO_USUARIO,
+      email: user.CORREO || "sin_correo",
+      role: user.role || "Sin rol",
+      roleId: user.ID_ROL || null,
     };
 
-    logger.info(`✅ Usuario autenticado: ID=${user.ID_USUARIO}, Correo=${user.CORREO}, Tipo=${user.ID_TIPO_USUARIO}, Rol=${user.role}`);
+    logger.info(`✅ Usuario autenticado: ID=${user.ID_USUARIO}, Correo=${user.CORREO || "sin_correo"}, Rol=${user.role || "sin_rol"}, RolID=${user.ID_ROL || "ninguno"}`);
     next();
   } catch (error) {
-    logger.error("🔥 Error en authMiddleware:", error.message);
-    res.status(500).json({ message: "Error del servidor en autenticación" });
+    logger.error(`🔥 Error en authMiddleware: ${error.message}`, { stack: error.stack });
+    res.status(500).json({ message: "Error del servidor en autenticación", error: error.message });
   }
 };
 

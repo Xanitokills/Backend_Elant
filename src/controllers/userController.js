@@ -3,53 +3,49 @@ const bcrypt = require("bcrypt");
 const crypto = require("crypto");
 const { poolPromise } = require("../config/db");
 const sql = require("mssql");
-
-const logger = require("../config/logger"); // Importa el logger
+const logger = require("../config/logger");
 const fs = require("fs");
 const path = require("path");
 
-// Obtener tipos de usuario
 const getUserTypes = async (req, res) => {
-  try {
-    const pool = await poolPromise;
-    const result = await pool.request().query(`
-            SELECT ID_TIPO_USUARIO, DETALLE_USUARIO
-            FROM MAE_TIPO_USUARIO
-        `);
-    res.status(200).json(result.recordset);
-  } catch (error) {
-    console.error("Error al obtener tipos de usuario:", error);
-    res.status(500).json({ message: "Error del servidor" });
-  }
-};
-
-// Obtener sexos
-const getSexes = async (req, res) => {
-  try {
-    const pool = await poolPromise;
-    const result = await pool.request().query(`
-            SELECT ID_SEXO, DESCRIPCION
-            FROM MAE_SEXO
-        `);
-    res.status(200).json(result.recordset);
-  } catch (error) {
-    console.error("Error al obtener sexos:", error);
-    res.status(500).json({ message: "Error del servidor" });
-  }
-};
-
-// Obtener roles activos
-const getRoles = async (req, res) => {
   try {
     const pool = await poolPromise;
     const result = await pool.request().query(`
       SELECT ID_TIPO_USUARIO, DETALLE_USUARIO
       FROM MAE_TIPO_USUARIO
+    `);
+    res.status(200).json(result.recordset);
+  } catch (error) {
+    logger.error(`Error al obtener tipos de usuario: ${error.message}`);
+    res.status(500).json({ message: "Error del servidor" });
+  }
+};
+
+const getSexes = async (req, res) => {
+  try {
+    const pool = await poolPromise;
+    const result = await pool.request().query(`
+      SELECT ID_SEXO, DESCRIPCION
+      FROM MAE_SEXO
+    `);
+    res.status(200).json(result.recordset);
+  } catch (error) {
+    logger.error(`Error al obtener sexos: ${error.message}`);
+    res.status(500).json({ message: "Error del servidor" });
+  }
+};
+
+const getRoles = async (req, res) => {
+  try {
+    const pool = await poolPromise;
+    const result = await pool.request().query(`
+      SELECT ID_ROL, DETALLE_USUARIO
+      FROM MAE_TIPO_USUARIO
       WHERE ESTADO = 1
     `);
     res.status(200).json(result.recordset);
   } catch (error) {
-    console.error("Error al obtener los roles:", error);
+    logger.error(`Error al obtener los roles: ${error.message}`);
     res.status(500).json({ message: "Error al obtener los roles" });
   }
 };
@@ -70,7 +66,6 @@ const updateUser = async (req, res) => {
     usuario,
   } = req.body;
 
-  // Validación de campos requeridos
   if (
     !nombres ||
     !apellidos ||
@@ -81,20 +76,17 @@ const updateUser = async (req, res) => {
     !id_sexo ||
     !usuario
   ) {
-    return res
-      .status(400)
-      .json({ message: "Todos los campos requeridos deben estar completos" });
+    return res.status(400).json({ message: "Todos los campos requeridos deben estar completos" });
   }
 
   try {
     const pool = await poolPromise;
-
     const result = await pool
       .request()
       .input("ID_USUARIO", sql.Int, id)
       .input("NOMBRES", sql.VarChar(50), nombres)
       .input("APELLIDOS", sql.VarChar(50), apellidos)
-      .input("DNI", sql.VarChar(8), dni)
+      .input("DNI", sql.VarChar(12), dni)
       .input("CORREO", sql.VarChar(100), correo)
       .input("CELULAR", sql.VarChar(9), celular || null)
       .input("NRO_DPTO", sql.Int, nro_dpto || null)
@@ -107,41 +99,33 @@ const updateUser = async (req, res) => {
 
     res.status(200).json({ message: "Usuario actualizado exitosamente" });
   } catch (error) {
-    console.error("Error en updateUser:", error);
-    res
-      .status(500)
-      .json({ message: error.message || "Error al actualizar el usuario" });
+    logger.error(`Error en updateUser: ${error.message}`);
+    res.status(500).json({ message: error.message || "Error al actualizar el usuario" });
   }
 };
 
-// Función para generar una contraseña aleatoria
 function generateRandomPassword() {
   return crypto.randomBytes(4).toString("hex");
 }
 
-// Configura tu transporte de correo (usando Gmail en este caso)
 const transporter = nodemailer.createTransport({
   service: "gmail",
   auth: {
-    user: process.env.MAIL_USER, // Asegúrate de usar tu usuario de Gmail
-    pass: process.env.MAIL_PASS, // Usa tu contraseña de aplicación
+    user: process.env.MAIL_USER,
+    pass: process.env.MAIL_PASS,
   },
 });
 
 const sendResetPasswordEmail = async (email, newPassword, fullName) => {
   try {
-    // Leer la plantilla HTML del correo
     const htmlTemplate = fs.readFileSync(
       path.join(__dirname, "../../html", "resetPasswordEmail.html"),
       "utf8"
     );
-
-    // Reemplazar los placeholders con el nombre completo y la nueva contraseña
     const htmlContent = htmlTemplate
       .replace("{{newPassword}}", newPassword)
       .replace("{{fullName}}", fullName);
 
-    // Configuración del correo
     const mailOptions = {
       from: process.env.NAME_USER,
       to: email,
@@ -149,13 +133,12 @@ const sendResetPasswordEmail = async (email, newPassword, fullName) => {
       html: htmlContent,
     };
 
-    // Enviar el correo
     await transporter.sendMail(mailOptions);
     logger.info(`Correo enviado con la nueva contraseña a: ${email}`);
-    return true; // ✅ éxito
+    return true;
   } catch (error) {
     logger.error(`Error al enviar el correo a ${email}: ${error.message}`);
-    return false; // ❌ fallo
+    return false;
   }
 };
 
@@ -164,13 +147,10 @@ const changePassword = async (req, res) => {
   const newPassword = generateRandomPassword();
 
   try {
-    // Generar un hash de la nueva contraseña
     const salt = await bcrypt.genSalt(6);
     const hashedPassword = await bcrypt.hash(newPassword, salt);
 
     const pool = await poolPromise;
-
-    // 1. Obtener el correo y el nombre completo del usuario
     const resultCorreo = await pool
       .request()
       .input("ID_USUARIO", sql.Int, id)
@@ -178,28 +158,18 @@ const changePassword = async (req, res) => {
         "SELECT CORREO, NOMBRES, APELLIDOS FROM dbo.MAE_USUARIO WHERE ID_USUARIO = @ID_USUARIO"
       );
 
-    const {
-      CORREO: correo,
-      NOMBRES: nombres,
-      APELLIDOS: apellidos,
-    } = resultCorreo.recordset[0];
+    const { CORREO: correo, NOMBRES: nombres, APELLIDOS: apellidos } = resultCorreo.recordset[0];
 
     if (!correo) {
       return res.status(404).json({ message: "Usuario no encontrado" });
     }
 
-    // Nombre completo
     const fullName = `${nombres} ${apellidos}`;
-
-    // 2. Enviar el correo con la nueva contraseña y el nombre completo
     const success = await sendResetPasswordEmail(correo, newPassword, fullName);
     if (!success) {
-      return res
-        .status(500)
-        .json({ message: "Error al enviar el correo de restablecimiento" });
+      return res.status(500).json({ message: "Error al enviar el correo de restablecimiento" });
     }
 
-    // 3. Solo si se envió el correo, actualizamos la contraseña en la base de datos
     await pool
       .request()
       .input("ID_USUARIO", sql.Int, id)
@@ -207,23 +177,16 @@ const changePassword = async (req, res) => {
       .input("CONTRASENA_SALT", sql.VarChar(50), salt)
       .execute("SP_ACTUALIZAR_CONTRASEÑA");
 
-    res
-      .status(200)
-      .json({ message: "Correo enviado y contraseña actualizada" });
+    res.status(200).json({ message: "Correo enviado y contraseña actualizada" });
   } catch (error) {
-    logger.error(
-      `Error al cambiar la contraseña para el usuario ID: ${id} - ${error.message}`
-    );
-    res
-      .status(500)
-      .json({ message: error.message || "Error al cambiar la contraseña" });
+    logger.error(`Error al cambiar la contraseña para el usuario ID: ${id} - ${error.message}`);
+    res.status(500).json({ message: error.message || "Error al cambiar la contraseña" });
   }
 };
 
 const getSidebarByUserId = async (req, res) => {
   const { id } = req.params;
 
-  // Validar que id sea un número entero
   if (!id || isNaN(id)) {
     logger.error(`ID de usuario inválido: ${id}`);
     return res.status(400).json({ message: "ID de usuario inválido" });
@@ -231,7 +194,6 @@ const getSidebarByUserId = async (req, res) => {
 
   try {
     const pool = await poolPromise;
-
     logger.info(`Solicitud de menú para el usuario ID: ${id}`);
 
     const result = await pool
@@ -239,30 +201,47 @@ const getSidebarByUserId = async (req, res) => {
       .input("ID_USUARIO", sql.Int, parseInt(id))
       .execute("SP_GET_MENUS_SUBMENUS_JSON");
 
-    const sidebarData = result.recordset;
+    logger.debug(`Resultado crudo del procedimiento: ${JSON.stringify(result, null, 2)}`);
 
-    if (!sidebarData || sidebarData.length === 0) {
-      logger.warn(`No se encontraron menús para el usuario ID: ${id}`);
+    // Verificar si recordset existe y tiene datos
+    if (!result.recordset || result.recordset.length === 0) {
+      logger.warn(`No se encontraron datos en recordset para el usuario ID: ${id}`);
       return res.status(200).json([]);
     }
 
-    logger.debug(
-      `Sidebar devuelto para ID ${id}: ${JSON.stringify(sidebarData, null, 2)}`
-    );
+    // Obtener el nombre de la primera columna (puede ser dinámico, como JSON_F52E2B61-...)
+    const jsonColumn = Object.keys(result.recordset[0])[0];
+    logger.debug(`Nombre de la columna JSON: ${jsonColumn}`);
 
-    res.status(200).json(sidebarData);
-  } catch (error) {
-    logger.error(
-      `Error al obtener el menú del usuario ID ${id}: ${error.message}`,
-      {
-        stack: error.stack,
+    // Extraer y parsear el JSON
+    let sidebarData = [];
+    try {
+      if (result.recordset[0][jsonColumn]) {
+        sidebarData = JSON.parse(result.recordset[0][jsonColumn]);
+        logger.debug(`JSON parseado: ${JSON.stringify(sidebarData, null, 2)}`);
+      } else {
+        logger.warn(`La columna ${jsonColumn} está vacía o es nula para ID: ${id}`);
+        return res.status(200).json([]);
       }
-    );
-    res.status(500).json({ message: "Error al obtener el menú del usuario" });
+    } catch (parseError) {
+      logger.error(`Error al parsear JSON desde ${jsonColumn}: ${parseError.message}`);
+      throw parseError;
+    }
+
+    // Asegurar que submenus sea un arreglo
+    const parsedSidebarData = sidebarData.map(item => ({
+      ...item,
+      submenus: item.submenus ? (typeof item.submenus === 'string' ? JSON.parse(item.submenus) : item.submenus) : []
+    }));
+
+    logger.info(`Sidebar procesado para ID ${id}: ${JSON.stringify(parsedSidebarData, null, 2)}`);
+    res.status(200).json(parsedSidebarData);
+  } catch (error) {
+    logger.error(`Error al obtener el menú del usuario ID ${id}: ${error.message}`, { stack: error.stack });
+    res.status(500).json({ message: "Error al obtener el menú del usuario", error: error.message });
   }
 };
 
-// Asignar rol Comité a usuario
 const asignarRolComite = async (req, res) => {
   try {
     const { id } = req.params;
@@ -271,17 +250,16 @@ const asignarRolComite = async (req, res) => {
     await pool
       .request()
       .input("ID_USUARIO", sql.Int, id)
-      .input("ID_TIPO_USUARIO", sql.Int, 6) // ID del rol Comité
+      .input("ID_ROL", sql.Int, 6)
       .execute("SP_INSERTAR_USUARIO_ROL");
 
     res.status(200).json({ message: "Rol Comité asignado exitosamente" });
   } catch (error) {
-    console.error("Error al asignar rol Comité:", error);
+    logger.error(`Error al asignar rol Comité: ${error.message}`);
     res.status(500).json({ message: "Error al asignar rol Comité" });
   }
 };
 
-// Quitar rol Comité a usuario
 const quitarRolComite = async (req, res) => {
   try {
     const { id } = req.params;
@@ -290,12 +268,12 @@ const quitarRolComite = async (req, res) => {
     await pool
       .request()
       .input("ID_USUARIO", sql.Int, id)
-      .input("ID_TIPO_USUARIO", sql.Int, 6) // ID del rol Comité
+      .input("ID_ROL", sql.Int, 6)
       .execute("SP_ELIMINAR_USUARIO_ROL");
 
     res.status(200).json({ message: "Rol Comité eliminado exitosamente" });
   } catch (error) {
-    console.error("Error al eliminar rol Comité:", error);
+    logger.error(`Error al eliminar rol Comité: ${error.message}`);
     res.status(500).json({ message: "Error al eliminar rol Comité" });
   }
 };
@@ -315,9 +293,7 @@ const getUserRoles = async (req, res) => {
       .request()
       .input("userId", sql.Int, userId)
       .query(`
-        SELECT ID_TIPO_USUARIO FROM MAE_USUARIO WHERE ID_USUARIO = @userId AND ESTADO = 1
-        UNION
-        SELECT ID_TIPO_USUARIO FROM MAE_USUARIO_ROL WHERE ID_USUARIO = @userId
+        SELECT ID_ROL FROM MAE_USUARIO_ROL WHERE ID_USUARIO = @userId
       `);
     res.status(200).json(result.recordset);
   } catch (error) {
@@ -333,8 +309,6 @@ module.exports = {
   changePassword,
   getSidebarByUserId,
   getRoles,
-  updateUser,
-  changePassword,
   asignarRolComite,
   quitarRolComite,
   getUserRoles
