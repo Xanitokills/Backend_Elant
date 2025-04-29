@@ -335,7 +335,6 @@ module.exports = {
   getRoles,
   updateUser,
   changePassword,
-  getSidebarByUserId,
   asignarRolComite,
   quitarRolComite,
   getUserRoles

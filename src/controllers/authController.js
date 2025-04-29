@@ -117,7 +117,6 @@ const getUserPermissions = async (userId) => {
   }
 };
 
-
 // Endpoint de login
 const login = async (req, res) => {
   const { dni, password } = req.body;
@@ -203,8 +202,6 @@ const login = async (req, res) => {
     res.status(500).json({ message: "Error del servidor", error: error.message });
   }
 };
-
-
 
 // Endpoint de validación de token
 const validate = async (req, res) => {
