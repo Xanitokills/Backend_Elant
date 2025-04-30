@@ -184,8 +184,42 @@ const register = async (req, res) => {
 
   try {
     const pool = await poolPromise;
+
+    // Validar unicidad del DNI
+    const dniCheck = await pool
+      .request()
+      .input("DNI", sql.VarChar(12), dni)
+      .query("SELECT COUNT(*) AS count FROM MAE_PERSONA WHERE DNI = @DNI");
+    if (dniCheck.recordset[0].count > 0) {
+      logger.warn(`DNI ya registrado: ${dni}`);
+      return res.status(400).json({ message: "El DNI ya está registrado" });
+    }
+
+    // Validar unicidad del correo
+    if (correo) {
+      const correoCheck = await pool
+        .request()
+        .input("CORREO", sql.VarChar(100), correo)
+        .query("SELECT COUNT(*) AS count FROM MAE_PERSONA WHERE CORREO = @CORREO");
+      if (correoCheck.recordset[0].count > 0) {
+        logger.warn(`Correo ya registrado: ${correo}`);
+        return res.status(400).json({ message: "El correo ya está registrado" });
+      }
+    }
+
+    // Validar unicidad del usuario (si acceso_sistema es true)
+    if (acceso_sistema && usuario) {
+      const usuarioCheck = await pool
+        .request()
+        .input("USUARIO", sql.VarChar(50), usuario)
+        .query("SELECT COUNT(*) AS count FROM MAE_USUARIO WHERE USUARIO = @USUARIO");
+      if (usuarioCheck.recordset[0].count > 0) {
+        logger.warn(`Usuario ya registrado: ${usuario}`);
+        return res.status(400).json({ message: "El usuario ya está registrado" });
+      }
+    }
+
     const password = acceso_sistema ? crypto.randomBytes(4).toString("hex") : null;
-    // Asegurarse de que usuario y roles sean null si acceso_sistema es false
     const finalUsuario = acceso_sistema ? usuario : null;
     const finalRoles = acceso_sistema ? roles : null;
 
@@ -264,17 +298,26 @@ const register = async (req, res) => {
       id_usuario,
     });
   } catch (error) {
-    // Mejorar el manejo de errores para capturar mensajes de SQL Server
+    // Mejorar el manejo de errores
     const errorDetails = {
       message: error.message || "Error desconocido",
-      sqlError: error.originalError?.info?.message || error.sqlMessage || "N/A",
-      errorNumber: error.originalError?.info?.number || error.number || "N/A",
+      sqlError:
+        error.originalError?.info?.message ||
+        error.originalError?.message ||
+        error.sqlMessage ||
+        "N/A",
+      errorNumber:
+        error.originalError?.info?.number || error.number || "N/A",
       errorCode: error.code || "N/A",
       errorState: error.state || "N/A",
       stack: error.stack,
     };
     logger.error(`Error al registrar persona:`, errorDetails);
-    res.status(500).json({ message: errorDetails.sqlError || "Error del servidor" });
+    res.status(500).json({
+      message: errorDetails.sqlError || "Error del servidor",
+      errorCode: errorDetails.errorCode,
+      errorNumber: errorDetails.errorNumber,
+    });
   }
 };
 
@@ -637,7 +680,6 @@ const quitarRolComite = async (req, res) => {
       .request()
       .input("ID_USUARIO", sql.Int, id)
       .input("ID_ROL", sql.Int, 6)
-
       .execute("SP_ELIMINAR_USUARIO_ROL");
 
     res.status(200).json({ message: "Rol Comité eliminado exitosamente" });
