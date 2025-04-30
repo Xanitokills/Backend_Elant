@@ -62,162 +62,8 @@ const register = async (req, res) => {
 
   logger.info("Datos recibidos en /register:", req.body);
 
-  // Validaciones
-  if (
-    !nombres ||
-    !apellidos ||
-    !dni ||
-    !fecha_nacimiento ||
-    !id_sexo ||
-    !id_perfil
-  ) {
-    logger.warn("Campos obligatorios faltantes:", {
-      nombres,
-      apellidos,
-      dni,
-      fecha_nacimiento,
-      id_sexo,
-      id_perfil,
-    });
-    return res.status(400).json({ message: "Campos obligatorios faltantes" });
-  }
-
-  if (!/^[0-9]{8}$/.test(dni)) {
-    logger.warn("DNI inválido:", dni);
-    return res.status(400).json({ message: "El DNI debe tener 8 dígitos" });
-  }
-
-  if (celular && !/^[9][0-9]{8}$/.test(celular)) {
-    logger.warn("Celular inválido:", celular);
-    return res
-      .status(400)
-      .json({ message: "El celular debe comenzar con 9 y tener 9 dígitos" });
-  }
-
-  if (contacto_emergencia && !/^[9][0-9]{8}$/.test(contacto_emergencia)) {
-    logger.warn("Contacto de emergencia inválido:", contacto_emergencia);
-    return res
-      .status(400)
-      .json({
-        message:
-          "El contacto de emergencia debe comenzar con 9 y tener 9 dígitos",
-      });
-  }
-
-  if (correo && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(correo)) {
-    logger.warn("Correo inválido:", correo);
-    return res.status(400).json({ message: "Formato de correo inválido" });
-  }
-
-  if (acceso_sistema && (!correo || !usuario || !roles || roles.length === 0)) {
-    logger.warn("Faltan datos para acceso al sistema:", {
-      correo,
-      usuario,
-      roles,
-    });
-    return res.status(400).json({
-      message: "Correo, usuario y roles son obligatorios para acceso al sistema",
-    });
-  }
-
-  // Calcular edad
-  const birthDate = new Date(fecha_nacimiento);
-  const today = new Date();
-  let age = today.getFullYear() - birthDate.getFullYear();
-  const monthDiff = today.getMonth() - birthDate.getMonth();
-  if (
-    monthDiff < 0 ||
-    (monthDiff === 0 && today.getDate() < birthDate.getDate())
-  ) {
-    age--;
-  }
-
-  if (age < 18 && !contacto_emergencia) {
-    logger.warn("Contacto de emergencia faltante para menor de edad:", age);
-    return res.status(400).json({
-      message: "El contacto de emergencia es obligatorio para menores de edad",
-    });
-  }
-
-  if (age >= 18 && !celular) {
-    logger.warn("Celular faltante para mayor de edad:", age);
-    return res.status(400).json({
-      message: "El celular es obligatorio para mayores de edad",
-    });
-  }
-
-  const idPerfilNum = parseInt(id_perfil);
-
-  if (idPerfilNum === 1) {
-    if (
-      !departamentos ||
-      departamentos.length === 0 ||
-      !id_clasificacion ||
-      !inicio_residencia
-    ) {
-      logger.warn("Campos faltantes para residente:", {
-        departamentos,
-        id_clasificacion,
-        inicio_residencia,
-      });
-      return res.status(400).json({
-        message:
-          "Departamentos, tipo de residente y fecha de inicio de residencia son obligatorios para residentes",
-      });
-    }
-
-    if (!/^\d{2}\/\d{2}\/\d{4}$/.test(inicio_residencia)) {
-      logger.warn("Formato de inicio_residencia inválido:", inicio_residencia);
-      return res.status(400).json({
-        message:
-          "La fecha de inicio de residencia debe estar en formato DD/MM/YYYY",
-      });
-    }
-  }
-
-  if (idPerfilNum !== 1 && (!fases_trabajador || fases_trabajador.length === 0)) {
-    logger.warn("Fases faltantes para trabajador:", fases_trabajador);
-    return res.status(400).json({
-      message: "Debe seleccionar al menos una fase para trabajadores",
-    });
-  }
-
   try {
     const pool = await poolPromise;
-
-    // Validar unicidad del DNI
-    const dniCheck = await pool
-      .request()
-      .input("DNI", sql.VarChar(12), dni)
-      .query("SELECT COUNT(*) AS count FROM MAE_PERSONA WHERE DNI = @DNI");
-    if (dniCheck.recordset[0].count > 0) {
-      logger.warn(`DNI ya registrado: ${dni}`);
-      return res.status(400).json({ message: "El DNI ya está registrado" });
-    }
-
-    // Validar unicidad del correo
-    if (correo) {
-      const correoCheck = await pool
-        .request()
-        .input("CORREO", sql.VarChar(100), correo)
-        .query("SELECT COUNT(*) AS count FROM MAE_PERSONA WHERE CORREO = @CORREO");
-      if (correoCheck.recordset[0].count > 0) {
-        logger.warn(`Correo ya registrado: ${correo}`);
-        return res.status(400).json({ message: "El correo ya está registrado" });
-      }
-    }
-
-    // Validar unicidad del usuario (si acceso_sistema es true)
-    if (acceso_sistema && usuario) {
-      const usuarioCheck = await pool
-        .request()
-        .input("USUARIO", sql.VarChar(50), usuario)
-        .query("SELECT COUNT(*) AS count FROM MAE_USUARIO WHERE USUARIO = @USUARIO");
-      if (usuarioCheck.recordset[0].count > 0) {
-        logger.warn(`Usuario ya registrado: ${usuario}`);
-        return res.status(400).json({ message: "El usuario ya está registrado" });
-      }
-    }
 
     const password = acceso_sistema ? crypto.randomBytes(4).toString("hex") : null;
     const finalUsuario = acceso_sistema ? usuario : null;
@@ -298,7 +144,6 @@ const register = async (req, res) => {
       id_usuario,
     });
   } catch (error) {
-    // Mejorar el manejo de errores
     const errorDetails = {
       message: error.message || "Error desconocido",
       sqlError:
@@ -313,10 +158,63 @@ const register = async (req, res) => {
       stack: error.stack,
     };
     logger.error(`Error al registrar persona:`, errorDetails);
-    res.status(500).json({
-      message: errorDetails.sqlError || "Error del servidor",
-      errorCode: errorDetails.errorCode,
+
+    // Mapear códigos de error específicos para el frontend
+    let statusCode = 400;
+    let clientMessage = errorDetails.sqlError;
+
+    switch (errorDetails.errorNumber) {
+      case 50001:
+        clientMessage = "Los campos NOMBRES, APELLIDOS, DNI, FECHA_NACIMIENTO, ID_SEXO e ID_PERFIL son obligatorios.";
+        break;
+      case 50002:
+        clientMessage = "El DNI debe tener exactamente 8 dígitos.";
+        break;
+      case 50003:
+        clientMessage = "El DNI ya está registrado.";
+        break;
+      case 50004:
+        clientMessage = "El correo ya está registrado.";
+        break;
+      case 50005:
+        clientMessage = "El celular debe comenzar con 9 y tener 9 dígitos.";
+        break;
+      case 50006:
+        clientMessage = "El contacto de emergencia debe comenzar con 9 y tener 9 dígitos.";
+        break;
+      case 50007:
+        clientMessage = "El contacto de emergencia es obligatorio para menores de edad.";
+        break;
+      case 50008:
+        clientMessage = "El celular es obligatorio para mayores de edad.";
+        break;
+      case 50009:
+        clientMessage = "DEPARTAMENTOS, ID_CLASIFICACION e INICIO_RESIDENCIA son obligatorios para el perfil Residente.";
+        break;
+      case 50010:
+        clientMessage = "El formato de INICIO_RESIDENCIA debe ser DD/MM/YYYY.";
+        break;
+      case 50011:
+        clientMessage = "FASES_TRABAJADOR es obligatorio para perfiles de trabajador.";
+        break;
+      case 50012:
+        clientMessage = "El usuario ya está registrado.";
+        break;
+      case 50013:
+        clientMessage = "El CORREO y CONTRASENA son obligatorios si se registra un usuario.";
+        break;
+      case 50014:
+        clientMessage = errorDetails.sqlError; // Mostrar el mensaje completo del error (incluye los departamentos duplicados)
+        break;
+      default:
+        clientMessage = "Error al registrar la persona: " + errorDetails.sqlError;
+        statusCode = 500;
+    }
+
+    res.status(statusCode).json({
+      message: clientMessage,
       errorNumber: errorDetails.errorNumber,
+      errorCode: errorDetails.errorCode,
     });
   }
 };
@@ -531,6 +429,11 @@ const changePassword = async (req, res) => {
         "SELECT CORREO, NOMBRES, APELLIDOS FROM dbo.MAE_USUARIO WHERE ID_USUARIO = @ID_USUARIO"
       );
 
+    if (!resultCorreo.recordset || resultCorreo.recordset.length === 0) {
+      logger.error(`Usuario con ID ${id} no encontrado`);
+      return res.status(404).json({ message: "Usuario no encontrado" });
+    }
+
     const {
       CORREO: correo,
       NOMBRES: nombres,
@@ -538,18 +441,20 @@ const changePassword = async (req, res) => {
     } = resultCorreo.recordset[0];
 
     if (!correo) {
-      return res.status(404).json({ message: "Usuario no encontrado" });
+      logger.warn(`Usuario con ID ${id} no tiene correo registrado`);
+      return res.status(400).json({ message: "El usuario no tiene un correo registrado" });
     }
 
     const fullName = `${nombres} ${apellidos}`;
     const success = await sendPasswordEmail(correo, newPassword, fullName);
     if (!success) {
+      logger.error(`Error al enviar el correo de restablecimiento a ${correo}`);
       return res
         .status(500)
         .json({ message: "Error al enviar el correo de restablecimiento" });
     }
 
-    const salt = crypto.randomBytes(16).toString("hex");
+    const salt = crypto.randomUUID();
     const hashedPassword = crypto
       .createHash("sha256")
       .update(newPassword + salt)
@@ -562,6 +467,7 @@ const changePassword = async (req, res) => {
       .input("CONTRASENA_SALT", sql.VarChar(50), salt)
       .execute("SP_ACTUALIZAR_CONTRASEÑA");
 
+    logger.info(`Contraseña restablecida para el usuario ID ${id}`);
     res
       .status(200)
       .json({ message: "Correo enviado y contraseña actualizada" });
