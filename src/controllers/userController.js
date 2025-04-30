@@ -7,6 +7,179 @@ const logger = require("../config/logger");
 const fs = require("fs");
 const path = require("path");
 
+//NUEVOS METODOS
+
+const transporter = nodemailer.createTransport({
+  service: "gmail",
+  auth: {
+    user: process.env.MAIL_USER,
+    pass: process.env.MAIL_PASS,
+  },
+});
+
+const sendPasswordEmail = async (email, password, fullName) => {
+  try {
+    const htmlTemplate = fs.readFileSync(
+      path.join(__dirname, "../../html", "resetPasswordEmail.html"),
+      "utf8"
+    );
+    const htmlContent = htmlTemplate
+      .replace("{{newPassword}}", password)
+      .replace("{{fullName}}", fullName);
+
+    const mailOptions = {
+      from: process.env.NAME_USER,
+      to: email,
+      subject: "Bienvenido - Credenciales de Acceso",
+      html: htmlContent,
+    };
+
+    await transporter.sendMail(mailOptions);
+    logger.info(`Correo enviado con la contraseña a: ${email}`);
+    return true;
+  } catch (error) {
+    logger.error(`Error al enviar el correo a ${email}: ${error.message}`);
+    return false;
+  }
+};
+
+const register = async (req, res) => {
+  const {
+    nombres,
+    apellidos,
+    dni,
+    correo,
+    celular,
+    contacto_emergencia,
+    fecha_nacimiento,
+    id_sexo,
+    id_perfil,
+    id_departamento,
+    usuario,
+    roles, // Array de ID_ROL
+    acceso_sistema, // Boolean
+  } = req.body;
+
+  // Validaciones
+  if (!nombres || !apellidos || !id_sexo || !id_perfil) {
+    return res.status(400).json({ message: "Campos obligatorios faltantes" });
+  }
+
+  if (acceso_sistema && (!correo || !usuario || !roles || roles.length === 0)) {
+    return res.status(400).json({
+      message:
+        "Correo, usuario y roles son obligatorios para acceso al sistema",
+    });
+  }
+
+  if (id_perfil === 1 && !id_departamento) {
+    return res
+      .status(400)
+      .json({ message: "ID_DEPARTAMENTO es obligatorio para residentes" });
+  }
+
+  try {
+    const pool = await poolPromise;
+    const password = acceso_sistema
+      ? crypto.randomBytes(4).toString("hex")
+      : null;
+    const rolesJson = roles ? JSON.stringify(roles) : null;
+
+    const request = pool
+      .request()
+      .input("NOMBRES", sql.VarChar(50), nombres)
+      .input("APELLIDOS", sql.VarChar(50), apellidos)
+      .input("DNI", sql.VarChar(12), dni)
+      .input("CORREO", sql.VarChar(100), correo || null)
+      .input("CELULAR", sql.VarChar(9), celular || null)
+      .input("CONTACTO_EMERGENCIA", sql.VarChar(9), contacto_emergencia || null)
+      .input("FECHA_NACIMIENTO", sql.Date, fecha_nacimiento || null)
+      .input("ID_SEXO", sql.Int, id_sexo)
+      .input("ID_PERFIL", sql.Int, id_perfil)
+      .input("ID_DEPARTAMENTO", sql.Int, id_departamento || null)
+      .input("USUARIO", sql.VarChar(50), usuario || null)
+      .input("CONTRASENA", sql.VarChar(255), password || null)
+      .input("ROLES", sql.VarChar(sql.MAX), rolesJson || null)
+      .output("ID_PERSONA_OUT", sql.Int)
+      .output("ID_USUARIO_OUT", sql.Int);
+
+    const result = await request.execute("SP_REGISTRAR_PERSONA");
+
+    const id_persona = result.output.ID_PERSONA_OUT;
+    const id_usuario = result.output.ID_USUARIO_OUT;
+
+    // Enviar correo si se creó un usuario
+    if (acceso_sistema && correo && password) {
+      const success = await sendPasswordEmail(
+        correo,
+        password,
+        `${nombres} ${apellidos}`
+      );
+      if (!success) {
+        logger.warn(
+          `No se pudo enviar el correo a ${correo}, pero el usuario fue registrado`
+        );
+      }
+    }
+
+    res.status(201).json({
+      message: "Persona registrada exitosamente",
+      id_persona,
+      id_usuario,
+    });
+  } catch (error) {
+    logger.error(`Error al registrar persona: ${error.message}`);
+    res.status(500).json({ message: error.message || "Error del servidor" });
+  }
+};
+
+const getPerfiles = async (req, res) => {
+  try {
+    const pool = await poolPromise;
+    const result = await pool.request().query(`
+      SELECT ID_PERFIL, DETALLE_PERFIL
+      FROM MAE_PERFIL
+      WHERE ESTADO = 1
+    `);
+    res.status(200).json(result.recordset);
+  } catch (error) {
+    logger.error(`Error al obtener perfiles: ${error.message}`);
+    res.status(500).json({ message: "Error del servidor" });
+  }
+};
+
+const getFases = async (req, res) => {
+  try {
+    const pool = await poolPromise;
+    const result = await pool.request().query(`
+      SELECT ID_FASE, NOMBRE
+      FROM MAE_FASE
+      WHERE ESTADO = 1
+    `);
+    res.status(200).json(result.recordset);
+  } catch (error) {
+    logger.error(`Error al obtener fases: ${error.message}`);
+    res.status(500).json({ message: "Error del servidor" });
+  }
+};
+
+const getDepartamentos = async (req, res) => {
+  try {
+    const pool = await poolPromise;
+    const result = await pool.request().query(`
+      SELECT ID_DEPARTAMENTO, NRO_DPTO, ID_FASE
+      FROM MAE_DEPARTAMENTO
+      WHERE ESTADO = 1
+    `);
+    res.status(200).json(result.recordset);
+  } catch (error) {
+    logger.error(`Error al obtener departamentos: ${error.message}`);
+    res.status(500).json({ message: "Error del servidor" });
+  }
+};
+
+//METODOS EXISTENTES
+
 const getUserTypes = async (req, res) => {
   try {
     const pool = await poolPromise;
@@ -50,6 +223,42 @@ const getRoles = async (req, res) => {
   }
 };
 
+// Endpoint para listar todos los usuarios
+const getAllUsers = async (req, res) => {
+  try {
+    const pool = await poolPromise;
+    const result = await pool.request().query(`
+      SELECT 
+        u.ID_USUARIO, 
+        u.NOMBRES, 
+        u.APELLIDOS, 
+        u.DNI, 
+        u.CORREO, 
+        u.CELULAR, 
+        u.NRO_DPTO, 
+        u.FECHA_NACIMIENTO, 
+        u.COMITE, 
+        u.USUARIO, 
+        u.ID_TIPO_USUARIO,
+        u.ID_SEXO,
+        t.DETALLE_USUARIO AS ROL,
+        s.DESCRIPCION AS SEXO
+      FROM MAE_USUARIO u
+      LEFT JOIN MAE_TIPO_USUARIO t ON u.ID_TIPO_USUARIO = t.ID_TIPO_USUARIO
+      LEFT JOIN MAE_SEXO s ON u.ID_SEXO = s.ID_SEXO
+      WHERE u.ESTADO = 1
+    `);
+
+    const users = result.recordset;
+    res.status(200).json(users);
+  } catch (error) {
+    console.error("Error al obtener los usuarios:", error);
+    res
+      .status(500)
+      .json({ message: "Error del servidor", error: error.message });
+  }
+};
+
 const updateUser = async (req, res) => {
   const { id } = req.params;
   const {
@@ -76,7 +285,9 @@ const updateUser = async (req, res) => {
     !id_sexo ||
     !usuario
   ) {
-    return res.status(400).json({ message: "Todos los campos requeridos deben estar completos" });
+    return res
+      .status(400)
+      .json({ message: "Todos los campos requeridos deben estar completos" });
   }
 
   try {
@@ -100,21 +311,15 @@ const updateUser = async (req, res) => {
     res.status(200).json({ message: "Usuario actualizado exitosamente" });
   } catch (error) {
     logger.error(`Error en updateUser: ${error.message}`);
-    res.status(500).json({ message: error.message || "Error al actualizar el usuario" });
+    res
+      .status(500)
+      .json({ message: error.message || "Error al actualizar el usuario" });
   }
 };
 
 function generateRandomPassword() {
   return crypto.randomBytes(4).toString("hex");
 }
-
-const transporter = nodemailer.createTransport({
-  service: "gmail",
-  auth: {
-    user: process.env.MAIL_USER,
-    pass: process.env.MAIL_PASS,
-  },
-});
 
 const sendResetPasswordEmail = async (email, newPassword, fullName) => {
   try {
@@ -158,7 +363,11 @@ const changePassword = async (req, res) => {
         "SELECT CORREO, NOMBRES, APELLIDOS FROM dbo.MAE_USUARIO WHERE ID_USUARIO = @ID_USUARIO"
       );
 
-    const { CORREO: correo, NOMBRES: nombres, APELLIDOS: apellidos } = resultCorreo.recordset[0];
+    const {
+      CORREO: correo,
+      NOMBRES: nombres,
+      APELLIDOS: apellidos,
+    } = resultCorreo.recordset[0];
 
     if (!correo) {
       return res.status(404).json({ message: "Usuario no encontrado" });
@@ -167,7 +376,9 @@ const changePassword = async (req, res) => {
     const fullName = `${nombres} ${apellidos}`;
     const success = await sendResetPasswordEmail(correo, newPassword, fullName);
     if (!success) {
-      return res.status(500).json({ message: "Error al enviar el correo de restablecimiento" });
+      return res
+        .status(500)
+        .json({ message: "Error al enviar el correo de restablecimiento" });
     }
 
     await pool
@@ -177,10 +388,16 @@ const changePassword = async (req, res) => {
       .input("CONTRASENA_SALT", sql.VarChar(50), salt)
       .execute("SP_ACTUALIZAR_CONTRASEÑA");
 
-    res.status(200).json({ message: "Correo enviado y contraseña actualizada" });
+    res
+      .status(200)
+      .json({ message: "Correo enviado y contraseña actualizada" });
   } catch (error) {
-    logger.error(`Error al cambiar la contraseña para el usuario ID: ${id} - ${error.message}`);
-    res.status(500).json({ message: error.message || "Error al cambiar la contraseña" });
+    logger.error(
+      `Error al cambiar la contraseña para el usuario ID: ${id} - ${error.message}`
+    );
+    res
+      .status(500)
+      .json({ message: error.message || "Error al cambiar la contraseña" });
   }
 };
 
@@ -201,11 +418,15 @@ const getSidebarByUserId = async (req, res) => {
       .input("ID_USUARIO", sql.Int, parseInt(id))
       .execute("SP_GET_MENUS_SUBMENUS_JSON");
 
-    logger.debug(`Resultado crudo del procedimiento: ${JSON.stringify(result, null, 2)}`);
+    logger.debug(
+      `Resultado crudo del procedimiento: ${JSON.stringify(result, null, 2)}`
+    );
 
     // Verificar si recordset existe y tiene datos
     if (!result.recordset || result.recordset.length === 0) {
-      logger.warn(`No se encontraron datos en recordset para el usuario ID: ${id}`);
+      logger.warn(
+        `No se encontraron datos en recordset para el usuario ID: ${id}`
+      );
       return res.status(200).json([]);
     }
 
@@ -220,25 +441,45 @@ const getSidebarByUserId = async (req, res) => {
         sidebarData = JSON.parse(result.recordset[0][jsonColumn]);
         logger.debug(`JSON parseado: ${JSON.stringify(sidebarData, null, 2)}`);
       } else {
-        logger.warn(`La columna ${jsonColumn} está vacía o es nula para ID: ${id}`);
+        logger.warn(
+          `La columna ${jsonColumn} está vacía o es nula para ID: ${id}`
+        );
         return res.status(200).json([]);
       }
     } catch (parseError) {
-      logger.error(`Error al parsear JSON desde ${jsonColumn}: ${parseError.message}`);
+      logger.error(
+        `Error al parsear JSON desde ${jsonColumn}: ${parseError.message}`
+      );
       throw parseError;
     }
 
     // Asegurar que submenus sea un arreglo
-    const parsedSidebarData = sidebarData.map(item => ({
+    const parsedSidebarData = sidebarData.map((item) => ({
       ...item,
-      submenus: item.submenus ? (typeof item.submenus === 'string' ? JSON.parse(item.submenus) : item.submenus) : []
+      submenus: item.submenus
+        ? typeof item.submenus === "string"
+          ? JSON.parse(item.submenus)
+          : item.submenus
+        : [],
     }));
 
-    logger.info(`Sidebar procesado para ID ${id}: ${JSON.stringify(parsedSidebarData, null, 2)}`);
+    logger.info(
+      `Sidebar procesado para ID ${id}: ${JSON.stringify(
+        parsedSidebarData,
+        null,
+        2
+      )}`
+    );
     res.status(200).json(parsedSidebarData);
   } catch (error) {
-    logger.error(`Error al obtener el menú del usuario ID ${id}: ${error.message}`, { stack: error.stack });
-    res.status(500).json({ message: "Error al obtener el menú del usuario", error: error.message });
+    logger.error(
+      `Error al obtener el menú del usuario ID ${id}: ${error.message}`,
+      { stack: error.stack }
+    );
+    res.status(500).json({
+      message: "Error al obtener el menú del usuario",
+      error: error.message,
+    });
   }
 };
 
@@ -289,20 +530,26 @@ const getUserRoles = async (req, res) => {
 
   try {
     const pool = await poolPromise;
-    const result = await pool
-      .request()
-      .input("userId", sql.Int, userId)
-      .query(`
+    const result = await pool.request().input("userId", sql.Int, userId).query(`
         SELECT ID_ROL FROM MAE_USUARIO_ROL WHERE ID_USUARIO = @userId
       `);
     res.status(200).json(result.recordset);
   } catch (error) {
-    logger.error(`Error al obtener roles para userId ${userId}: ${error.message}`);
-    res.status(500).json({ message: "Error al obtener roles", error: error.message });
+    logger.error(
+      `Error al obtener roles para userId ${userId}: ${error.message}`
+    );
+    res
+      .status(500)
+      .json({ message: "Error al obtener roles", error: error.message });
   }
 };
 
 module.exports = {
+  getPerfiles,
+  getFases,
+  getDepartamentos,
+  register,
+  getAllUsers,
   getUserTypes,
   getSexes,
   updateUser,
@@ -311,5 +558,5 @@ module.exports = {
   getRoles,
   asignarRolComite,
   quitarRolComite,
-  getUserRoles
+  getUserRoles,
 };

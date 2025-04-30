@@ -2,9 +2,12 @@ const express = require("express");
 const router = express.Router();
 const authMiddleware = require("../middleware/authMiddleware");
 const { checkPermission } = require("../middleware/permissions");
-const logger = require("../config/logger");
-
 const {
+  register,
+  getPerfiles,
+  getFases,
+  getDepartamentos,
+  getAllUsers,
   getUserTypes,
   getSexes,
   getRoles,
@@ -13,20 +16,24 @@ const {
   changePassword,
   asignarRolComite,
   quitarRolComite,
-  getUserRoles
+  getUserRoles,
 } = require("../controllers/userController");
 
-// Rutas protegidas con ID_MENU=1 (Usuarios)
+router.post("/register", authMiddleware, checkPermission({ menuId: 1 }), register);
+router.get("/users", authMiddleware, checkPermission({ menuId: 1 }), getAllUsers);
 router.put("/users/:id", authMiddleware, checkPermission({ menuId: 1 }), updateUser);
 router.put("/users/change-password/:id", authMiddleware, checkPermission({ menuId: 1 }), changePassword);
 router.post("/users/:id/asignar-comite", authMiddleware, checkPermission({ menuId: 1 }), asignarRolComite);
 router.delete("/users/:id/quitar-comite", authMiddleware, checkPermission({ menuId: 1 }), quitarRolComite);
 
-// Rutas sin permisos específicos
 router.get("/user-types", getUserTypes);
 router.get("/sexes", getSexes);
 router.get("/get-roles", getRoles);
 router.get("/user-roles", authMiddleware, getUserRoles);
 router.get("/sidebar/:id", authMiddleware, getSidebarByUserId);
+
+router.get("/perfiles", authMiddleware, getPerfiles);
+router.get("/fases", authMiddleware, getFases);
+router.get("/departamentos", authMiddleware, getDepartamentos);
 
 module.exports = router;
