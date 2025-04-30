@@ -18,7 +18,7 @@ const transporter = nodemailer.createTransport({
 const sendPasswordEmail = async (email, password, fullName) => {
   try {
     const htmlTemplate = fs.readFileSync(
-      path.join(__dirname, "../../html", "resetPasswordEmail.html"),
+      path.join(__dirname, "../../html", "welcomeEmail.html"),
       "utf8"
     );
     const htmlContent = htmlTemplate
