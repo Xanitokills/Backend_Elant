@@ -13,7 +13,8 @@ CREATE OR ALTER PROCEDURE SP_REGISTRAR_PERSONA
     @INICIO_RESIDENCIA VARCHAR(10) = NULL, -- Formato DD/MM/YYYY
     @FASES_TRABAJADOR VARCHAR(MAX) = NULL, -- Lista de ID_FASE en formato JSON
     @USUARIO VARCHAR(50) = NULL,
-    @CONTRASENA VARCHAR(255) = NULL,
+    @CONTRASENA_HASH VARCHAR(255) = NULL, -- Recibimos el hash ya generado
+    @CONTRASENA_SALT VARCHAR(50) = NULL, -- Recibimos el SALT ya generado
     @ROLES VARCHAR(MAX) = NULL, -- Lista de ID_ROL en formato JSON
     @ID_PERSONA_OUT INT OUTPUT,
     @ID_USUARIO_OUT INT OUTPUT
@@ -21,7 +22,7 @@ AS
 BEGIN
     SET NOCOUNT ON;
     BEGIN TRY
-        -- Validaciones
+        -- Validaciones existentes (sin cambios)
         IF @NOMBRES IS NULL OR @APELLIDOS IS NULL OR @DNI IS NULL OR 
            @FECHA_NACIMIENTO IS NULL OR @ID_SEXO IS NULL OR @ID_PERFIL IS NULL
             THROW 50001, 'Los campos NOMBRES, APELLIDOS, DNI, FECHA_NACIMIENTO, ID_SEXO e ID_PERFIL son obligatorios.', 1;
@@ -65,8 +66,8 @@ BEGIN
         IF @USUARIO IS NOT NULL AND EXISTS (SELECT 1 FROM MAE_USUARIO WHERE USUARIO = @USUARIO AND ESTADO = 1)
             THROW 50012, 'El usuario ya está registrado.', 1;
 
-        IF @USUARIO IS NOT NULL AND (@CORREO IS NULL OR @CONTRASENA IS NULL)
-            THROW 50013, 'El CORREO y CONTRASENA son obligatorios si se registra un usuario.', 1;
+        IF @USUARIO IS NOT NULL AND (@CORREO IS NULL OR @CONTRASENA_HASH IS NULL OR @CONTRASENA_SALT IS NULL)
+            THROW 50013, 'El CORREO, CONTRASENA_HASH y CONTRASENA_SALT son obligatorios si se registra un usuario.', 1;
 
         -- Iniciar transacción
         BEGIN TRANSACTION;
@@ -89,6 +90,29 @@ BEGIN
             DECLARE @DepartamentoID INT;
             DECLARE departamentos_cursor CURSOR FOR
                 SELECT value FROM OPENJSON(@DEPARTAMENTOS);
+
+            -- Validar duplicados antes de insertar
+            DECLARE @Duplicados TABLE (DepartamentoID INT);
+            DECLARE @DuplicadoIDs VARCHAR(MAX);
+
+            INSERT INTO @Duplicados (DepartamentoID)
+            SELECT value
+            FROM OPENJSON(@DEPARTAMENTOS)
+            WHERE value IN (
+                SELECT ID_DEPARTAMENTO 
+                FROM MAE_RESIDENTE 
+                WHERE ID_PERSONA = @ID_PERSONA_OUT AND ESTADO = 1
+            );
+
+            IF EXISTS (SELECT 1 FROM @Duplicados)
+            BEGIN
+                SET @DuplicadoIDs = (
+                    SELECT STRING_AGG(CAST(DepartamentoID AS VARCHAR), ', ') 
+                    FROM @Duplicados
+                );
+                DECLARE @ErrorMsg NVARCHAR(4000) = 'El residente ya está registrado en los departamentos: ' + ISNULL(@DuplicadoIDs, '');
+                THROW 50014, @ErrorMsg, 1;
+            END;
 
             OPEN departamentos_cursor;
             FETCH NEXT FROM departamentos_cursor INTO @DepartamentoID;
@@ -136,22 +160,18 @@ BEGIN
             DEALLOCATE fases_cursor;
         END
 
-        -- Si tiene acceso al sistema, registrar en MAE_USUARIO
+        -- Si se proporciona un usuario, registrar en MAE_USUARIO
         IF @USUARIO IS NOT NULL
         BEGIN
-            DECLARE @SALT VARCHAR(50) = CONVERT(VARCHAR(50), NEWID());
-            DECLARE @CONTRASENA_HASH VARCHAR(255) = HASHBYTES('SHA2_256', @CONTRASENA + @SALT);
-
             INSERT INTO MAE_USUARIO (
                 USUARIO, CONTRASENA_HASH, CONTRASENA_SALT, ESTADO, PRIMER_INICIO, ID_PERSONA
             )
             VALUES (
-                @USUARIO, @CONTRASENA_HASH, @SALT, 1, 1, @ID_PERSONA_OUT
+                @USUARIO, @CONTRASENA_HASH, @CONTRASENA_SALT, 1, 1, @ID_PERSONA_OUT
             );
 
             SET @ID_USUARIO_OUT = SCOPE_IDENTITY();
 
-            -- Registrar roles en MAE_USUARIO_ROL
             IF @ROLES IS NOT NULL
             BEGIN
                 INSERT INTO MAE_USUARIO_ROL (ID_USUARIO, ID_ROL)

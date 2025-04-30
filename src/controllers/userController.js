@@ -5,6 +5,7 @@ const sql = require("mssql");
 const logger = require("../config/logger");
 const fs = require("fs");
 const path = require("path");
+const bcrypt = require("bcrypt");
 
 const transporter = nodemailer.createTransport({
   service: "gmail",
@@ -65,12 +66,25 @@ const register = async (req, res) => {
   try {
     const pool = await poolPromise;
 
-    const password = acceso_sistema ? crypto.randomBytes(4).toString("hex") : null;
+    const password = acceso_sistema
+      ? crypto.randomBytes(4).toString("hex")
+      : null;
     const finalUsuario = acceso_sistema ? usuario : null;
     const finalRoles = acceso_sistema ? roles : null;
 
+    // Generar el hash y el SALT con bcrypt si hay contraseña
+    let hashedPassword = null;
+    let salt = null;
+    if (acceso_sistema && password) {
+      const saltRounds = 10;
+      salt = await bcrypt.genSalt(saltRounds); // Genera el SALT
+      hashedPassword = await bcrypt.hash(password, salt); // Genera el hash con el SALT
+    }
+
     const rolesJson = finalRoles ? JSON.stringify(finalRoles) : null;
-    const departamentosJson = departamentos ? JSON.stringify(departamentos) : null;
+    const departamentosJson = departamentos
+      ? JSON.stringify(departamentos)
+      : null;
     const fasesTrabajadorJson = fases_trabajador
       ? JSON.stringify(fases_trabajador)
       : null;
@@ -89,31 +103,40 @@ const register = async (req, res) => {
       .input("DEPARTAMENTOS", sql.VarChar(sql.MAX), departamentosJson || null)
       .input("ID_CLASIFICACION", sql.Int, id_clasificacion || null)
       .input("INICIO_RESIDENCIA", sql.VarChar(10), inicio_residencia || null)
-      .input("FASES_TRABAJADOR", sql.VarChar(sql.MAX), fasesTrabajadorJson || null)
+      .input(
+        "FASES_TRABAJADOR",
+        sql.VarChar(sql.MAX),
+        fasesTrabajadorJson || null
+      )
       .input("USUARIO", sql.VarChar(50), finalUsuario || null)
-      .input("CONTRASENA", sql.VarChar(255), password || null)
+      .input("CONTRASENA_HASH", sql.VarChar(255), hashedPassword || null)
+      .input("CONTRASENA_SALT", sql.VarChar(50), salt || null)
       .input("ROLES", sql.VarChar(sql.MAX), rolesJson || null)
       .output("ID_PERSONA_OUT", sql.Int)
       .output("ID_USUARIO_OUT", sql.Int);
 
-    logger.info("Ejecutando SP_REGISTRAR_PERSONA con los siguientes parámetros:", {
-      NOMBRES: nombres.toUpperCase(),
-      APELLIDOS: apellidos.toUpperCase(),
-      DNI: dni,
-      CORREO: correo,
-      CELULAR: celular,
-      CONTACTO_EMERGENCIA: contacto_emergencia,
-      FECHA_NACIMIENTO: fecha_nacimiento,
-      ID_SEXO: id_sexo,
-      ID_PERFIL: id_perfil,
-      DEPARTAMENTOS: departamentosJson,
-      ID_CLASIFICACION: id_clasificacion,
-      INICIO_RESIDENCIA: inicio_residencia,
-      FASES_TRABAJADOR: fasesTrabajadorJson,
-      USUARIO: finalUsuario,
-      CONTRASENA: password,
-      ROLES: rolesJson,
-    });
+    logger.info(
+      "Ejecutando SP_REGISTRAR_PERSONA con los siguientes parámetros:",
+      {
+        NOMBRES: nombres.toUpperCase(),
+        APELLIDOS: apellidos.toUpperCase(),
+        DNI: dni,
+        CORREO: correo,
+        CELULAR: celular,
+        CONTACTO_EMERGENCIA: contacto_emergencia,
+        FECHA_NACIMIENTO: fecha_nacimiento,
+        ID_SEXO: id_sexo,
+        ID_PERFIL: id_perfil,
+        DEPARTAMENTOS: departamentosJson,
+        ID_CLASIFICACION: id_clasificacion,
+        INICIO_RESIDENCIA: inicio_residencia,
+        FASES_TRABAJADOR: fasesTrabajadorJson,
+        USUARIO: finalUsuario,
+        CONTRASENA_HASH: hashedPassword,
+        CONTRASENA_SALT: salt,
+        ROLES: rolesJson,
+      }
+    );
 
     const result = await request.execute("SP_REGISTRAR_PERSONA");
 
@@ -151,21 +174,20 @@ const register = async (req, res) => {
         error.originalError?.message ||
         error.sqlMessage ||
         "N/A",
-      errorNumber:
-        error.originalError?.info?.number || error.number || "N/A",
+      errorNumber: error.originalError?.info?.number || error.number || "N/A",
       errorCode: error.code || "N/A",
       errorState: error.state || "N/A",
       stack: error.stack,
     };
     logger.error(`Error al registrar persona:`, errorDetails);
 
-    // Mapear códigos de error específicos para el frontend
     let statusCode = 400;
     let clientMessage = errorDetails.sqlError;
 
     switch (errorDetails.errorNumber) {
       case 50001:
-        clientMessage = "Los campos NOMBRES, APELLIDOS, DNI, FECHA_NACIMIENTO, ID_SEXO e ID_PERFIL son obligatorios.";
+        clientMessage =
+          "Los campos NOMBRES, APELLIDOS, DNI, FECHA_NACIMIENTO, ID_SEXO e ID_PERFIL son obligatorios.";
         break;
       case 50002:
         clientMessage = "El DNI debe tener exactamente 8 dígitos.";
@@ -180,34 +202,40 @@ const register = async (req, res) => {
         clientMessage = "El celular debe comenzar con 9 y tener 9 dígitos.";
         break;
       case 50006:
-        clientMessage = "El contacto de emergencia debe comenzar con 9 y tener 9 dígitos.";
+        clientMessage =
+          "El contacto de emergencia debe comenzar con 9 y tener 9 dígitos.";
         break;
       case 50007:
-        clientMessage = "El contacto de emergencia es obligatorio para menores de edad.";
+        clientMessage =
+          "El contacto de emergencia es obligatorio para menores de edad.";
         break;
       case 50008:
         clientMessage = "El celular es obligatorio para mayores de edad.";
         break;
       case 50009:
-        clientMessage = "DEPARTAMENTOS, ID_CLASIFICACION e INICIO_RESIDENCIA son obligatorios para el perfil Residente.";
+        clientMessage =
+          "DEPARTAMENTOS, ID_CLASIFICACION e INICIO_RESIDENCIA son obligatorios para el perfil Residente.";
         break;
       case 50010:
         clientMessage = "El formato de INICIO_RESIDENCIA debe ser DD/MM/YYYY.";
         break;
       case 50011:
-        clientMessage = "FASES_TRABAJADOR es obligatorio para perfiles de trabajador.";
+        clientMessage =
+          "FASES_TRABAJADOR es obligatorio para perfiles de trabajador.";
         break;
       case 50012:
         clientMessage = "El usuario ya está registrado.";
         break;
       case 50013:
-        clientMessage = "El CORREO y CONTRASENA son obligatorios si se registra un usuario.";
+        clientMessage =
+          "El CORREO, CONTRASENA_HASH y CONTRASENA_SALT son obligatorios si se registra un usuario.";
         break;
       case 50014:
-        clientMessage = errorDetails.sqlError; // Mostrar el mensaje completo del error (incluye los departamentos duplicados)
+        clientMessage = errorDetails.sqlError;
         break;
       default:
-        clientMessage = "Error al registrar la persona: " + errorDetails.sqlError;
+        clientMessage =
+          "Error al registrar la persona: " + errorDetails.sqlError;
         statusCode = 500;
     }
 
@@ -218,7 +246,6 @@ const register = async (req, res) => {
     });
   }
 };
-
 // Métodos existentes (sin cambios)
 const getPerfiles = async (req, res) => {
   try {
@@ -442,7 +469,9 @@ const changePassword = async (req, res) => {
 
     if (!correo) {
       logger.warn(`Usuario con ID ${id} no tiene correo registrado`);
-      return res.status(400).json({ message: "El usuario no tiene un correo registrado" });
+      return res
+        .status(400)
+        .json({ message: "El usuario no tiene un correo registrado" });
     }
 
     const fullName = `${nombres} ${apellidos}`;
@@ -454,11 +483,10 @@ const changePassword = async (req, res) => {
         .json({ message: "Error al enviar el correo de restablecimiento" });
     }
 
-    const salt = crypto.randomUUID();
-    const hashedPassword = crypto
-      .createHash("sha256")
-      .update(newPassword + salt)
-      .digest("hex");
+    // Generar el hash y el SALT con bcrypt
+    const saltRounds = 10;
+    const salt = await bcrypt.genSalt(saltRounds);
+    const hashedPassword = await bcrypt.hash(newPassword, salt);
 
     await pool
       .request()
