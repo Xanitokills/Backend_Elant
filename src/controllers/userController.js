@@ -60,6 +60,8 @@ const register = async (req, res) => {
     acceso_sistema,
   } = req.body;
 
+  logger.info("Datos recibidos en /register:", req.body);
+
   // Validaciones
   if (
     !nombres ||
@@ -69,20 +71,31 @@ const register = async (req, res) => {
     !id_sexo ||
     !id_perfil
   ) {
+    logger.warn("Campos obligatorios faltantes:", {
+      nombres,
+      apellidos,
+      dni,
+      fecha_nacimiento,
+      id_sexo,
+      id_perfil,
+    });
     return res.status(400).json({ message: "Campos obligatorios faltantes" });
   }
 
   if (!/^[0-9]{8}$/.test(dni)) {
+    logger.warn("DNI inválido:", dni);
     return res.status(400).json({ message: "El DNI debe tener 8 dígitos" });
   }
 
   if (celular && !/^[9][0-9]{8}$/.test(celular)) {
+    logger.warn("Celular inválido:", celular);
     return res
       .status(400)
       .json({ message: "El celular debe comenzar con 9 y tener 9 dígitos" });
   }
 
   if (contacto_emergencia && !/^[9][0-9]{8}$/.test(contacto_emergencia)) {
+    logger.warn("Contacto de emergencia inválido:", contacto_emergencia);
     return res
       .status(400)
       .json({
@@ -92,10 +105,16 @@ const register = async (req, res) => {
   }
 
   if (correo && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(correo)) {
+    logger.warn("Correo inválido:", correo);
     return res.status(400).json({ message: "Formato de correo inválido" });
   }
 
   if (acceso_sistema && (!correo || !usuario || !roles || roles.length === 0)) {
+    logger.warn("Faltan datos para acceso al sistema:", {
+      correo,
+      usuario,
+      roles,
+    });
     return res.status(400).json({
       message: "Correo, usuario y roles son obligatorios para acceso al sistema",
     });
@@ -114,24 +133,33 @@ const register = async (req, res) => {
   }
 
   if (age < 18 && !contacto_emergencia) {
+    logger.warn("Contacto de emergencia faltante para menor de edad:", age);
     return res.status(400).json({
       message: "El contacto de emergencia es obligatorio para menores de edad",
     });
   }
 
   if (age >= 18 && !celular) {
+    logger.warn("Celular faltante para mayor de edad:", age);
     return res.status(400).json({
       message: "El celular es obligatorio para mayores de edad",
     });
   }
 
-  if (id_perfil === 1) {
+  const idPerfilNum = parseInt(id_perfil);
+
+  if (idPerfilNum === 1) {
     if (
       !departamentos ||
       departamentos.length === 0 ||
       !id_clasificacion ||
       !inicio_residencia
     ) {
+      logger.warn("Campos faltantes para residente:", {
+        departamentos,
+        id_clasificacion,
+        inicio_residencia,
+      });
       return res.status(400).json({
         message:
           "Departamentos, tipo de residente y fecha de inicio de residencia son obligatorios para residentes",
@@ -139,6 +167,7 @@ const register = async (req, res) => {
     }
 
     if (!/^\d{2}\/\d{2}\/\d{4}$/.test(inicio_residencia)) {
+      logger.warn("Formato de inicio_residencia inválido:", inicio_residencia);
       return res.status(400).json({
         message:
           "La fecha de inicio de residencia debe estar en formato DD/MM/YYYY",
@@ -146,7 +175,8 @@ const register = async (req, res) => {
     }
   }
 
-  if (id_perfil !== 1 && (!fases_trabajador || fases_trabajador.length === 0)) {
+  if (idPerfilNum !== 1 && (!fases_trabajador || fases_trabajador.length === 0)) {
+    logger.warn("Fases faltantes para trabajador:", fases_trabajador);
     return res.status(400).json({
       message: "Debe seleccionar al menos una fase para trabajadores",
     });
@@ -155,7 +185,11 @@ const register = async (req, res) => {
   try {
     const pool = await poolPromise;
     const password = acceso_sistema ? crypto.randomBytes(4).toString("hex") : null;
-    const rolesJson = roles ? JSON.stringify(roles) : null;
+    // Asegurarse de que usuario y roles sean null si acceso_sistema es false
+    const finalUsuario = acceso_sistema ? usuario : null;
+    const finalRoles = acceso_sistema ? roles : null;
+
+    const rolesJson = finalRoles ? JSON.stringify(finalRoles) : null;
     const departamentosJson = departamentos ? JSON.stringify(departamentos) : null;
     const fasesTrabajadorJson = fases_trabajador
       ? JSON.stringify(fases_trabajador)
@@ -176,18 +210,41 @@ const register = async (req, res) => {
       .input("ID_CLASIFICACION", sql.Int, id_clasificacion || null)
       .input("INICIO_RESIDENCIA", sql.VarChar(10), inicio_residencia || null)
       .input("FASES_TRABAJADOR", sql.VarChar(sql.MAX), fasesTrabajadorJson || null)
-      .input("USUARIO", sql.VarChar(50), usuario || null)
+      .input("USUARIO", sql.VarChar(50), finalUsuario || null)
       .input("CONTRASENA", sql.VarChar(255), password || null)
       .input("ROLES", sql.VarChar(sql.MAX), rolesJson || null)
       .output("ID_PERSONA_OUT", sql.Int)
       .output("ID_USUARIO_OUT", sql.Int);
 
+    logger.info("Ejecutando SP_REGISTRAR_PERSONA con los siguientes parámetros:", {
+      NOMBRES: nombres.toUpperCase(),
+      APELLIDOS: apellidos.toUpperCase(),
+      DNI: dni,
+      CORREO: correo,
+      CELULAR: celular,
+      CONTACTO_EMERGENCIA: contacto_emergencia,
+      FECHA_NACIMIENTO: fecha_nacimiento,
+      ID_SEXO: id_sexo,
+      ID_PERFIL: id_perfil,
+      DEPARTAMENTOS: departamentosJson,
+      ID_CLASIFICACION: id_clasificacion,
+      INICIO_RESIDENCIA: inicio_residencia,
+      FASES_TRABAJADOR: fasesTrabajadorJson,
+      USUARIO: finalUsuario,
+      CONTRASENA: password,
+      ROLES: rolesJson,
+    });
+
     const result = await request.execute("SP_REGISTRAR_PERSONA");
+
+    logger.info("Resultado de SP_REGISTRAR_PERSONA:", {
+      ID_PERSONA_OUT: result.output.ID_PERSONA_OUT,
+      ID_USUARIO_OUT: result.output.ID_USUARIO_OUT,
+    });
 
     const id_persona = result.output.ID_PERSONA_OUT;
     const id_usuario = result.output.ID_USUARIO_OUT;
 
-    // Enviar correo si se creó un usuario
     if (acceso_sistema && correo && password) {
       const success = await sendPasswordEmail(
         correo,
@@ -207,11 +264,21 @@ const register = async (req, res) => {
       id_usuario,
     });
   } catch (error) {
-    logger.error(`Error al registrar persona: ${error.message}`);
-    res.status(500).json({ message: error.message || "Error del servidor" });
+    // Mejorar el manejo de errores para capturar mensajes de SQL Server
+    const errorDetails = {
+      message: error.message || "Error desconocido",
+      sqlError: error.originalError?.info?.message || error.sqlMessage || "N/A",
+      errorNumber: error.originalError?.info?.number || error.number || "N/A",
+      errorCode: error.code || "N/A",
+      errorState: error.state || "N/A",
+      stack: error.stack,
+    };
+    logger.error(`Error al registrar persona:`, errorDetails);
+    res.status(500).json({ message: errorDetails.sqlError || "Error del servidor" });
   }
 };
 
+// Métodos existentes (sin cambios)
 const getPerfiles = async (req, res) => {
   try {
     const pool = await poolPromise;
@@ -272,7 +339,6 @@ const getTiposResidente = async (req, res) => {
   }
 };
 
-// Métodos existentes
 const getUserTypes = async (req, res) => {
   try {
     const pool = await poolPromise;
@@ -571,6 +637,7 @@ const quitarRolComite = async (req, res) => {
       .request()
       .input("ID_USUARIO", sql.Int, id)
       .input("ID_ROL", sql.Int, 6)
+
       .execute("SP_ELIMINAR_USUARIO_ROL");
 
     res.status(200).json({ message: "Rol Comité eliminado exitosamente" });
