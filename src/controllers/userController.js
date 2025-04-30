@@ -22,7 +22,7 @@ const sendPasswordEmail = async (email, password, fullName) => {
       "utf8"
     );
     const htmlContent = htmlTemplate
-      .replace("{{newPassword}}", password)
+      .replace("{{initialPassword}}", password) // Cambiado de {{newPassword}} a {{initialPassword}}
       .replace("{{fullName}}", fullName);
 
     const mailOptions = {

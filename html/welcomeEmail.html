@@ -10,6 +10,7 @@
         background-color: #93c5fd; /* COLOR_LIGHT_BLUE */
         margin: 0;
         padding: 0;
+        line-height: 0; /* Prevent extra spacing */
       }
 
       .container {
@@ -34,10 +35,11 @@
         display: flex;
         justify-content: flex-end;
         align-items: center;
+        line-height: 0; /* Prevent extra spacing */
       }
 
       .logo {
-        display: flex;
+        display: inline-flex;
         align-items: center;
         background-color: #ffffff;
         border-radius: 50%;
@@ -45,75 +47,43 @@
         height: 50px;
         justify-content: center;
         position: relative;
-      }
-
-      .logo::before {
-        content: "";
-        display: block;
-        width: 20px;
-        height: 30px;
-        background-color: #4a5568; /* COLOR_DARK_GRAY for the building body */
-        position: absolute;
-        bottom: 10px;
-        border-radius: 2px;
-      }
-
-      .logo::after {
-        content: "";
-        display: block;
-        width: 10px;
-        height: 5px;
-        background-color: #93c5fd; /* COLOR_LIGHT_BLUE for the antenna */
-        position: absolute;
-        top: 5px;
-        left: 50%;
-        transform: translateX(-50%);
-      }
-
-      .logo-windows {
-        position: absolute;
-        width: 4px;
-        height: 4px;
-        background-color: #93c5fd; /* COLOR_LIGHT_BLUE for windows */
-        top: 15px;
-        left: 50%;
-        transform: translateX(-50%);
-        box-shadow: 
-          6px 0 0 #93c5fd, /* Window to the right */
-          -6px 0 0 #93c5fd, /* Window to the left */
-          0 8px 0 #93c5fd, /* Window below */
-          6px 8px 0 #93c5fd, /* Window below right */
-          -6px 8px 0 #93c5fd; /* Window below left */
+        font-size: 16px;
+        font-weight: bold;
+        color: #4a5568; /* COLOR_DARK_GRAY for the logo text */
+        line-height: 50px; /* Center the text vertically */
       }
 
       .logo-text {
         font-size: 12px;
-        color: #4a5568; /* COLOR_DARK_GRAY */
+        color: #ffffff; /* White as requested */
         font-weight: bold;
         margin-left: 5px;
+        line-height: 50px; /* Align with logo */
       }
 
       .content {
         padding: 30px;
         text-align: center;
+        line-height: normal; /* Reset for content */
       }
 
       .h1 {
         color: #60a5fa; /* COLOR_VIBRANT_BLUE */
         font-size: 30px;
-        margin-bottom: 20px;
+        margin: 0 0 20px 0;
       }
 
       .h2 {
         color: #6caeb6; /* COLOR_VERDE */
         font-size: 22px;
-        margin-bottom: 20px;
+        margin: 0 0 20px 0;
       }
 
       p {
         font-size: 14px;
         color: #4a5568; /* COLOR_DARK_GRAY */
         line-height: 1.6;
+        margin: 0 0 10px 0;
       }
 
       .password-box {
@@ -139,7 +109,7 @@
         text-decoration: none;
         border-radius: 8px;
         display: inline-block;
-        margin: 20px auto;
+        margin: 20px 0;
         transition: background-color 0.3s ease;
       }
 
@@ -155,6 +125,7 @@
         padding: 20px;
         background-color: #f4f8f4;
         border-radius: 0 0 10px 10px;
+        line-height: normal;
       }
 
       .footer a {
@@ -176,34 +147,13 @@
         .logo {
           width: 40px;
           height: 40px;
-        }
-
-        .logo::before {
-          width: 16px;
-          height: 24px;
-          bottom: 8px;
-        }
-
-        .logo::after {
-          width: 8px;
-          height: 4px;
-          top: 4px;
-        }
-
-        .logo-windows {
-          width: 3px;
-          height: 3px;
-          top: 12px;
-          box-shadow: 
-            5px 0 0 #93c5fd, 
-            -5px 0 0 #93c5fd, 
-            0 6px 0 #93c5fd, 
-            5px 6px 0 #93c5fd, 
-            -5px 6px 0 #93c5fd;
+          font-size: 14px;
+          line-height: 40px;
         }
 
         .logo-text {
           font-size: 10px;
+          line-height: 40px;
         }
 
         .h1 {
@@ -229,9 +179,7 @@
   <body>
     <div class="container">
       <div class="header">
-        <div class="logo">
-          <div class="logo-windows"></div>
-        </div>
+        <div class="logo">[SH]</div>
         <span class="logo-text">SoftHome</span>
       </div>
       <div class="content">
