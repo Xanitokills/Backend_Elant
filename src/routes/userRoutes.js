@@ -7,6 +7,7 @@ const {
   getPerfiles,
   getFases,
   getDepartamentos,
+  getTiposResidente,
   getAllUsers,
   getUserTypes,
   getSexes,
@@ -35,5 +36,6 @@ router.get("/sidebar/:id", authMiddleware, getSidebarByUserId);
 router.get("/perfiles", authMiddleware, getPerfiles);
 router.get("/fases", authMiddleware, getFases);
 router.get("/departamentos", authMiddleware, getDepartamentos);
+router.get("/tipos-residente", authMiddleware, getTiposResidente);
 
 module.exports = router;

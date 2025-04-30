@@ -1,13 +1,10 @@
 const nodemailer = require("nodemailer");
-const bcrypt = require("bcrypt");
 const crypto = require("crypto");
 const { poolPromise } = require("../config/db");
 const sql = require("mssql");
 const logger = require("../config/logger");
 const fs = require("fs");
 const path = require("path");
-
-//NUEVOS METODOS
 
 const transporter = nodemailer.createTransport({
   service: "gmail",
@@ -54,49 +51,131 @@ const register = async (req, res) => {
     fecha_nacimiento,
     id_sexo,
     id_perfil,
-    id_departamento,
+    departamentos,
+    id_clasificacion,
+    inicio_residencia,
+    fases_trabajador,
     usuario,
-    roles, // Array de ID_ROL
-    acceso_sistema, // Boolean
+    roles,
+    acceso_sistema,
   } = req.body;
 
   // Validaciones
-  if (!nombres || !apellidos || !id_sexo || !id_perfil) {
+  if (
+    !nombres ||
+    !apellidos ||
+    !dni ||
+    !fecha_nacimiento ||
+    !id_sexo ||
+    !id_perfil
+  ) {
     return res.status(400).json({ message: "Campos obligatorios faltantes" });
+  }
+
+  if (!/^[0-9]{8}$/.test(dni)) {
+    return res.status(400).json({ message: "El DNI debe tener 8 dígitos" });
+  }
+
+  if (celular && !/^[9][0-9]{8}$/.test(celular)) {
+    return res
+      .status(400)
+      .json({ message: "El celular debe comenzar con 9 y tener 9 dígitos" });
+  }
+
+  if (contacto_emergencia && !/^[9][0-9]{8}$/.test(contacto_emergencia)) {
+    return res
+      .status(400)
+      .json({
+        message:
+          "El contacto de emergencia debe comenzar con 9 y tener 9 dígitos",
+      });
+  }
+
+  if (correo && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(correo)) {
+    return res.status(400).json({ message: "Formato de correo inválido" });
   }
 
   if (acceso_sistema && (!correo || !usuario || !roles || roles.length === 0)) {
     return res.status(400).json({
-      message:
-        "Correo, usuario y roles son obligatorios para acceso al sistema",
+      message: "Correo, usuario y roles son obligatorios para acceso al sistema",
     });
   }
 
-  if (id_perfil === 1 && !id_departamento) {
-    return res
-      .status(400)
-      .json({ message: "ID_DEPARTAMENTO es obligatorio para residentes" });
+  // Calcular edad
+  const birthDate = new Date(fecha_nacimiento);
+  const today = new Date();
+  let age = today.getFullYear() - birthDate.getFullYear();
+  const monthDiff = today.getMonth() - birthDate.getMonth();
+  if (
+    monthDiff < 0 ||
+    (monthDiff === 0 && today.getDate() < birthDate.getDate())
+  ) {
+    age--;
+  }
+
+  if (age < 18 && !contacto_emergencia) {
+    return res.status(400).json({
+      message: "El contacto de emergencia es obligatorio para menores de edad",
+    });
+  }
+
+  if (age >= 18 && !celular) {
+    return res.status(400).json({
+      message: "El celular es obligatorio para mayores de edad",
+    });
+  }
+
+  if (id_perfil === 1) {
+    if (
+      !departamentos ||
+      departamentos.length === 0 ||
+      !id_clasificacion ||
+      !inicio_residencia
+    ) {
+      return res.status(400).json({
+        message:
+          "Departamentos, tipo de residente y fecha de inicio de residencia son obligatorios para residentes",
+      });
+    }
+
+    if (!/^\d{2}\/\d{2}\/\d{4}$/.test(inicio_residencia)) {
+      return res.status(400).json({
+        message:
+          "La fecha de inicio de residencia debe estar en formato DD/MM/YYYY",
+      });
+    }
+  }
+
+  if (id_perfil !== 1 && (!fases_trabajador || fases_trabajador.length === 0)) {
+    return res.status(400).json({
+      message: "Debe seleccionar al menos una fase para trabajadores",
+    });
   }
 
   try {
     const pool = await poolPromise;
-    const password = acceso_sistema
-      ? crypto.randomBytes(4).toString("hex")
-      : null;
+    const password = acceso_sistema ? crypto.randomBytes(4).toString("hex") : null;
     const rolesJson = roles ? JSON.stringify(roles) : null;
+    const departamentosJson = departamentos ? JSON.stringify(departamentos) : null;
+    const fasesTrabajadorJson = fases_trabajador
+      ? JSON.stringify(fases_trabajador)
+      : null;
 
     const request = pool
       .request()
-      .input("NOMBRES", sql.VarChar(50), nombres)
-      .input("APELLIDOS", sql.VarChar(50), apellidos)
+      .input("NOMBRES", sql.VarChar(50), nombres.toUpperCase())
+      .input("APELLIDOS", sql.VarChar(50), apellidos.toUpperCase())
       .input("DNI", sql.VarChar(12), dni)
       .input("CORREO", sql.VarChar(100), correo || null)
       .input("CELULAR", sql.VarChar(9), celular || null)
       .input("CONTACTO_EMERGENCIA", sql.VarChar(9), contacto_emergencia || null)
-      .input("FECHA_NACIMIENTO", sql.Date, fecha_nacimiento || null)
+      .input("FECHA_NACIMIENTO", sql.Date, fecha_nacimiento)
       .input("ID_SEXO", sql.Int, id_sexo)
       .input("ID_PERFIL", sql.Int, id_perfil)
-      .input("ID_DEPARTAMENTO", sql.Int, id_departamento || null)
+      .input("DEPARTAMENTOS", sql.VarChar(sql.MAX), departamentosJson || null)
+      .input("ID_CLASIFICACION", sql.Int, id_clasificacion || null)
+      .input("INICIO_RESIDENCIA", sql.VarChar(10), inicio_residencia || null)
+      .input("FASES_TRABAJADOR", sql.VarChar(sql.MAX), fasesTrabajadorJson || null)
       .input("USUARIO", sql.VarChar(50), usuario || null)
       .input("CONTRASENA", sql.VarChar(255), password || null)
       .input("ROLES", sql.VarChar(sql.MAX), rolesJson || null)
@@ -167,7 +246,7 @@ const getDepartamentos = async (req, res) => {
   try {
     const pool = await poolPromise;
     const result = await pool.request().query(`
-      SELECT ID_DEPARTAMENTO, NRO_DPTO, ID_FASE
+      SELECT ID_DEPARTAMENTO, NRO_DPTO, DESCRIPCION, ID_FASE
       FROM MAE_DEPARTAMENTO
       WHERE ESTADO = 1
     `);
@@ -178,8 +257,22 @@ const getDepartamentos = async (req, res) => {
   }
 };
 
-//METODOS EXISTENTES
+const getTiposResidente = async (req, res) => {
+  try {
+    const pool = await poolPromise;
+    const result = await pool.request().query(`
+      SELECT ID_CLASIFICACION, DETALLE_CLASIFICACION
+      FROM MAE_TIPO_RESIDENTE
+      WHERE ESTADO = 1
+    `);
+    res.status(200).json(result.recordset);
+  } catch (error) {
+    logger.error(`Error al obtener tipos de residente: ${error.message}`);
+    res.status(500).json({ message: "Error del servidor" });
+  }
+};
 
+// Métodos existentes
 const getUserTypes = async (req, res) => {
   try {
     const pool = await poolPromise;
@@ -223,7 +316,6 @@ const getRoles = async (req, res) => {
   }
 };
 
-// Endpoint para listar todos los usuarios
 const getAllUsers = async (req, res) => {
   try {
     const pool = await poolPromise;
@@ -317,44 +409,11 @@ const updateUser = async (req, res) => {
   }
 };
 
-function generateRandomPassword() {
-  return crypto.randomBytes(4).toString("hex");
-}
-
-const sendResetPasswordEmail = async (email, newPassword, fullName) => {
-  try {
-    const htmlTemplate = fs.readFileSync(
-      path.join(__dirname, "../../html", "resetPasswordEmail.html"),
-      "utf8"
-    );
-    const htmlContent = htmlTemplate
-      .replace("{{newPassword}}", newPassword)
-      .replace("{{fullName}}", fullName);
-
-    const mailOptions = {
-      from: process.env.NAME_USER,
-      to: email,
-      subject: "Restablecimiento de Contraseña",
-      html: htmlContent,
-    };
-
-    await transporter.sendMail(mailOptions);
-    logger.info(`Correo enviado con la nueva contraseña a: ${email}`);
-    return true;
-  } catch (error) {
-    logger.error(`Error al enviar el correo a ${email}: ${error.message}`);
-    return false;
-  }
-};
-
 const changePassword = async (req, res) => {
   const { id } = req.params;
-  const newPassword = generateRandomPassword();
+  const newPassword = crypto.randomBytes(4).toString("hex");
 
   try {
-    const salt = await bcrypt.genSalt(6);
-    const hashedPassword = await bcrypt.hash(newPassword, salt);
-
     const pool = await poolPromise;
     const resultCorreo = await pool
       .request()
@@ -374,12 +433,18 @@ const changePassword = async (req, res) => {
     }
 
     const fullName = `${nombres} ${apellidos}`;
-    const success = await sendResetPasswordEmail(correo, newPassword, fullName);
+    const success = await sendPasswordEmail(correo, newPassword, fullName);
     if (!success) {
       return res
         .status(500)
         .json({ message: "Error al enviar el correo de restablecimiento" });
     }
+
+    const salt = crypto.randomBytes(16).toString("hex");
+    const hashedPassword = crypto
+      .createHash("sha256")
+      .update(newPassword + salt)
+      .digest("hex");
 
     await pool
       .request()
@@ -422,7 +487,6 @@ const getSidebarByUserId = async (req, res) => {
       `Resultado crudo del procedimiento: ${JSON.stringify(result, null, 2)}`
     );
 
-    // Verificar si recordset existe y tiene datos
     if (!result.recordset || result.recordset.length === 0) {
       logger.warn(
         `No se encontraron datos en recordset para el usuario ID: ${id}`
@@ -430,11 +494,9 @@ const getSidebarByUserId = async (req, res) => {
       return res.status(200).json([]);
     }
 
-    // Obtener el nombre de la primera columna (puede ser dinámico, como JSON_F52E2B61-...)
     const jsonColumn = Object.keys(result.recordset[0])[0];
     logger.debug(`Nombre de la columna JSON: ${jsonColumn}`);
 
-    // Extraer y parsear el JSON
     let sidebarData = [];
     try {
       if (result.recordset[0][jsonColumn]) {
@@ -453,7 +515,6 @@ const getSidebarByUserId = async (req, res) => {
       throw parseError;
     }
 
-    // Asegurar que submenus sea un arreglo
     const parsedSidebarData = sidebarData.map((item) => ({
       ...item,
       submenus: item.submenus
@@ -545,17 +606,18 @@ const getUserRoles = async (req, res) => {
 };
 
 module.exports = {
+  register,
   getPerfiles,
   getFases,
   getDepartamentos,
-  register,
-  getAllUsers,
+  getTiposResidente,
   getUserTypes,
   getSexes,
+  getRoles,
+  getAllUsers,
   updateUser,
   changePassword,
   getSidebarByUserId,
-  getRoles,
   asignarRolComite,
   quitarRolComite,
   getUserRoles,
