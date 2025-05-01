@@ -14,6 +14,8 @@ const menuRoutes = require("./routes/menuRoutes");
 const dashboardRoutes = require("./routes/dashboardRoutes");
 const maintenanceRoutes = require("./routes/maintenanceRoutes");
 const orderRoutes = require("./routes/orderRoutes");
+const userListRoutes = require("./routes/userListRoutes");
+
 const { checkForUpdates } = require("./controllers/dashboardController");
 require("dotenv").config();
 
@@ -63,7 +65,8 @@ app.use("/api", maintenanceRoutes);
 logger.info("Rutas de maintenanceRoutes cargadas.");
 app.use("/api", orderRoutes(io)); // ¡Cambio aquí: pasar io!
 logger.info("Rutas de orderRoutes cargadas.");
-
+app.use("/api", userListRoutes);
+logger.info("Rutas de userListRoutes cargadas.");
 // Middleware para depurar solicitudes
 app.use((req, res, next) => {
   logger.info(`Solicitud recibida: ${req.method} ${req.url}`);
