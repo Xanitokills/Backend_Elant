@@ -137,7 +137,7 @@ const deletePerson = async (req, res) => {
 
 const manageSystemAccess = async (req, res) => {
   const { id } = req.params;
-  const { usuario, correo, roles, activar } = req.body;
+  const { usuario, correo, roles, activar, nombres, apellidos } = req.body;
 
   try {
     const pool = await poolPromise;
@@ -150,15 +150,23 @@ const manageSystemAccess = async (req, res) => {
       .input("ACTIVAR", sql.Bit, activar)
       .execute("SP_GESTIONAR_ACCESO_SISTEMA");
 
+    let idUsuario = null;
+    if (activar && result.recordset && result.recordset.length > 0) {
+      idUsuario = result.recordset[0].ID_USUARIO;
+    }
+
     if (activar && correo) {
       const password = require("crypto").randomBytes(4).toString("hex");
-      const success = await sendPasswordEmail(correo, password, `${req.body.nombres} ${req.body.apellidos}`);
+      const success = await sendPasswordEmail(correo, password, `${nombres} ${apellidos}`);
       if (!success) {
         logger.warn(`No se pudo enviar el correo a ${correo}`);
       }
     }
 
-    res.status(200).json({ message: activar ? "Acceso al sistema activado" : "Acceso al sistema desactivado" });
+    res.status(200).json({
+      message: activar ? "Acceso al sistema activado" : "Acceso al sistema desactivado",
+      idUsuario,
+    });
   } catch (error) {
     logger.error(`Error al gestionar acceso para persona ${id}: ${error.message}`);
     res.status(error.number || 500).json({ message: error.message || "Error al gestionar acceso" });
@@ -278,6 +286,19 @@ const changePassword = async (req, res) => {
   }
 };
 
+const getRoles = async (req, res) => {
+  try {
+    const pool = await poolPromise;
+    const result = await pool
+      .request()
+      .query("SELECT ID_ROL, DETALLE_USUARIO FROM MAE_TIPO_USUARIO WHERE ESTADO = 1");
+    res.status(200).json(result.recordset);
+  } catch (error) {
+    logger.error(`Error al obtener roles: ${error.message}`);
+    res.status(500).json({ message: "Error al obtener roles" });
+  }
+};
+
 module.exports = {
   listPersons,
   getPersonDetails,
@@ -288,4 +309,5 @@ module.exports = {
   uploadPersonPhoto,
   getPersonPhoto,
   changePassword,
+  getRoles,
 };

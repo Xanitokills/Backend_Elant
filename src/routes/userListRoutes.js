@@ -12,6 +12,7 @@ const {
   uploadPersonPhoto,
   getPersonPhoto,
   changePassword,
+  getRoles, // Nuevo endpoint
 } = require("../controllers/userListController");
 
 router.get("/persons", authMiddleware, checkPermission({ menuId: 1 }), listPersons);
@@ -23,5 +24,6 @@ router.put("/persons/:id/roles", authMiddleware, checkPermission({ menuId: 1 }),
 router.post("/persons/:id/photo", authMiddleware, checkPermission({ menuId: 1 }), uploadPersonPhoto);
 router.get("/persons/:id/photo", authMiddleware, checkPermission({ menuId: 1 }), getPersonPhoto);
 router.put("/persons/:id/change-password", authMiddleware, checkPermission({ menuId: 1 }), changePassword);
+router.get("/roles", authMiddleware, checkPermission({ menuId: 1 }), getRoles); // Nueva ruta para roles
 
 module.exports = router;
