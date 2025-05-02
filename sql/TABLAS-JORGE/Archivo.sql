@@ -23,6 +23,29 @@ select * from [dbo].[MAE_ROL_SUBMENU]
 
 
 ######################################################################
+SELECT * FROM MAE_PERFIL
+select * from MAE_PERSONA
+select * from MAE_SEXO
+SELECT * FROM MAE_TRABAJADOR_FASE
+
+SELECT * FROM MAE_RESIDENTE
+SELECT * FROM MAE_TIPO_RESIDENTE
+
+SELECT * FROM MAE_DEPARTAMENTO
+SELECT * FROM MAE_FASE
+
+select * from MAE_USUARIO
+select * from MAE_TIPO_USUARIO -- MAE_ROLES_ACCESO
+select * from MAE_USUARIO_ROL
+
+
+select * from [dbo].[MAE_MENU]
+select * from [dbo].[MAE_SUBMENU]
+select * from [dbo].[MAE_ROL_MENU]
+select * from [dbo].[MAE_ROL_SUBMENU]
+
+
+######################################################################
 TABLA MAE_PERFIL
 
 Name	Owner	Type	Created_datetime
@@ -96,10 +119,12 @@ FOREIGN KEY	FK_PERSONA_SEXO	No Action	No Action	Enabled	Is_For_Replication	ID_SE
 PRIMARY KEY (clustered)	PK__MAE_PERS__78244149BD128D6C	(n/a)	(n/a)	(n/a)	(n/a)	ID_PERSONA
 UNIQUE (non-clustered)	UQ_MAE_PERSONA_DNI	(n/a)	(n/a)	(n/a)	(n/a)	DNI
 
-
 Table is referenced by foreign key
+SotfHomeData.dbo.MAE_PERFIL: FK_MAE_PERFIL_MAE_PERSONA
+SotfHomeData.dbo.MAE_PERSONA_FOTO: FK_PERSONA_FOTO_PERSONA
+SotfHomeData.dbo.MAE_RESIDENTE: FK_MAE_USUARIO_DEPARTAMENTO_MAE_PERSONA
+SotfHomeData.dbo.MAE_TRABAJADOR_FASE: FK_MAE_TRABAJADOR_FASE_MAE_PERSONA
 SotfHomeData.dbo.MAE_USUARIO: FK_USUARIO_PERSONA
-SotfHomeData.dbo.MAE_USUARIO_DEPARTAMENTO: FK_MAE_USUARIO_DEPARTAMENTO_MAE_PERSONA
 
 
 --TABLA MAE_PERSONA
@@ -114,7 +139,11 @@ ID_PERSONA	NOMBRES	APELLIDOS	DNI	CORREO	CELULAR	CONTACTO_EMERGENCIA	FECHA_NACIMI
 7	Juanita	Torres Suarez	75544876	Juanita_torrez@gmail.com	976332655	976332655	2000-01-01	2	1	2
 8	Neymar Messi	Gonzalo Prada	74944323	Neymar.messi@gmail.com	980443276	980443276	1997-04-20	2	1	2
 9	keoma	perez sifuentes	71286893	keomanps@gmail.com	908721007	NULL	1995-07-01	1	1	1
-
+10	MARIA	LOPEZ	87654321	usuario10@example.com	912345678	911223344	1995-06-15	2	1	2
+12	RENIMER	ROJAS SAAVEDRA	74944386	usuario12@example.com	970115159	992560471	1997-06-30	1	1	1
+13	MARADONA 	SANTOS QUEVEDO	74876583	usuario13@example.com	992568437	992560471	1995-06-30	1	1	1
+14	KAKAROTO	GOGOKU MEZ	12345684	usuario14@example.com	987654321	911111111	1990-10-10	1	1	2
+15	AMNER 	SALAZAR VEGA	74897542	usuario15@example.com	970115148	NULL	1997-05-30	2	1	1
 #######################################################################
 TABLA MAE_SEXO
 
@@ -156,6 +185,33 @@ ID_SEXO	DESCRIPCION
 
 ########################################################################
 
+dbo.MAE_PERSONA_FOTO
+
+Identity	Seed	Increment	Not For Replication
+ID_FOTO	1	1	0
+
+Column_name	Type	Computed	Length	Prec	Scale	Nullable	TrimTrailingBlanks	FixedLenNullInSource	Collation
+ID_FOTO	int	no	4	10   	0    	no	(n/a)	(n/a)	NULL
+ID_PERSONA	int	no	4	10   	0    	no	(n/a)	(n/a)	NULL
+FOTO	varbinary	no	-1	     	     	no	no	no	NULL
+FORMATO	varchar	no	10	     	     	no	no	no	SQL_Latin1_General_CP1_CI_AS
+FECHA_SUBIDA	datetime	no	8	     	     	no	(n/a)	(n/a)	NULL
+ESTADO	bit	no	1	     	     	no	(n/a)	(n/a)	NULL
+
+constraint_type	constraint_name	delete_action	update_action	status_enabled	status_for_replication	constraint_keys
+CHECK on column ESTADO	CK__MAE_PERSO__ESTAD__41B8C09B	(n/a)	(n/a)	Enabled	Is_For_Replication	([ESTADO]=(1) OR [ESTADO]=(0))
+DEFAULT on column ESTADO	DF__MAE_PERSO__ESTAD__40C49C62	(n/a)	(n/a)	(n/a)	(n/a)	((1))
+DEFAULT on column FECHA_SUBIDA	DF__MAE_PERSO__FECHA__3FD07829	(n/a)	(n/a)	(n/a)	(n/a)	(getdate())
+FOREIGN KEY	FK_PERSONA_FOTO_PERSONA	Cascade	No Action	Enabled	Is_For_Replication	ID_PERSONA
+ 	 	 	 	 	 	REFERENCES SotfHomeData.dbo.MAE_PERSONA (ID_PERSONA)
+PRIMARY KEY (clustered)	PK__MAE_PERS__61DFD4CFF2F3BD1B	(n/a)	(n/a)	(n/a)	(n/a)	ID_FOTO
+
+index_name	index_description	index_keys
+PK__MAE_PERS__61DFD4CFF2F3BD1B	clustered, unique, primary key located on PRIMARY	ID_FOTO
+
+########################################################################
+
+
 TABLA MAE_TRABAJADOR_FASE
 
 Name	Owner	Type	Created_datetime
@@ -192,6 +248,9 @@ PRIMARY KEY (clustered)	PK__MAE_USUA__F7DFF2B6F8F8D255	(n/a)	(n/a)	(n/a)	(n/a)	I
 ID_TRABAJADOR	ID_FASE	FECHA_ASIGNACION	ESTADO
 7	2	2025-04-30	1
 8	2	2025-04-30	1
+10	1	2025-04-30	1
+10	2	2025-04-30	1
+14	1	2025-04-30	1
 
 ########################################################################
 
@@ -408,7 +467,6 @@ FOREIGN KEY	FK_USUARIO_PERSONA	No Action	No Action	Enabled	Is_For_Replication	ID
 PRIMARY KEY (clustered)	PK__MAE_USUA__91136B90F99C23B9	(n/a)	(n/a)	(n/a)	(n/a)	ID_USUARIO
 
 
-
 Table is referenced by foreign key
 SotfHomeData.dbo.MAE_ACCESO_PUERTA: FK_ACCESO_USUARIO
 SotfHomeData.dbo.MAE_ACTA: FK_ACTA_USUARIO
@@ -423,7 +481,6 @@ SotfHomeData.dbo.MAE_IMAGENES_LOGIN: FK_IMAGEN_USUARIO
 SotfHomeData.dbo.MAE_INCIDENCIA: FK_INCIDENCIA_USUARIO_REPORTE
 SotfHomeData.dbo.MAE_INCIDENCIA: FK_INCIDENCIA_USUARIO_RESOLUCION
 SotfHomeData.dbo.MAE_MANTENIMIENTO: FK_MANTENIMIENTO_USUARIO
-SotfHomeData.dbo.MAE_USUARIO_FASE: FK_USUARIO_FASE_USUARIO
 SotfHomeData.dbo.MAE_USUARIO_ROL: FK_USUARIO_ROL_USUARIO
 SotfHomeData.dbo.MAE_VISITA: FK_VISITA_PROPIETARIO
 SotfHomeData.dbo.MAE_VISITA: FK_VISITA_USUARIO
@@ -483,10 +540,7 @@ SotfHomeData.dbo.MAE_ROL_MENU: FK_ROL_MENU_TIPO
 SotfHomeData.dbo.MAE_ROL_SUBMENU: FK_ROL_SUBMENU_TIPO
 SotfHomeData.dbo.MAE_USUARIO_ROL: FK_USUARIO_ROL_TIPO
 
-
-
-TABLA MAE_TIPO_USUARIO
-
+--TABLA MAE_TIPO_USUARIO
 ID_ROL	DETALLE_USUARIO	ESTADO
 1	Sistemas	1
 2	Administrador	1
@@ -527,8 +581,6 @@ PRIMARY KEY (clustered)	PK_USUARIO_ROL	(n/a)	(n/a)	(n/a)	(n/a)	ID_USUARIO, ID_RO
 
 
 --TABLA MAE_USUARIO_ROL
-
-
 ID_USUARIO	ID_ROL
 4	1
 5	2
@@ -598,13 +650,6 @@ CREATE TABLE dbo.MAE_ROL_SUBMENU
 
 ######################################################################
 
-CONSULTAS:
-
-EXEC sp_help TABLA;
-
-
-######################################################################
-
 DATA DE MENU Y SUBMENUS
 
 -- Ver men煤s activos
@@ -670,3 +715,5 @@ ID_ROL	ID_SUBMENU	NOMBRE	URL	ID_MENU
 1	8	Reservas	/reservas	5
 1	9	Registrar Encargo	/RegisterOrder	6
 1	10	Visitas Programadas	/visitasProgramadas	2
+
+

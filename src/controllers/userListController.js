@@ -368,6 +368,28 @@ const getRoles = async (req, res) => {
     }
   };
 
+  const checkUsernameExists = async (req, res) => {
+  const { username } = req.query;
+
+  if (!username) {
+    return res.status(400).json({ message: "Debe proporcionar un nombre de usuario" });
+  }
+
+  try {
+    const pool = await poolPromise;
+    const result = await pool
+      .request()
+      .input("USUARIO", sql.VarChar(50), username)
+      .query("SELECT COUNT(*) AS TOTAL FROM MAE_USUARIO WHERE USUARIO = @USUARIO");
+
+    res.status(200).json({ exists: result.recordset[0].TOTAL > 0 });
+  } catch (error) {
+    logger.error(`Error al verificar usuario: ${error.message}`);
+    res.status(500).json({ message: "Error al verificar usuario" });
+  }
+};
+
+
 module.exports = {
   listPersons,
   getPersonDetails,
@@ -380,4 +402,5 @@ module.exports = {
   getPersonPhoto,
   changePassword,
   getRoles,
+  checkUsernameExists,
 };

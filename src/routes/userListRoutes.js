@@ -13,7 +13,8 @@ const {
   getPersonPhoto,
   changePassword,
   getRoles,
-  updateEmail, // Nueva función
+  updateEmail,
+  checkUsernameExists, // Nueva función
 } = require("../controllers/userListController");
 
 router.get("/persons", authMiddleware, checkPermission({ menuId: 1 }), listPersons);
@@ -26,6 +27,7 @@ router.post("/persons/:id/photo", authMiddleware, checkPermission({ menuId: 1 })
 router.get("/persons/:id/photo", authMiddleware, checkPermission({ menuId: 1 }), getPersonPhoto);
 router.put("/persons/:id/change-password", authMiddleware, checkPermission({ menuId: 1 }), changePassword);
 router.get("/roles", authMiddleware, checkPermission({ menuId: 1 }), getRoles);
-router.put("/persons/:id/email", authMiddleware, checkPermission({ menuId: 1 }), updateEmail); // Nueva ruta
+router.put("/persons/:id/email", authMiddleware, checkPermission({ menuId: 1 }), updateEmail); 
+router.get("/check-username", authMiddleware, checkPermission({ menuId: 1 }), checkUsernameExists);
 
 module.exports = router;
