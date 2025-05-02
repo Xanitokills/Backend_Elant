@@ -84,75 +84,76 @@ const getPersonDetails = async (req, res) => {
 };
 
 const updatePerson = async (req, res) => {
-  const { id } = req.params;
-  const { basicInfo, residentInfo, workerInfo, photo } = req.body;
-
-  try {
-    const pool = await poolPromise;
-    const request = pool
-      .request()
-      .input("ID_PERSONA", sql.Int, id)
-      .input("NOMBRES", sql.VarChar(50), basicInfo.nombres)
-      .input("APELLIDOS", sql.VarChar(50), basicInfo.apellidos)
-      .input("DNI", sql.VarChar(12), basicInfo.dni)
-      .input("CORREO", sql.VarChar(100), basicInfo.correo)
-      .input("CELULAR", sql.VarChar(9), basicInfo.celular)
-      .input(
-        "CONTACTO_EMERGENCIA",
-        sql.VarChar(9),
-        basicInfo.contacto_emergencia
-      )
-      .input("FECHA_NACIMIENTO", sql.Date, basicInfo.fecha_nacimiento)
-      .input("ID_SEXO", sql.Int, basicInfo.id_sexo)
-      .input("ID_PERFIL", sql.Int, basicInfo.id_perfil)
-      .input(
-        "DEPARTAMENTOS",
-        sql.NVarChar(sql.MAX),
-        residentInfo
-          ? JSON.stringify(residentInfo.map((r) => r.id_departamento))
-          : null
-      )
-      .input(
-        "ID_CLASIFICACION",
-        sql.Int,
-        residentInfo && residentInfo[0]
-          ? residentInfo[0].id_clasificacion
-          : null
-      )
-      .input(
-        "INICIO_RESIDENCIA",
-        sql.VarChar(10),
-        residentInfo && residentInfo[0]
-          ? new Date(residentInfo[0].inicio_residencia).toISOString().substring(0, 10)
-          : null
-      )
-      .input(
-        "FASES_TRABAJADOR",
-        sql.NVarChar(sql.MAX),
-        workerInfo ? JSON.stringify(workerInfo.map((w) => w.id_fase)) : null
-      );
-
-    await request.execute("SP_ACTUALIZAR_PERSONA");
-
-    if (photo) {
-      await pool
+    const { id } = req.params;
+    const { basicInfo, residentInfo, workerInfo, photo } = req.body;
+  
+    try {
+      const pool = await poolPromise;
+      const request = pool
         .request()
         .input("ID_PERSONA", sql.Int, id)
+        .input("NOMBRES", sql.VarChar(50), basicInfo.nombres)
+        .input("APELLIDOS", sql.VarChar(50), basicInfo.apellidos)
+        .input("DNI", sql.VarChar(12), basicInfo.dni)
+        .input("CORREO", sql.VarChar(100), basicInfo.correo)
+        .input("CELULAR", sql.VarChar(9), basicInfo.celular)
         .input(
-          "FOTO",
-          sql.VarBinary(sql.MAX),
-          Buffer.from(photo.foto, "base64")
+          "CONTACTO_EMERGENCIA",
+          sql.VarChar(9),
+          basicInfo.contacto_emergencia
         )
-        .input("FORMATO", sql.VarChar(10), photo.formato)
-        .execute("SP_SUBIR_FOTO_PERSONA");
+        .input("FECHA_NACIMIENTO", sql.Date, basicInfo.fecha_nacimiento)
+        .input("ID_SEXO", sql.Int, basicInfo.id_sexo)
+        .input("ID_PERFIL", sql.Int, basicInfo.id_perfil)
+        .input(
+          "DEPARTAMENTOS",
+          sql.NVarChar(sql.MAX),
+          residentInfo
+            ? JSON.stringify(residentInfo.map((r) => r.id_departamento))
+            : null
+        )
+        .input(
+          "ID_CLASIFICACION",
+          sql.Int,
+          residentInfo && residentInfo[0]
+            ? residentInfo[0].id_clasificacion
+            : null
+        )
+        .input(
+          "INICIO_RESIDENCIA",
+          sql.VarChar(10),
+          residentInfo && residentInfo[0]
+            ? new Date(residentInfo[0].inicio_residencia).toISOString().substring(0, 10)
+            : null
+        )
+        .input(
+          "FASES_TRABAJADOR",
+          sql.NVarChar(sql.MAX),
+          workerInfo ? JSON.stringify(workerInfo.map((w) => w.id_fase)) : null
+        );
+  
+      await request.execute("SP_ACTUALIZAR_PERSONA");
+  
+      if (photo) {
+        await pool
+          .request()
+          .input("ID_PERSONA", sql.Int, id)
+          .input("FOTO", sql.VarBinary(sql.MAX), Buffer.from(photo.foto, "base64"))
+          .input("FORMATO", sql.VarChar(10), photo.formato)
+          .execute("SP_SUBIR_FOTO_PERSONA");
+      }
+  
+      res.status(200).json({ message: "Persona actualizada exitosamente" });
+    } catch (error) {
+      logger.error(`❌ Error al actualizar persona ${id}: ${error.message}`);
+      logger.error(`📍 Stack Trace:\n${error.stack}`);
+      res.status(500).json({
+        message: error.message || "Error del servidor",
+        stack: error.stack,
+      });
     }
-
-    res.status(200).json({ message: "Persona actualizada exitosamente" });
-  } catch (error) {
-    logger.error(`Error al actualizar persona ${id}: ${error.message}`);
-    res.status(500).json({ message: "Error del servidor" });
-  }
-};
+  };
+  
 
 const updateEmail = async (req, res) => {
   const { id } = req.params;
@@ -318,25 +319,25 @@ const manageRoles = async (req, res) => {
 };
 
 const uploadPersonPhoto = async (req, res) => {
-  const { id } = req.params;
-  const { photo, formato } = req.body;
-
-  try {
-    const pool = await poolPromise;
-    await pool
-      .request()
-      .input("ID_PERSONA", sql.Int, id)
-      .input("FOTO", sql.VarBinary(sql.MAX), Buffer.from(photo, "base64"))
-      .input("FORMATO", sql.VarChar(10), formato)
-      .execute("SP_SUBIR_FOTO_PERSONA");
-
-    res.status(200).json({ message: "Foto subida exitosamente" });
-  } catch (error) {
-    logger.error(`Error al subir foto para persona ${id}: ${error.message}`);
-    res.status(500).json({ message: "Error al subir foto" });
-  }
-};
-
+    const { id } = req.params;
+    const { photo, formato } = req.body;
+  
+    try {
+      const pool = await poolPromise;
+      await pool
+        .request()
+        .input("ID_PERSONA", sql.Int, id)
+        .input("FOTO", sql.VarBinary(sql.MAX), Buffer.from(photo, "base64"))
+        .input("FORMATO", sql.VarChar(10), formato)
+        .execute("SP_SUBIR_FOTO_PERSONA");
+  
+      res.status(200).json({ message: "Foto subida exitosamente" });
+    } catch (error) {
+      logger.error(`Error al subir foto para persona ${id}: ${error.message}`);
+      res.status(500).json({ message: "Error al subir foto" });
+    }
+  };
+  
 const getPersonPhoto = async (req, res) => {
   const { id } = req.params;
   try {
