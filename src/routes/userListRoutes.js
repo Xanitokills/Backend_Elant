@@ -12,7 +12,8 @@ const {
   uploadPersonPhoto,
   getPersonPhoto,
   changePassword,
-  getRoles, // Nuevo endpoint
+  getRoles,
+  updateEmail, // Nueva función
 } = require("../controllers/userListController");
 
 router.get("/persons", authMiddleware, checkPermission({ menuId: 1 }), listPersons);
@@ -24,6 +25,7 @@ router.put("/persons/:id/roles", authMiddleware, checkPermission({ menuId: 1 }),
 router.post("/persons/:id/photo", authMiddleware, checkPermission({ menuId: 1 }), uploadPersonPhoto);
 router.get("/persons/:id/photo", authMiddleware, checkPermission({ menuId: 1 }), getPersonPhoto);
 router.put("/persons/:id/change-password", authMiddleware, checkPermission({ menuId: 1 }), changePassword);
-router.get("/roles", authMiddleware, checkPermission({ menuId: 1 }), getRoles); // Nueva ruta para roles
+router.get("/roles", authMiddleware, checkPermission({ menuId: 1 }), getRoles);
+router.put("/persons/:id/email", authMiddleware, checkPermission({ menuId: 1 }), updateEmail); // Nueva ruta
 
 module.exports = router;

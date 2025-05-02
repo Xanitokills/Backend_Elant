@@ -76,46 +76,61 @@ const getPersonDetails = async (req, res) => {
 
 const updatePerson = async (req, res) => {
   const { id } = req.params;
-  const {
-    nombres,
-    apellidos,
-    dni,
-    correo,
-    celular,
-    contacto_emergencia,
-    fecha_nacimiento,
-    id_sexo,
-    id_perfil,
-    departamentos,
-    id_clasificacion,
-    inicio_residencia,
-    fases_trabajador,
-  } = req.body;
+  const { basicInfo, residentInfo, workerInfo, photo } = req.body;
+
+  try {
+    const pool = await poolPromise;
+    const request = pool
+      .request()
+      .input("ID_PERSONA", sql.Int, id)
+      .input("NOMBRES", sql.VarChar(50), basicInfo.nombres)
+      .input("APELLIDOS", sql.VarChar(50), basicInfo.apellidos)
+      .input("DNI", sql.VarChar(12), basicInfo.dni)
+      .input("CORREO", sql.VarChar(100), basicInfo.correo)
+      .input("CELULAR", sql.VarChar(9), basicInfo.celular)
+      .input("CONTACTO_EMERGENCIA", sql.VarChar(9), basicInfo.contacto_emergencia)
+      .input("FECHA_NACIMIENTO", sql.Date, basicInfo.fecha_nacimiento)
+      .input("ID_SEXO", sql.Int, basicInfo.id_sexo)
+      .input("ID_PERFIL", sql.Int, basicInfo.id_perfil)
+      .input("DEPARTAMENTOS", sql.NVarChar(sql.MAX), residentInfo ? JSON.stringify(residentInfo.map(r => r.id_departamento)) : null)
+      .input("ID_CLASIFICACION", sql.Int, residentInfo && residentInfo[0] ? residentInfo[0].id_clasificacion : null)
+      .input("INICIO_RESIDENCIA", sql.VarChar(10), residentInfo && residentInfo[0] ? residentInfo[0].inicio_residencia : null)
+      .input("FASES_TRABAJADOR", sql.NVarChar(sql.MAX), workerInfo ? JSON.stringify(workerInfo.map(w => w.id_fase)) : null);
+
+    await request.execute("SP_ACTUALIZAR_PERSONA");
+
+    if (photo) {
+      await pool
+        .request()
+        .input("ID_PERSONA", sql.Int, id)
+        .input("FOTO", sql.VarBinary(sql.MAX), Buffer.from(photo.foto, "base64"))
+        .input("FORMATO", sql.VarChar(10), photo.formato)
+        .execute("SP_SUBIR_FOTO_PERSONA");
+    }
+
+    res.status(200).json({ message: "Persona actualizada exitosamente" });
+  } catch (error) {
+    logger.error(`Error al actualizar persona ${id}: ${error.message}`);
+    res.status(error.number || 500).json({ message: error.message || "Error al actualizar persona" });
+  }
+};
+
+const updateEmail = async (req, res) => {
+  const { id } = req.params;
+  const { correo } = req.body;
 
   try {
     const pool = await poolPromise;
     await pool
       .request()
       .input("ID_PERSONA", sql.Int, id)
-      .input("NOMBRES", sql.VarChar(50), nombres)
-      .input("APELLIDOS", sql.VarChar(50), apellidos)
-      .input("DNI", sql.VarChar(12), dni)
       .input("CORREO", sql.VarChar(100), correo)
-      .input("CELULAR", sql.VarChar(9), celular)
-      .input("CONTACTO_EMERGENCIA", sql.VarChar(9), contacto_emergencia)
-      .input("FECHA_NACIMIENTO", sql.Date, fecha_nacimiento)
-      .input("ID_SEXO", sql.Int, id_sexo)
-      .input("ID_PERFIL", sql.Int, id_perfil)
-      .input("DEPARTAMENTOS", sql.NVarChar(sql.MAX), departamentos ? JSON.stringify(departamentos) : null)
-      .input("ID_CLASIFICACION", sql.Int, id_clasificacion)
-      .input("INICIO_RESIDENCIA", sql.VarChar(10), inicio_residencia)
-      .input("FASES_TRABAJADOR", sql.NVarChar(sql.MAX), fases_trabajador ? JSON.stringify(fases_trabajador) : null)
-      .execute("SP_ACTUALIZAR_PERSONA");
+      .execute("SP_ACTUALIZAR_CORREO_PERSONA");
 
-    res.status(200).json({ message: "Persona actualizada exitosamente" });
+    res.status(200).json({ message: "Correo actualizado exitosamente" });
   } catch (error) {
-    logger.error(`Error al actualizar persona ${id}: ${error.message}`);
-    res.status(error.number || 500).json({ message: error.message || "Error al actualizar persona" });
+    logger.error(`Error al actualizar correo de persona ${id}: ${error.message}`);
+    res.status(500).json({ message: "Error al actualizar correo" });
   }
 };
 
@@ -141,35 +156,77 @@ const manageSystemAccess = async (req, res) => {
 
   try {
     const pool = await poolPromise;
-    const result = await pool
-      .request()
-      .input("ID_PERSONA", sql.Int, id)
-      .input("USUARIO", sql.VarChar(50), usuario)
-      .input("CORREO", sql.VarChar(100), correo)
-      .input("ROLES", sql.NVarChar(sql.MAX), roles ? JSON.stringify(roles) : null)
-      .input("ACTIVAR", sql.Bit, activar)
-      .execute("SP_GESTIONAR_ACCESO_SISTEMA");
 
-    let idUsuario = null;
-    if (activar && result.recordset && result.recordset.length > 0) {
-      idUsuario = result.recordset[0].ID_USUARIO;
-    }
+    if (activar) {
+      // Verificar si el usuario ya existe
+      const userCheck = await pool
+        .request()
+        .input("ID_PERSONA", sql.Int, id)
+        .query("SELECT ID_USUARIO, ESTADO FROM MAE_USUARIO WHERE ID_PERSONA = @ID_PERSONA");
 
-    if (activar && correo) {
-      const password = require("crypto").randomBytes(4).toString("hex");
-      const success = await sendPasswordEmail(correo, password, `${nombres} ${apellidos}`);
-      if (!success) {
-        logger.warn(`No se pudo enviar el correo a ${correo}`);
+      let idUsuario;
+      let newPassword;
+
+      if (userCheck.recordset.length > 0) {
+        // Usuario existe, reactivar
+        idUsuario = userCheck.recordset[0].ID_USUARIO;
+        if (userCheck.recordset[0].ESTADO === 1) {
+          return res.status(400).json({ message: "El usuario ya está activo" });
+        }
+        newPassword = require("crypto").randomBytes(4).toString("hex");
+      } else {
+        // Crear nuevo usuario
+        newPassword = require("crypto").randomBytes(4).toString("hex");
+        const saltRounds = 10;
+        const salt = await bcrypt.genSalt(saltRounds);
+        const hashedPassword = await bcrypt.hash(newPassword, salt);
+
+        const userResult = await pool
+          .request()
+          .input("ID_PERSONA", sql.Int, id)
+          .input("USUARIO", sql.VarChar(50), usuario)
+          .input("CONTRASENA_HASH", sql.VarChar(255), hashedPassword)
+          .input("CONTRASENA_SALT", sql.VarChar(50), salt)
+          .query(
+            "INSERT INTO MAE_USUARIO (ID_PERSONA, USUARIO, CONTRASENA_HASH, CONTRASENA_SALT, ESTADO, PRIMER_INICIO) OUTPUT INSERTED.ID_USUARIO VALUES (@ID_PERSONA, @USUARIO, @CONTRASENA_HASH, @CONTRASENA_SALT, 1, 1)"
+          );
+
+        idUsuario = userResult.recordset[0].ID_USUARIO;
       }
-    }
 
-    res.status(200).json({
-      message: activar ? "Acceso al sistema activado" : "Acceso al sistema desactivado",
-      idUsuario,
-    });
+      // Asignar roles
+      if (roles && roles.length > 0) {
+        await pool
+          .request()
+          .input("ID_USUARIO", sql.Int, idUsuario)
+          .input("ROLES", sql.NVarChar(sql.MAX), JSON.stringify(roles))
+          .execute("SP_GESTIONAR_ROLES");
+      }
+
+      // Enviar correo con credenciales
+      const fullName = `${nombres} ${apellidos}`;
+      const emailSent = await sendPasswordEmail(correo, newPassword, fullName);
+      if (!emailSent) {
+        logger.warn(`No se pudo enviar el correo a ${correo}, pero el acceso fue activado`);
+      }
+
+      res.status(200).json({
+        message: "Acceso activado exitosamente",
+        idUsuario,
+        usuario,
+      });
+    } else {
+      // Desactivar acceso
+      await pool
+        .request()
+        .input("ID_PERSONA", sql.Int, id)
+        .execute("SP_GESTIONAR_ACCESO_SISTEMA");
+
+      res.status(200).json({ message: "Acceso desactivado exitosamente" });
+    }
   } catch (error) {
     logger.error(`Error al gestionar acceso para persona ${id}: ${error.message}`);
-    res.status(error.number || 500).json({ message: error.message || "Error al gestionar acceso" });
+    res.status(500).json({ message: "Error al gestionar acceso" });
   }
 };
 
@@ -185,6 +242,20 @@ const manageRoles = async (req, res) => {
       .input("ROLES", sql.NVarChar(sql.MAX), JSON.stringify(roles))
       .execute("SP_GESTIONAR_ROLES");
 
+    // Verificar si el usuario tiene roles asignados
+    const roleCheck = await pool
+      .request()
+      .input("ID_USUARIO", sql.Int, id)
+      .query("SELECT COUNT(*) AS RoleCount FROM MAE_USUARIO_ROL WHERE ID_USUARIO = @ID_USUARIO");
+
+    if (roleCheck.recordset[0].RoleCount === 0) {
+      // Desactivar usuario si no tiene roles
+      await pool
+        .request()
+        .input("ID_USUARIO", sql.Int, id)
+        .query("UPDATE MAE_USUARIO SET ESTADO = 0 WHERE ID_USUARIO = @ID_USUARIO");
+    }
+
     res.status(200).json({ message: "Roles actualizados exitosamente" });
   } catch (error) {
     logger.error(`Error al gestionar roles para usuario ${id}: ${error.message}`);
@@ -194,14 +265,14 @@ const manageRoles = async (req, res) => {
 
 const uploadPersonPhoto = async (req, res) => {
   const { id } = req.params;
-  const { foto, formato } = req.body;
+  const { photo, formato } = req.body;
 
   try {
     const pool = await poolPromise;
     await pool
       .request()
       .input("ID_PERSONA", sql.Int, id)
-      .input("FOTO", sql.VarBinary(sql.MAX), Buffer.from(foto, "base64"))
+      .input("FOTO", sql.VarBinary(sql.MAX), Buffer.from(photo, "base64"))
       .input("FORMATO", sql.VarChar(10), formato)
       .execute("SP_SUBIR_FOTO_PERSONA");
 
@@ -221,52 +292,26 @@ const getPersonPhoto = async (req, res) => {
       .input("ID_PERSONA", sql.Int, id)
       .execute("SP_OBTENER_FOTO_PERSONA");
 
-    if (result.recordset.length > 0) {
-      res.status(200).json({
-        foto: result.recordset[0].FOTO.toString("base64"),
-        formato: result.recordset[0].FORMATO,
-      });
-    } else {
-      res.status(404).json({ message: "Foto no encontrada" });
+    if (result.recordset.length === 0 || !result.recordset[0].FOTO) {
+      return res.status(404).json({ message: "Foto no encontrada" });
     }
+
+    res.status(200).json({
+      foto: result.recordset[0].FOTO.toString("base64"),
+      formato: result.recordset[0].FORMATO,
+    });
   } catch (error) {
-    logger.error(`Error al obtener foto para persona ${id}: ${error.message}`);
+    logger.error(`Error al obtener foto de persona ${id}: ${error.message}`);
     res.status(500).json({ message: "Error al obtener foto" });
   }
 };
 
 const changePassword = async (req, res) => {
   const { id } = req.params;
-  const newPassword = require("crypto").randomBytes(4).toString("hex");
 
   try {
     const pool = await poolPromise;
-    const resultCorreo = await pool
-      .request()
-      .input("ID_USUARIO", sql.Int, id)
-      .query(
-        "SELECT CORREO, NOMBRES, APELLIDOS FROM dbo.MAE_USUARIO u JOIN dbo.MAE_PERSONA p ON u.ID_PERSONA = p.ID_PERSONA WHERE u.ID_USUARIO = @ID_USUARIO"
-      );
-
-    if (!resultCorreo.recordset || resultCorreo.recordset.length === 0) {
-      logger.error(`Usuario con ID ${id} no encontrado`);
-      return res.status(404).json({ message: "Usuario no encontrado" });
-    }
-
-    const { CORREO: correo, NOMBRES: nombres, APELLIDOS: apellidos } = resultCorreo.recordset[0];
-
-    if (!correo) {
-      logger.warn(`Usuario con ID ${id} no tiene correo registrado`);
-      return res.status(400).json({ message: "El usuario no tiene un correo registrado" });
-    }
-
-    const fullName = `${nombres} ${apellidos}`;
-    const success = await sendPasswordEmail(correo, newPassword, fullName);
-    if (!success) {
-      logger.error(`Error al enviar el correo de restablecimiento a ${correo}`);
-      return res.status(500).json({ message: "Error al enviar el correo de restablecimiento" });
-    }
-
+    const newPassword = require("crypto").randomBytes(4).toString("hex");
     const saltRounds = 10;
     const salt = await bcrypt.genSalt(saltRounds);
     const hashedPassword = await bcrypt.hash(newPassword, salt);
@@ -276,22 +321,38 @@ const changePassword = async (req, res) => {
       .input("ID_USUARIO", sql.Int, id)
       .input("CONTRASENA_HASH", sql.VarChar(255), hashedPassword)
       .input("CONTRASENA_SALT", sql.VarChar(50), salt)
-      .execute("SP_ACTUALIZAR_CONTRASEÑA");
+      .query(
+        "UPDATE MAE_USUARIO SET CONTRASENA_HASH = @CONTRASENA_HASH, CONTRASENA_SALT = @CONTRASENA_SALT, PRIMER_INICIO = 1 WHERE ID_USUARIO = @ID_USUARIO"
+      );
 
-    logger.info(`Contraseña restablecida para el usuario ID ${id}`);
-    res.status(200).json({ message: "Correo enviado y contraseña actualizada" });
+    // Obtener correo y nombre completo
+    const userInfo = await pool
+      .request()
+      .input("ID_USUARIO", sql.Int, id)
+      .query(
+        "SELECT p.CORREO, p.NOMBRES, p.APELLIDOS FROM MAE_USUARIO u JOIN MAE_PERSONA p ON u.ID_PERSONA = p.ID_PERSONA WHERE u.ID_USUARIO = @ID_USUARIO"
+      );
+
+    if (userInfo.recordset.length > 0) {
+      const { CORREO, NOMBRES, APELLIDOS } = userInfo.recordset[0];
+      const fullName = `${NOMBRES} ${APELLIDOS}`;
+      const emailSent = await sendPasswordEmail(CORREO, newPassword, fullName);
+      if (!emailSent) {
+        logger.warn(`No se pudo enviar el correo a ${CORREO}, pero la contraseña fue restablecida`);
+      }
+    }
+
+    res.status(200).json({ message: "Contraseña restablecida exitosamente" });
   } catch (error) {
-    logger.error(`Error al cambiar la contraseña para el usuario ID: ${id} - ${error.message}`);
-    res.status(500).json({ message: error.message || "Error al cambiar la contraseña" });
+    logger.error(`Error al restablecer contraseña para usuario ${id}: ${error.message}`);
+    res.status(500).json({ message: "Error al restablecer contraseña" });
   }
 };
 
 const getRoles = async (req, res) => {
   try {
     const pool = await poolPromise;
-    const result = await pool
-      .request()
-      .query("SELECT ID_ROL, DETALLE_USUARIO FROM MAE_TIPO_USUARIO WHERE ESTADO = 1");
+    const result = await pool.request().query("SELECT ID_ROL, DETALLE_USUARIO FROM MAE_ROL WHERE ESTADO = 1");
     res.status(200).json(result.recordset);
   } catch (error) {
     logger.error(`Error al obtener roles: ${error.message}`);
@@ -303,6 +364,7 @@ module.exports = {
   listPersons,
   getPersonDetails,
   updatePerson,
+  updateEmail,
   deletePerson,
   manageSystemAccess,
   manageRoles,
