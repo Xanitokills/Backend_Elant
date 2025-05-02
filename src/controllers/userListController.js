@@ -123,7 +123,7 @@ const updatePerson = async (req, res) => {
         "INICIO_RESIDENCIA",
         sql.VarChar(10),
         residentInfo && residentInfo[0]
-          ? residentInfo[0].inicio_residencia
+          ? new Date(residentInfo[0].inicio_residencia).toISOString().substring(0, 10)
           : null
       )
       .input(
@@ -150,9 +150,7 @@ const updatePerson = async (req, res) => {
     res.status(200).json({ message: "Persona actualizada exitosamente" });
   } catch (error) {
     logger.error(`Error al actualizar persona ${id}: ${error.message}`);
-    res
-      .status(error.number || 500)
-      .json({ message: error.message || "Error al actualizar persona" });
+    res.status(500).json({ message: "Error del servidor" });
   }
 };
 
@@ -194,88 +192,91 @@ const deletePerson = async (req, res) => {
 };
 
 const manageSystemAccess = async (req, res) => {
-    const { id } = req.params;
-    const { usuario, correo, roles, activar, nombres, apellidos } = req.body;
-  
-    try {
-      const pool = await poolPromise;
-  
-      if (activar) {
-        // Verificar si el usuario ya existe
-        const userCheck = await pool
+  const { id } = req.params;
+  const { usuario, correo, roles, activar, nombres, apellidos } = req.body;
+
+  try {
+    const pool = await poolPromise;
+
+    if (activar) {
+      // Verificar si el usuario ya existe
+      const userCheck = await pool
+        .request()
+        .input("ID_PERSONA", sql.Int, id)
+        .query(
+          "SELECT ID_USUARIO, ESTADO FROM MAE_USUARIO WHERE ID_PERSONA = @ID_PERSONA"
+        );
+
+      let idUsuario;
+      let newPassword;
+
+      if (userCheck.recordset.length > 0) {
+        idUsuario = userCheck.recordset[0].ID_USUARIO;
+        if (userCheck.recordset[0].ESTADO === 1) {
+          return res.status(400).json({ message: "El usuario ya está activo" });
+        }
+        newPassword = require("crypto").randomBytes(4).toString("hex");
+      } else {
+        newPassword = require("crypto").randomBytes(4).toString("hex");
+        const saltRounds = 10;
+        const salt = await bcrypt.genSalt(saltRounds);
+        const hashedPassword = await bcrypt.hash(newPassword, salt);
+
+        const userResult = await pool
           .request()
           .input("ID_PERSONA", sql.Int, id)
-          .query("SELECT ID_USUARIO, ESTADO FROM MAE_USUARIO WHERE ID_PERSONA = @ID_PERSONA");
-  
-        let idUsuario;
-        let newPassword;
-  
-        if (userCheck.recordset.length > 0) {
-          idUsuario = userCheck.recordset[0].ID_USUARIO;
-          if (userCheck.recordset[0].ESTADO === 1) {
-            return res.status(400).json({ message: "El usuario ya está activo" });
-          }
-          newPassword = require("crypto").randomBytes(4).toString("hex");
-        } else {
-          newPassword = require("crypto").randomBytes(4).toString("hex");
-          const saltRounds = 10;
-          const salt = await bcrypt.genSalt(saltRounds);
-          const hashedPassword = await bcrypt.hash(newPassword, salt);
-  
-          const userResult = await pool
-            .request()
-            .input("ID_PERSONA", sql.Int, id)
-            .input("USUARIO", sql.VarChar(50), usuario)
-            .input("CONTRASENA_HASH", sql.VarChar(255), hashedPassword)
-            .input("CONTRASENA_SALT", sql.VarChar(50), salt)
-            .query(
-              "INSERT INTO MAE_USUARIO (ID_PERSONA, USUARIO, CONTRASENA_HASH, CONTRASENA_SALT, ESTADO, PRIMER_INICIO) OUTPUT INSERTED.ID_USUARIO VALUES (@ID_PERSONA, @USUARIO, @CONTRASENA_HASH, @CONTRASENA_SALT, 1, 1)"
-            );
-  
-          idUsuario = userResult.recordset[0].ID_USUARIO;
-        }
-  
-        // Asignar roles
-        if (roles && roles.length > 0) {
-          await pool
-            .request()
-            .input("ID_USUARIO", sql.Int, idUsuario)
-            .input("ROLES", sql.NVarChar(sql.MAX), JSON.stringify(roles))
-            .execute("SP_GESTIONAR_ROLES");
-        }
-  
-        // Enviar correo
-        const fullName = `${nombres} ${apellidos}`;
-        const emailSent = await sendPasswordEmail(correo, newPassword, fullName);
-        if (!emailSent) {
-          logger.warn(`No se pudo enviar el correo a ${correo}, pero el acceso fue activado`);
-        }
-  
-        res.status(200).json({
-          message: "Acceso activado exitosamente",
-          idUsuario,
-          usuario,
-        });
-  
-      } else {
-        // DESACTIVAR acceso usando el SP correcto
+          .input("USUARIO", sql.VarChar(50), usuario)
+          .input("CONTRASENA_HASH", sql.VarChar(255), hashedPassword)
+          .input("CONTRASENA_SALT", sql.VarChar(50), salt)
+          .query(
+            "INSERT INTO MAE_USUARIO (ID_PERSONA, USUARIO, CONTRASENA_HASH, CONTRASENA_SALT, ESTADO, PRIMER_INICIO) OUTPUT INSERTED.ID_USUARIO VALUES (@ID_PERSONA, @USUARIO, @CONTRASENA_HASH, @CONTRASENA_SALT, 1, 1)"
+          );
+
+        idUsuario = userResult.recordset[0].ID_USUARIO;
+      }
+
+      // Asignar roles
+      if (roles && roles.length > 0) {
         await pool
           .request()
-          .input("ID_PERSONA", sql.Int, id)
-          .execute("SP_QUITAR_ACCESO_SISTEMA");
-  
-        res.status(200).json({ message: "Acceso desactivado exitosamente" });
+          .input("ID_USUARIO", sql.Int, idUsuario)
+          .input("ROLES", sql.NVarChar(sql.MAX), JSON.stringify(roles))
+          .execute("SP_GESTIONAR_ROLES");
       }
-  
-    } catch (error) {
-      logger.error(`Error al gestionar acceso para persona ${id}: ${error.message}\nStack: ${error.stack}`);
-      res.status(500).json({
-        message: error.message || "Error al gestionar acceso",
-        stack: error.stack,
+
+      // Enviar correo
+      const fullName = `${nombres} ${apellidos}`;
+      const emailSent = await sendPasswordEmail(correo, newPassword, fullName);
+      if (!emailSent) {
+        logger.warn(
+          `No se pudo enviar el correo a ${correo}, pero el acceso fue activado`
+        );
+      }
+
+      res.status(200).json({
+        message: "Acceso activado exitosamente",
+        idUsuario,
+        usuario,
       });
+    } else {
+      // DESACTIVAR acceso usando el SP correcto
+      await pool
+        .request()
+        .input("ID_PERSONA", sql.Int, id)
+        .execute("SP_QUITAR_ACCESO_SISTEMA");
+
+      res.status(200).json({ message: "Acceso desactivado exitosamente" });
     }
-  };
-  
+  } catch (error) {
+    logger.error(
+      `Error al gestionar acceso para persona ${id}: ${error.message}\nStack: ${error.stack}`
+    );
+    res.status(500).json({
+      message: error.message || "Error al gestionar acceso",
+      stack: error.stack,
+    });
+  }
+};
 
 const manageRoles = async (req, res) => {
   const { id } = req.params;
