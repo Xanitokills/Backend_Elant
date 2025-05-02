@@ -41,15 +41,19 @@ const sendPasswordEmail = async (email, password, fullName) => {
 };
 
 const listPersons = async (req, res) => {
-  try {
-    const pool = await poolPromise;
-    const result = await pool.request().execute("SP_LISTAR_PERSONAS");
-    res.status(200).json(result.recordset);
-  } catch (error) {
-    logger.error(`Error al listar personas: ${error.message}`);
-    res.status(500).json({ message: "Error del servidor" });
-  }
-};
+    try {
+      const mostrarActivos = req.query.mostrarActivos !== undefined ? parseInt(req.query.mostrarActivos) : 1;
+      const pool = await poolPromise;
+      const result = await pool
+        .request()
+        .input("MOSTRAR_ACTIVOS", sql.Bit, mostrarActivos)
+        .execute("SP_LISTAR_PERSONAS");
+      res.status(200).json(result.recordset);
+    } catch (error) {
+      logger.error(`Error al listar personas: ${error.message}`);
+      res.status(500).json({ message: "Error del servidor" });
+    }
+  };
 
 const getPersonDetails = async (req, res) => {
   const { id } = req.params;
@@ -350,15 +354,19 @@ const changePassword = async (req, res) => {
 };
 
 const getRoles = async (req, res) => {
-  try {
-    const pool = await poolPromise;
-    const result = await pool.request().query("SELECT ID_ROL, DETALLE_USUARIO FROM MAE_ROL WHERE ESTADO = 1");
-    res.status(200).json(result.recordset);
-  } catch (error) {
-    logger.error(`Error al obtener roles: ${error.message}`);
-    res.status(500).json({ message: "Error al obtener roles" });
-  }
-};
+    try {
+      const pool = await poolPromise;
+      const result = await pool.request().query("SELECT ID_ROL, DETALLE_USUARIO FROM MAE_TIPO_USUARIO WHERE ESTADO = 1");
+      if (result.recordset.length === 0) {
+        logger.warn("No se encontraron roles activos");
+        return res.status(200).json([]);
+      }
+      res.status(200).json(result.recordset);
+    } catch (error) {
+      logger.error(`Error al obtener roles: ${error.message}, Stack: ${error.stack}`);
+      res.status(500).json({ message: "Error al obtener roles" });
+    }
+  };
 
 module.exports = {
   listPersons,
