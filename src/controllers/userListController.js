@@ -59,29 +59,52 @@ const listPersons = async (req, res) => {
 };
 
 const getPersonDetails = async (req, res) => {
-  const { id } = req.params;
-  try {
-    const pool = await poolPromise;
-    const result = await pool
-      .request()
-      .input("ID_PERSONA", sql.Int, id)
-      .execute("SP_OBTENER_PERSONA_DETALLE");
-
-    const [basicInfo, residentInfo, workerInfo, roles] = result.recordsets;
-
-    res.status(200).json({
-      basicInfo: basicInfo[0] || {},
-      residentInfo,
-      workerInfo,
-      roles,
-    });
-  } catch (error) {
-    logger.error(
-      `Error al obtener detalles de persona ${id}: ${error.message}`
-    );
-    res.status(500).json({ message: "Error del servidor" });
-  }
-};
+    const { id } = req.params;
+    try {
+      const pool = await poolPromise;
+  
+      const result = await pool
+        .request()
+        .input("ID_PERSONA", sql.Int, id)
+        .execute("SP_OBTENER_PERSONA_DETALLE");
+  
+      const [basicInfo, residentInfo, workerInfo, roles] = result.recordsets;
+  
+      // 🔹 Obtener la foto
+      const fotoResult = await pool
+        .request()
+        .input("ID_PERSONA", sql.Int, id)
+        .execute("SP_OBTENER_FOTO_PERSONA");
+  
+      const foto = fotoResult.recordset[0]
+        ? {
+            FOTO: fotoResult.recordset[0].FOTO.toString("base64"),
+            FORMATO: fotoResult.recordset[0].FORMATO,
+          }
+        : {
+            FOTO: null,
+            FORMATO: null,
+          };
+  
+      // 🔹 Enviar toda la data unificada
+      res.status(200).json({
+        basicInfo: {
+          ...basicInfo[0],
+          ...foto,
+        },
+        residentInfo,
+        workerInfo,
+        roles,
+      });
+    } catch (error) {
+      logger.error(
+        `❌ Error al obtener detalles de persona ${id}: ${error.message}`
+      );
+      logger.error(`📍 Stack Trace:\n${error.stack}`);
+      res.status(500).json({ message: "Error del servidor" });
+    }
+  };
+  
 
 const updatePerson = async (req, res) => {
     const { id } = req.params;
