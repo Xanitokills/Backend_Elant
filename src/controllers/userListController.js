@@ -477,6 +477,23 @@ const checkUsernameExists = async (req, res) => {
   }
 };
 
+const deletePersonPhoto = async (req, res) => {
+  const { id } = req.params;
+  try {
+    const pool = await poolPromise;
+    await pool
+      .request()
+      .input("ID_PERSONA", sql.Int, id)
+      .execute("SP_ELIMINAR_FOTO_PERSONA");
+
+    res.status(200).json({ message: "Foto eliminada exitosamente" });
+  } catch (error) {
+    logger.error(`Error al eliminar foto de persona ${id}: ${error.message}`);
+    res.status(500).json({ message: "Error al eliminar foto" });
+  }
+};
+
+
 module.exports = {
   listPersons,
   getPersonDetails,
@@ -490,4 +507,5 @@ module.exports = {
   changePassword,
   getRoles,
   checkUsernameExists,
+  deletePersonPhoto,
 };

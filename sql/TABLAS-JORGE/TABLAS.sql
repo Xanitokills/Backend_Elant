@@ -1,26 +1,3 @@
-########################################################################
-
-SELECT * FROM MAE_PERFIL
-select * from MAE_PERSONA
-select * from MAE_SEXO
-SELECT * FROM MAE_TRABAJADOR_FASE
-
-SELECT * FROM MAE_RESIDENTE
-SELECT * FROM MAE_TIPO_RESIDENTE
-
-SELECT * FROM MAE_DEPARTAMENTO
-SELECT * FROM MAE_FASE
-
-select * from MAE_USUARIO
-select * from MAE_TIPO_USUARIO -- MAE_ROLES_ACCESO
-select * from MAE_USUARIO_ROL
-
-
-select * from [dbo].[MAE_MENU]
-select * from [dbo].[MAE_SUBMENU]
-select * from [dbo].[MAE_ROL_MENU]
-select * from [dbo].[MAE_ROL_SUBMENU]
-
 
 ######################################################################
 SELECT * FROM MAE_PERFIL

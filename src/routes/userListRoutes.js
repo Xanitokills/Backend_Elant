@@ -14,7 +14,8 @@ const {
   changePassword,
   getRoles,
   updateEmail,
-  checkUsernameExists, // Nueva función
+  checkUsernameExists,
+  deletePersonPhoto,
 } = require("../controllers/userListController");
 
 router.get("/persons", authMiddleware, checkPermission({ menuId: 1 }), listPersons);
@@ -25,6 +26,7 @@ router.post("/persons/:id/access", authMiddleware, checkPermission({ menuId: 1 }
 router.put("/persons/:id/roles", authMiddleware, checkPermission({ menuId: 1 }), manageRoles);
 router.post("/persons/:id/photo", authMiddleware, checkPermission({ menuId: 1 }), uploadPersonPhoto);
 router.get("/persons/:id/photo", authMiddleware, checkPermission({ menuId: 1 }), getPersonPhoto);
+router.delete("/persons/:id/photo", authMiddleware, checkPermission({ menuId: 1 }), deletePersonPhoto);
 router.put("/persons/:id/change-password", authMiddleware, checkPermission({ menuId: 1 }), changePassword);
 router.get("/roles", authMiddleware, checkPermission({ menuId: 1 }), getRoles);
 router.put("/persons/:id/email", authMiddleware, checkPermission({ menuId: 1 }), updateEmail); 
