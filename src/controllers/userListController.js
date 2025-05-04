@@ -106,7 +106,7 @@ const getPersonDetails = async (req, res) => {
   };
   
 
-const updatePerson = async (req, res) => {
+  const updatePerson = async (req, res) => {
     const { id } = req.params;
     const { basicInfo, residentInfo, workerInfo, photo } = req.body;
   
@@ -129,25 +129,9 @@ const updatePerson = async (req, res) => {
         .input("ID_SEXO", sql.Int, basicInfo.id_sexo)
         .input("ID_PERFIL", sql.Int, basicInfo.id_perfil)
         .input(
-          "DEPARTAMENTOS",
+          "RESIDENTES",
           sql.NVarChar(sql.MAX),
-          residentInfo
-            ? JSON.stringify(residentInfo.map((r) => r.id_departamento))
-            : null
-        )
-        .input(
-          "ID_CLASIFICACION",
-          sql.Int,
-          residentInfo && residentInfo[0]
-            ? residentInfo[0].id_clasificacion
-            : null
-        )
-        .input(
-          "INICIO_RESIDENCIA",
-          sql.VarChar(10),
-          residentInfo && residentInfo[0]
-            ? new Date(residentInfo[0].inicio_residencia).toISOString().substring(0, 10)
-            : null
+          residentInfo ? JSON.stringify(residentInfo) : null
         )
         .input(
           "FASES_TRABAJADOR",
@@ -176,6 +160,7 @@ const updatePerson = async (req, res) => {
       });
     }
   };
+  
   
 
 const updateEmail = async (req, res) => {
