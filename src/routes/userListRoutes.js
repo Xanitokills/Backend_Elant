@@ -16,6 +16,7 @@ const {
   updateEmail,
   checkUsernameExists,
   deletePersonPhoto,
+  activatePerson,
 } = require("../controllers/userListController");
 
 router.get("/persons", authMiddleware, checkPermission({ menuId: 1 }), listPersons);
@@ -31,5 +32,6 @@ router.put("/persons/:id/change-password", authMiddleware, checkPermission({ men
 router.get("/roles", authMiddleware, checkPermission({ menuId: 1 }), getRoles);
 router.put("/persons/:id/email", authMiddleware, checkPermission({ menuId: 1 }), updateEmail); 
 router.get("/check-username", authMiddleware, checkPermission({ menuId: 1 }), checkUsernameExists);
+router.put("/persons/:id/activate", authMiddleware, checkPermission({ menuId: 1 }), activatePerson);
 
 module.exports = router;

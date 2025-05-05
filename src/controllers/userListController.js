@@ -478,6 +478,22 @@ const deletePersonPhoto = async (req, res) => {
   }
 };
 
+const activatePerson = async (req, res) => {
+  const { id } = req.params;
+  try {
+    const pool = await poolPromise;
+    await pool
+      .request()
+      .input("ID_PERSONA", sql.Int, id)
+      .execute("SP_ACTIVAR_PERSONA");
+
+    res.status(200).json({ message: "Persona activada exitosamente" });
+  } catch (error) {
+    logger.error(`Error al activar persona ${id}: ${error.message}`);
+    res.status(500).json({ message: "Error al activar persona" });
+  }
+};
+
 
 module.exports = {
   listPersons,
@@ -493,4 +509,5 @@ module.exports = {
   getRoles,
   checkUsernameExists,
   deletePersonPhoto,
+  activatePerson,
 };
