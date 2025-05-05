@@ -648,6 +648,34 @@ const getUserRoles = async (req, res) => {
   }
 };
 
+
+const getFotoPersona = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const pool = await poolPromise;
+
+    const result = await pool.request()
+      .input("ID_PERSONA", sql.Int, id)
+      .query(`
+        SELECT FOTO FROM MAE_PERSONA_FOTO WHERE ID_PERSONA = @ID_PERSONA
+      `);
+
+    if (result.recordset.length === 0 || !result.recordset[0].FOTO) {
+      return res.status(404).json({ message: "Foto no encontrada" });
+    }
+
+    const fotoBuffer = result.recordset[0].FOTO;
+    const fotoBase64 = `data:image/jpeg;base64,${fotoBuffer.toString('base64')}`;
+
+    res.json({ fotoBase64 });
+  } catch (error) {
+    console.error("Error al obtener la foto:", error.message);
+    res.status(500).json({ message: "Error al obtener la foto" });
+  }
+};
+
+
+
 module.exports = {
   register,
   getPerfiles,
@@ -664,4 +692,5 @@ module.exports = {
   asignarRolComite,
   quitarRolComite,
   getUserRoles,
+  getFotoPersona,
 };

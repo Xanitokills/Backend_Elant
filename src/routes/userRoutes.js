@@ -18,6 +18,7 @@ const {
   asignarRolComite,
   quitarRolComite,
   getUserRoles,
+  getFotoPersona,
 } = require("../controllers/userController");
 
 router.post("/register", authMiddleware, checkPermission({ menuId: 1 }), register);
@@ -32,6 +33,7 @@ router.get("/sexes", getSexes);
 router.get("/get-roles", getRoles);
 router.get("/user-roles", authMiddleware, getUserRoles);
 router.get("/sidebar/:id", authMiddleware, getSidebarByUserId);
+router.get('/foto/:id', authMiddleware,getFotoPersona);
 
 router.get("/perfiles", authMiddleware, getPerfiles);
 router.get("/fases", authMiddleware, getFases);

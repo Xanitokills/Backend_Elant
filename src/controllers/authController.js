@@ -133,25 +133,26 @@ const login = async (req, res) => {
   // Validar formato de DNI
   if (!validateDNI(dni)) {
     logger.warn(`Formato de DNI inválido: ${dni}`);
-    return res
-      .status(400)
-      .json({
-        message: "Formato de DNI inválido (máximo 12 caracteres alfanuméricos)",
-      });
+    return res.status(400).json({
+      message: "Formato de DNI inválido (máximo 12 caracteres alfanuméricos)",
+    });
   }
 
   try {
     const pool = await poolPromise;
-    const result = await pool.request().input("dni", sql.VarChar(12), dni)
+    const result = await pool.request()
+      .input("dni", sql.VarChar(12), dni)
       .query(`
         SELECT 
           p.ID_PERSONA, 
           p.NOMBRES, 
           p.APELLIDOS, 
+          s.DESCRIPCION AS SEXO,
           u.ID_USUARIO, 
           u.CONTRASENA_HASH, 
           u.PRIMER_INICIO
         FROM MAE_PERSONA p
+        JOIN MAE_SEXO s ON p.ID_SEXO = s.ID_SEXO
         JOIN MAE_USUARIO u ON p.ID_PERSONA = u.ID_PERSONA
         WHERE p.DNI = @dni AND p.ESTADO = 1 AND u.ESTADO = 1
       `);
@@ -172,9 +173,9 @@ const login = async (req, res) => {
     }
 
     // Obtener roles del usuario
-    const rolesResult = await pool
-      .request()
-      .input("userId", sql.Int, user.ID_USUARIO).query(`
+    const rolesResult = await pool.request()
+      .input("userId", sql.Int, user.ID_USUARIO)
+      .query(`
         SELECT t.ID_ROL, t.DETALLE_USUARIO
         FROM MAE_USUARIO_ROL ur
         JOIN MAE_TIPO_USUARIO t ON ur.ID_ROL = t.ID_ROL
@@ -182,15 +183,31 @@ const login = async (req, res) => {
       `);
     const roles = rolesResult.recordset.map((r) => r.DETALLE_USUARIO);
 
+    // Obtener foto si existe
+    const fotoResult = await pool.request()
+      .input("personaId", sql.Int, user.ID_PERSONA)
+      .query(`
+        SELECT TOP 1 FOTO, FORMATO
+        FROM MAE_PERSONA_FOTO
+        WHERE ID_PERSONA = @personaId AND ESTADO = 1
+        ORDER BY FECHA_SUBIDA DESC
+      `);
+
+    let fotoBase64 = null;
+    if (fotoResult.recordset.length > 0) {
+      const { FOTO, FORMATO } = fotoResult.recordset[0];
+      const base64String = Buffer.from(FOTO).toString("base64");
+      fotoBase64 = `data:image/${FORMATO.toLowerCase()};base64,${base64String}`;
+    }
+
     // Generar token JWT
     const token = generateToken(user.ID_USUARIO, roles);
 
     // Obtener permisos
     const permissions = await getUserPermissions(user.ID_USUARIO);
 
-    logger.info(
-      `Inicio de sesión exitoso para DNI: ${dni}, ID_USUARIO: ${user.ID_USUARIO}`
-    );
+    logger.info(`Inicio de sesión exitoso para DNI: ${dni}, ID_USUARIO: ${user.ID_USUARIO}`);
+
     // Respuesta
     res.status(200).json({
       token,
@@ -202,16 +219,19 @@ const login = async (req, res) => {
         personaId: user.ID_PERSONA,
         name: `${user.NOMBRES} ${user.APELLIDOS}`,
         roles,
+        sexo: user.SEXO,
+        foto: fotoBase64,
       },
       permissions,
     });
+
   } catch (error) {
     logger.error(`Error al iniciar sesión para DNI: ${dni}: ${error.message}`);
-    res
-      .status(500)
-      .json({ message: "Error del servidor", error: error.message });
+    res.status(500).json({ message: "Error del servidor", error: error.message });
   }
 };
+
+
 
 // Endpoint de validación de token
 const validate = async (req, res) => {
