@@ -2,24 +2,22 @@ const { poolPromise } = require("../config/db");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const express = require("express");
-const upload = require("../config/multerConfig"); // Importa la configuración de Multer
+const upload = require("../config/multerConfig");
 const logger = require("../config/logger");
-const sql = require("mssql"); // <-- ESTA ES LA LÍNEA FALTANTE
+const sql = require("mssql");
 
-// Función para validar el formato del DNI
 const validateDNI = (dni) => {
   const dniRegex = /^[a-zA-Z0-9]{1,12}$/;
   return dniRegex.test(dni);
 };
 
-// Función para generar un token JWT
 const generateToken = (userId, roles) => {
   if (!process.env.JWT_SECRET) {
     throw new Error("JWT_SECRET no está definido en las variables de entorno");
   }
   return jwt.sign({ id: userId, roles }, process.env.JWT_SECRET, {
-    expiresIn: "1h",
-    //expiresIn: "2m",
+    expiresIn: "5m",
+    //expiresIn: "1H"
   });
 };
 
@@ -65,11 +63,8 @@ const getUserPermissions = async (userId) => {
       `);
 
     const rows = result.recordset;
-
-    // Agrupar menús y submenús
     const menusMap = new Map();
 
-    // Primera pasada: añadir todos los menús
     rows.forEach((row) => {
       if (row.Tipo === "Menú") {
         menusMap.set(row.ID, {
@@ -83,7 +78,6 @@ const getUserPermissions = async (userId) => {
       }
     });
 
-    // Segunda pasada: añadir submenús
     rows.forEach((row) => {
       if (row.Tipo === "Submenú") {
         if (menusMap.has(row.ID)) {
@@ -102,7 +96,6 @@ const getUserPermissions = async (userId) => {
       }
     });
 
-    // Convertir a array y ordenar
     const permissions = Array.from(menusMap.values());
     permissions.sort((a, b) => a.orden - b.orden);
     permissions.forEach((menu) => {
@@ -121,17 +114,14 @@ const getUserPermissions = async (userId) => {
   }
 };
 
-// Endpoint de login
 const login = async (req, res) => {
   const { dni, password } = req.body;
 
-  // Validar campos requeridos
   if (!dni || !password) {
     logger.warn("DNI o contraseña no proporcionados");
     return res.status(400).json({ message: "DNI y contraseña son requeridos" });
   }
 
-  // Validar formato de DNI
   if (!validateDNI(dni)) {
     logger.warn(`Formato de DNI inválido: ${dni}`);
     return res.status(400).json({
@@ -160,20 +150,17 @@ const login = async (req, res) => {
 
     const user = result.recordset[0];
 
-    // Verificar si el usuario existe
     if (!user) {
       logger.warn(`Usuario no encontrado para DNI: ${dni}`);
       return res.status(401).json({ message: "Credenciales inválidas" });
     }
 
-    // Verificar la contraseña
     const isMatch = await bcrypt.compare(password, user.CONTRASENA_HASH);
     if (!isMatch) {
       logger.warn(`Contraseña incorrecta para DNI: ${dni}`);
       return res.status(401).json({ message: "Credenciales inválidas" });
     }
 
-    // Obtener roles del usuario
     const rolesResult = await pool.request()
       .input("userId", sql.Int, user.ID_USUARIO)
       .query(`
@@ -184,7 +171,6 @@ const login = async (req, res) => {
       `);
     const roles = rolesResult.recordset.map((r) => r.DETALLE_USUARIO);
 
-    // Obtener foto si existe
     const fotoResult = await pool.request()
       .input("personaId", sql.Int, user.ID_PERSONA)
       .query(`
@@ -201,15 +187,11 @@ const login = async (req, res) => {
       fotoBase64 = `data:image/${FORMATO.toLowerCase()};base64,${base64String}`;
     }
 
-    // Generar token JWT
     const token = generateToken(user.ID_USUARIO, roles);
-
-    // Obtener permisos
     const permissions = await getUserPermissions(user.ID_USUARIO);
 
     logger.info(`Inicio de sesión exitoso para DNI: ${dni}, ID_USUARIO: ${user.ID_USUARIO}`);
 
-    // Respuesta
     res.status(200).json({
       token,
       roles,
@@ -225,16 +207,12 @@ const login = async (req, res) => {
       },
       permissions,
     });
-
   } catch (error) {
     logger.error(`Error al iniciar sesión para DNI: ${dni}: ${error.message}`);
     res.status(500).json({ message: "Error del servidor", error: error.message });
   }
 };
 
-
-
-// Endpoint de validación de token
 const validate = async (req, res) => {
   const authHeader = req.headers.authorization;
 
@@ -274,7 +252,6 @@ const validate = async (req, res) => {
       return res.status(401).json({ message: "Usuario no encontrado" });
     }
 
-    // Obtener roles del usuario
     const rolesResult = await pool
       .request()
       .input("userId", sql.Int, user.ID_USUARIO).query(`
@@ -285,7 +262,6 @@ const validate = async (req, res) => {
       `);
     const roles = rolesResult.recordset.map((r) => r.DETALLE_USUARIO);
 
-    // Obtener permisos
     const permissions = await getUserPermissions(user.ID_USUARIO);
 
     res.status(200).json({
@@ -297,7 +273,7 @@ const validate = async (req, res) => {
         roles,
       },
       userName: `${user.NOMBRES} ${user.APELLIDOS}`,
-      roles, // Array de roles, ej: ["Administrador", "Comité"]
+      roles,
       primerInicio: user.PRIMER_INICIO === 1,
       permissions,
     });
@@ -363,6 +339,7 @@ const uploadImage = async (req, res) => {
       .json({ message: "Error al subir la imagen.", error: error.message });
   }
 };
+
 const getLoginImages = async (req, res) => {
   try {
     logger.info("Iniciando la obtención de imágenes...");
@@ -396,6 +373,7 @@ const getLoginImages = async (req, res) => {
       .json({ message: "Error al obtener las imágenes", error: error.message });
   }
 };
+
 const deleteLoginImage = async (req, res) => {
   const { imageId } = req.params;
 
@@ -427,6 +405,7 @@ const deleteLoginImage = async (req, res) => {
       .json({ message: "Error al eliminar la imagen", error: error.message });
   }
 };
+
 const changeAuthenticatedUserPassword = async (req, res) => {
   const userId = req.user?.id;
   const { currentPassword, newPassword } = req.body;
@@ -474,15 +453,13 @@ const changeAuthenticatedUserPassword = async (req, res) => {
       `);
 
     return res
-      .status(200)
-      .json({ message: "Contraseña actualizada con éxito" });
+      .status(200).json({ message: "Contraseña actualizada con éxito" });
   } catch (error) {
     console.error("Error al cambiar la contraseña:", error);
     return res.status(500).json({ message: "Error del servidor" });
   }
 };
 
-// Endpoint para listar todos los movimientos de las personas (ingresos y salidas)
 const getAllMovements = async (req, res) => {
   try {
     const pool = await poolPromise;
@@ -513,7 +490,101 @@ const getAllMovements = async (req, res) => {
   }
 };
 
-// Export the new functions
+const refreshToken = async (req, res) => {
+  console.log("authController - /refresh-token endpoint called");
+  const authHeader = req.headers.authorization;
+  console.log("authController - Authorization header:", authHeader);
+
+  if (!authHeader || !authHeader.startsWith("Bearer ")) {
+    logger.warn("No se proporcionó token o formato inválido");
+    console.log("authController - Missing or invalid token");
+    return res.status(401).json({ message: "Token no proporcionado o formato inválido" });
+  }
+
+  const token = authHeader.split(" ")[1];
+  console.log("authController - Extracted token:", token);
+
+  if (!process.env.JWT_SECRET) {
+    logger.error("JWT_SECRET no está definido");
+    console.log("authController - JWT_SECRET not defined");
+    return res.status(500).json({ message: "Error del servidor: JWT_SECRET no está definido" });
+  }
+
+  try {
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    console.log("authController - Token decoded, userId:", decoded.id);
+    const userId = decoded.id;
+
+    const pool = await poolPromise;
+    const result = await pool.request()
+      .input("id", sql.Int, userId)
+      .query(`
+        SELECT 
+          u.ID_USUARIO, 
+          p.ID_PERSONA, 
+          p.NOMBRES, 
+          p.APELLIDOS, 
+          u.PRIMER_INICIO
+        FROM MAE_USUARIO u
+        JOIN MAE_PERSONA p ON u.ID_PERSONA = p.ID_PERSONA
+        WHERE u.ID_USUARIO = @id AND u.ESTADO = 1 AND p.ESTADO = 1
+      `);
+    console.log("authController - User query result:", result.recordset);
+
+    const user = result.recordset[0];
+    if (!user) {
+      logger.warn(`Usuario no encontrado para ID: ${userId}`);
+      console.log("authController - User not found for ID:", userId);
+      return res.status(401).json({ message: "Usuario no encontrado" });
+    }
+
+    const rolesResult = await pool.request()
+      .input("userId", sql.Int, user.ID_USUARIO)
+      .query(`
+        SELECT t.ID_ROL, t.DETALLE_USUARIO
+        FROM MAE_USUARIO_ROL ur
+        JOIN MAE_TIPO_USUARIO t ON ur.ID_ROL = t.ID_ROL
+        WHERE ur.ID_USUARIO = @userId AND t.ESTADO = 1
+      `);
+    const roles = rolesResult.recordset.map((r) => r.DETALLE_USUARIO);
+    console.log("authController - User roles:", roles);
+
+    const newToken = generateToken(user.ID_USUARIO, roles);
+    console.log("authController - New token generated:", newToken);
+    const permissions = await getUserPermissions(user.ID_USUARIO);
+    console.log("authController - Permissions fetched:", permissions);
+
+    logger.info(`Token renovado exitosamente para usuario ID: ${user.ID_USUARIO}`);
+    console.log("authController - Token refresh successful for user ID:", user.ID_USUARIO);
+
+    res.status(200).json({
+      token: newToken,
+      userName: `${user.NOMBRES} ${user.APELLIDOS}`,
+      roles,
+      primerInicio: user.PRIMER_INICIO === 1,
+      user: {
+        id: user.ID_USUARIO,
+        personaId: user.ID_PERSONA,
+        name: `${user.NOMBRES} ${user.APELLIDOS}`,
+        roles,
+      },
+      permissions,
+    });
+  } catch (error) {
+    logger.error(`Error al renovar el token: ${error.message}`);
+    console.log("authController - Error during token refresh:", error.message);
+    if (error.name === "TokenExpiredError") {
+      console.log("authController - Token expired error");
+      return res.status(401).json({ message: "Token expirado" });
+    }
+    if (error.name === "JsonWebTokenError") {
+      console.log("authController - Invalid token error");
+      return res.status(401).json({ message: "Token inválido" });
+    }
+    res.status(500).json({ message: "Error al renovar el token", error: error.message });
+  }
+};
+
 module.exports = {
   login,
   validate,
@@ -521,5 +592,6 @@ module.exports = {
   getLoginImages,
   deleteLoginImage,
   changeAuthenticatedUserPassword,
-  getAllMovements
+  getAllMovements,
+  refreshToken
 };
