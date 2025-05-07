@@ -16,8 +16,7 @@ const generateToken = (userId, roles) => {
     throw new Error("JWT_SECRET no está definido en las variables de entorno");
   }
   return jwt.sign({ id: userId, roles }, process.env.JWT_SECRET, {
-    expiresIn: "5m",
-    //expiresIn: "1H"
+    expiresIn: process.env.ExpiresInToken,
   });
 };
 
