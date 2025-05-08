@@ -78,93 +78,125 @@ const getUserPermissions = async (userId) => {
 
 const login = async (req, res) => {
   const { dni, password } = req.body;
+
   if (!dni || !password)
     return res.status(400).json({ message: "DNI y contraseña son requeridos" });
+
   if (!validateDNI(dni))
     return res.status(400).json({ message: "Formato de DNI inválido" });
+
   try {
     const pool = await poolPromise;
-    const result = await pool.request().input("dni", sql.VarChar(12), dni)
+    const result = await pool.request()
+      .input("dni", sql.VarChar(12), dni)
       .query(`
-      SELECT p.ID_PERSONA, p.NOMBRES, p.APELLIDOS, s.DESCRIPCION AS SEXO, u.ID_USUARIO, u.CONTRASENA_HASH, u.ESTADO, u.INTENTOS_FALLIDOS_CONTRASEÑA
-      FROM MAE_PERSONA p JOIN MAE_SEXO s ON p.ID_SEXO = s.ID_SEXO JOIN MAE_USUARIO u ON p.ID_PERSONA = u.ID_PERSONA
-      WHERE p.DNI = @dni AND p.ESTADO = 1
-    `);
-    const user = result.recordset[0];
-    if (!user)
-      return res.status(401).json({ message: "Usuario no encontrado o DNI inválido" });
-    if (user.ESTADO === 0 && user.INTENTOS_FALLIDOS_CONTRASEÑA >= 5) {
-      return res
-        .status(403)
-        .json({
-          message:
-            "Cuenta inactiva por intentos fallidos de contraseña, comuníquese con el administrador",
-        });
-    }
-    if (user.ESTADO === 0)
-      return res.status(403).json({ message: "Usuario inactivo" });
-    if (user.INTENTOS_FALLIDOS_CONTRASEÑA >= 5)
-      return res
-        .status(403)
-        .json({ message: "Cuenta bloqueada por intentos fallidos" });
-    const isMatch = await bcrypt.compare(password, user.CONTRASENA_HASH);
-    if (!isMatch) {
-      await pool.request().input("id", sql.Int, user.ID_USUARIO).query(`
-        UPDATE MAE_USUARIO SET INTENTOS_FALLIDOS_CONTRASEÑA = ISNULL(INTENTOS_FALLIDOS_CONTRASEÑA, 0) + 1 WHERE ID_USUARIO = @id
+        SELECT 
+          p.ID_PERSONA, p.NOMBRES, p.APELLIDOS, s.DESCRIPCION AS SEXO,
+          u.ID_USUARIO, u.CONTRASENA_HASH, u.ESTADO, u.INTENTOS_FALLIDOS_CONTRASEÑA
+        FROM MAE_PERSONA p
+        JOIN MAE_SEXO s ON p.ID_SEXO = s.ID_SEXO
+        JOIN MAE_USUARIO u ON p.ID_PERSONA = u.ID_PERSONA
+        WHERE p.DNI = @dni AND p.ESTADO = 1
       `);
-      if ((user.INTENTOS_FALLIDOS_CONTRASEÑA || 0) + 1 >= 5) {
-        await pool.request().input("id", sql.Int, user.ID_USUARIO).query(`
-          UPDATE MAE_USUARIO SET ESTADO = 0 WHERE ID_USUARIO = @id
-        `);
+
+    const user = result.recordset[0];
+
+    if (!user)
+      return res.status(401).json({ message: "Usuario o contraseña incorrectos" });
+
+    // Bloquear completamente usuarios inactivos
+    if (user.ESTADO === 0) {
+      if (user.INTENTOS_FALLIDOS_CONTRASEÑA >= 5) {
+        return res.status(403).json({
+          message:
+            "Usuario inactivo por ingresar varias veces una contraseña incorrecta. Por favor, comunícate con el administrador.",
+        });
       }
-      return res.status(401).json({ message: "Contraseña incorrecta" });
+      return res.status(403).json({ message: "Usuario inactivo" });
     }
-    await pool.request().input("id", sql.Int, user.ID_USUARIO).query(`
-      UPDATE MAE_USUARIO SET INTENTOS_FALLIDOS_CONTRASEÑA = 0 WHERE ID_USUARIO = @id
-    `);
-    const rolesResult = await pool
-      .request()
-      .input("userId", sql.Int, user.ID_USUARIO).query(`
-      SELECT t.ID_ROL, t.DETALLE_USUARIO FROM MAE_USUARIO_ROL ur JOIN MAE_TIPO_USUARIO t ON ur.ID_ROL = t.ID_ROL WHERE ur.ID_USUARIO = @userId AND t.ESTADO = 1
-    `);
+
+    // Verificar contraseña
+    const isMatch = await bcrypt.compare(password, user.CONTRASENA_HASH);
+
+    if (!isMatch) {
+      const newAttempts = (user.INTENTOS_FALLIDOS_CONTRASEÑA || 0) + 1;
+
+      await pool.request()
+        .input("id", sql.Int, user.ID_USUARIO)
+        .input("attempts", sql.Int, newAttempts)
+        .query(`
+          UPDATE MAE_USUARIO 
+          SET INTENTOS_FALLIDOS_CONTRASEÑA = @attempts 
+          WHERE ID_USUARIO = @id
+        `);
+
+      // Bloquear usuario si supera los intentos permitidos
+      if (newAttempts >= 5) {
+        await pool.request()
+          .input("id", sql.Int, user.ID_USUARIO)
+          .query(`UPDATE MAE_USUARIO SET ESTADO = 0 WHERE ID_USUARIO = @id`);
+      }
+
+      return res.status(401).json({ message: "Usuario o contraseña incorrectos" });
+    }
+
+    // Solo resetear intentos si el usuario está activo
+    await pool.request()
+      .input("id", sql.Int, user.ID_USUARIO)
+      .query(`UPDATE MAE_USUARIO SET INTENTOS_FALLIDOS_CONTRASEÑA = 0 WHERE ID_USUARIO = @id`);
+
+    // Obtener roles del usuario
+    const rolesResult = await pool.request()
+      .input("userId", sql.Int, user.ID_USUARIO)
+      .query(`
+        SELECT t.ID_ROL, t.DETALLE_USUARIO 
+        FROM MAE_USUARIO_ROL ur 
+        JOIN MAE_TIPO_USUARIO t ON ur.ID_ROL = t.ID_ROL 
+        WHERE ur.ID_USUARIO = @userId AND t.ESTADO = 1
+      `);
     const roles = rolesResult.recordset.map((r) => r.DETALLE_USUARIO);
-    const fotoResult = await pool
-      .request()
-      .input("personaId", sql.Int, user.ID_PERSONA).query(`
-      SELECT TOP 1 FOTO, FORMATO FROM MAE_PERSONA_FOTO WHERE ID_PERSONA = @personaId AND ESTADO = 1 ORDER BY FECHA_SUBIDA DESC
-    `);
+
+    // Obtener foto del usuario
+    const fotoResult = await pool.request()
+      .input("personaId", sql.Int, user.ID_PERSONA)
+      .query(`
+        SELECT TOP 1 FOTO, FORMATO 
+        FROM MAE_PERSONA_FOTO 
+        WHERE ID_PERSONA = @personaId AND ESTADO = 1 
+        ORDER BY FECHA_SUBIDA DESC
+      `);
     let fotoBase64 = null;
     if (fotoResult.recordset.length > 0) {
       const { FOTO, FORMATO } = fotoResult.recordset[0];
-      fotoBase64 = `data:image/${FORMATO.toLowerCase()};base64,${Buffer.from(
-        FOTO
-      ).toString("base64")}`;
+      fotoBase64 = `data:image/${FORMATO.toLowerCase()};base64,${Buffer.from(FOTO).toString("base64")}`;
     }
+
+    // Generar token y obtener permisos
     const token = generateToken(user.ID_USUARIO, roles);
     const permissions = await getUserPermissions(user.ID_USUARIO);
-    res
-      .status(200)
-      .json({
-        token,
+
+    res.status(200).json({
+      token,
+      roles,
+      userName: `${user.NOMBRES} ${user.APELLIDOS}`,
+      user: {
+        id: user.ID_USUARIO,
+        personaId: user.ID_PERSONA,
+        name: `${user.NOMBRES} ${user.APELLIDOS}`,
         roles,
-        userName: `${user.NOMBRES} ${user.APELLIDOS}`,
-        user: {
-          id: user.ID_USUARIO,
-          personaId: user.ID_PERSONA,
-          name: `${user.NOMBRES} ${user.APELLIDOS}`,
-          roles,
-          sexo: user.SEXO,
-          foto: fotoBase64,
-        },
-        permissions,
-      });
+        sexo: user.SEXO,
+        foto: fotoBase64,
+      },
+      permissions,
+    });
+
   } catch (error) {
     logger.error(`Error al iniciar sesión para DNI: ${dni}: ${error.message}`);
-    res
-      .status(500)
-      .json({ message: "Error del servidor", error: error.message });
+    res.status(500).json({ message: "Error del servidor", error: error.message });
   }
 };
+
+
 
 
 const forgotPassword = async (req, res) => {
