@@ -96,24 +96,13 @@ const login = async (req, res) => {
         FROM MAE_PERSONA p
         JOIN MAE_SEXO s ON p.ID_SEXO = s.ID_SEXO
         JOIN MAE_USUARIO u ON p.ID_PERSONA = u.ID_PERSONA
-        WHERE p.DNI = @dni AND p.ESTADO = 1
+        WHERE p.DNI = @dni AND p.ESTADO = 1 AND u.ESTADO = 1
       `);
 
     const user = result.recordset[0];
 
     if (!user)
-      return res.status(401).json({ message: "Usuario o contraseña incorrectos" });
-
-    // Bloquear completamente usuarios inactivos
-    if (user.ESTADO === 0) {
-      if (user.INTENTOS_FALLIDOS_CONTRASEÑA >= 5) {
-        return res.status(403).json({
-          message:
-            "Usuario inactivo por ingresar varias veces una contraseña incorrecta. Por favor, comunícate con el administrador.",
-        });
-      }
-      return res.status(403).json({ message: "Usuario inactivo" });
-    }
+      return res.status(401).json({ message: "Usuario no encontrado o inactivo" });
 
     // Verificar contraseña
     const isMatch = await bcrypt.compare(password, user.CONTRASENA_HASH);
@@ -135,12 +124,16 @@ const login = async (req, res) => {
         await pool.request()
           .input("id", sql.Int, user.ID_USUARIO)
           .query(`UPDATE MAE_USUARIO SET ESTADO = 0 WHERE ID_USUARIO = @id`);
+        return res.status(403).json({
+          message:
+            "Usuario bloqueado por múltiples intentos fallidos. Comunícate con el administrador.",
+        });
       }
 
-      return res.status(401).json({ message: "Usuario o contraseña incorrectos" });
+      return res.status(401).json({ message: "Contraseña incorrecta" });
     }
 
-    // Solo resetear intentos si el usuario está activo
+    // Resetear intentos fallidos
     await pool.request()
       .input("id", sql.Int, user.ID_USUARIO)
       .query(`UPDATE MAE_USUARIO SET INTENTOS_FALLIDOS_CONTRASEÑA = 0 WHERE ID_USUARIO = @id`);
@@ -195,9 +188,6 @@ const login = async (req, res) => {
     res.status(500).json({ message: "Error del servidor", error: error.message });
   }
 };
-
-
-
 
 const forgotPassword = async (req, res) => {
   const { dni } = req.body;
