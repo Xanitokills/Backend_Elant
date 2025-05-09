@@ -3,76 +3,149 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Código de Verificación</title>
+  <title>Código de Verificación - SoftHome</title>
   <style>
     body {
+      font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+      background-color: #93c5fd;
       margin: 0;
       padding: 0;
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
-      background-color: #f4f4f4;
-      color: #333;
+      line-height: 0;
     }
     .container {
       max-width: 600px;
       margin: 40px auto;
       background-color: #ffffff;
-      border-radius: 8px;
-      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-      overflow: hidden;
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
     }
     .header {
-      background-color: #007bff;
-      padding: 20px;
-      text-align: center;
+      background: linear-gradient(to right, #4a5568, #60a5fa);
       color: #ffffff;
+      padding: 20px;
+      border-radius: 10px 10px 0 0;
+      text-align: right;
+      display: flex;
+      justify-content: flex-end;
+      align-items: center;
+      line-height: 0;
     }
-    .header h1 {
-      margin: 0;
-      font-size: 24px;
+    .logo {
+      display: inline-flex;
+      align-items: center;
+      background-color: #ffffff;
+      border-radius: 50%;
+      width: 50px;
+      height: 50px;
+      justify-content: center;
+      position: relative;
+      font-size: 16px;
+      font-weight: bold;
+      color: #4a5568;
+      line-height: 50px;
+    }
+    .logo-text {
+      font-size: 12px;
+      color: #ffffff;
+      font-weight: bold;
+      margin-left: 5px;
+      line-height: 50px;
     }
     .content {
       padding: 30px;
       text-align: center;
+      line-height: normal;
     }
-    .content p {
-      font-size: 16px;
+    .h1 {
+      color: #60a5fa;
+      font-size: 30px;
+      margin: 0 0 20px 0;
+    }
+    .h2 {
+      color: #6caeb6;
+      font-size: 22px;
+      margin: 0 0 20px 0;
+    }
+    p {
+      font-size: 14px;
+      color: #4a5568;
       line-height: 1.6;
-      margin: 0 0 20px;
+      margin: 0 0 10px 0;
     }
-    .code {
-      display: inline-block;
-      background-color: #e9ecef;
-      padding: 10px 20px;
+    .code-box {
+      background-color: #93c5fd;
+      color: #4a5568;
       font-size: 24px;
       font-weight: bold;
-      color: #007bff;
-      border-radius: 5px;
+      padding: 20px;
+      border-radius: 8px;
+      display: inline-block;
       margin: 20px 0;
-      letter-spacing: 2px;
+      text-align: center;
+      width: auto;
+      max-width: 100%;
+      word-wrap: break-word;
+    }
+    .button {
+      background-color: #60a5fa;
+      color: #ffffff;
+      padding: 12px 24px;
+      font-size: 16px;
+      text-decoration: none;
+      border-radius: 8px;
+      display: inline-block;
+      margin: 20px 0;
+      transition: background-color 0.3s ease;
+    }
+    .button:hover {
+      background-color: #4a5568;
     }
     .footer {
-      background-color: #f8f9fa;
-      padding: 20px;
+      font-size: 12px;
+      color: #4a5568;
+      margin-top: 30px;
       text-align: center;
-      font-size: 14px;
-      color: #666;
+      padding: 20px;
+      background-color: #f4f8f4;
+      border-radius: 0 0 10px 10px;
+      line-height: normal;
     }
     .footer a {
-      color: #007bff;
+      color: #60a5fa;
       text-decoration: none;
     }
-    @media only screen and (max-width: 600px) {
+    .footer a:hover {
+      text-decoration: underline;
+    }
+    @media (max-width: 600px) {
       .container {
+        padding: 15px;
         margin: 20px;
       }
-      .content {
-        padding: 20px;
+      .logo {
+        width: 40px;
+        height: 40px;
+        font-size: 14px;
+        line-height: 40px;
       }
-      .header h1 {
-        font-size: 20px;
+      .logo-text {
+        font-size: 10px;
+        line-height: 40px;
       }
-      .code {
+      .h1 {
+        font-size: 24px;
+      }
+      .h2 {
+        font-size: 18px;
+      }
+      .code-box {
         font-size: 20px;
+        padding: 15px;
+      }
+      .button {
+        font-size: 14px;
+        padding: 10px 20px;
       }
     }
   </style>
@@ -80,18 +153,25 @@
 <body>
   <div class="container">
     <div class="header">
-      <h1>Softhome - Código de Verificación</h1>
+      <span class="logo-text">SoftHome</span>
     </div>
     <div class="content">
-      <p>Estimado/a {{fullName}},</p>
-      <p>Hemos recibido una solicitud para verificar tu cuenta. Usa el siguiente código para completar el proceso:</p>
-      <div class="code">{{code}}</div>
+      <div class="h1">Hola,</div>
+      <div class="h2"><strong>{{fullName}}</strong></div>
+      <p>Hemos recibido una solicitud para verificar tu cuenta.</p>
+      <p>Usa el siguiente código para completar el proceso:</p>
+      <div class="code-box">
+        <strong>{{code}}</strong>
+      </div>
       <p>Este código es válido por 15 minutos. Si no solicitaste este código, ignora este correo o contacta a nuestro equipo de soporte.</p>
     </div>
-    <div class="footer">
-      <p>© 2025 Softhome. Todos los derechos reservados.</p>
-      <p><a href="mailto:mailedificioelant@gmail.com">Contáctanos</a> | <a href="https://softhome.com">Visita nuestro sitio</a></p>
-    </div>
+      <div class="footer">
+        <p>© 2025 SoftHome - Todos los derechos reservados</p>
+        <p>
+          Contáctanos:
+          <a href="mailto:support@softhome.com">support@softhome.com</a>
+        </p>
+      </div>
   </div>
 </body>
 </html>
