@@ -384,7 +384,7 @@ const verifyCode = async (req, res) => {
     }
 
     // Código válido: generar nueva contraseña
-    const newPassword = crypto.randomBytes(4).toString("hex"); // Genera una contraseña de 8 caracteres
+    const newPassword = crypto.randomBytes(4).toString("hex");
     const salt = await bcrypt.genSalt(10);
     const hashedPassword = await bcrypt.hash(newPassword, salt);
 
@@ -423,7 +423,8 @@ const verifyCode = async (req, res) => {
     const fullName = `${user.NOMBRES} ${user.APELLIDOS}`;
     emailTemplate = emailTemplate
       .replace("{{fullName}}", fullName)
-      .replace("{{newPassword}}", newPassword);
+      .replace("{{newPassword}}", newPassword)
+      .replace("${process.env.FRONTEND_URL}", process.env.FRONTEND_URL || "http://localhost:5173");
 
     // Enviar correo con la nueva contraseña
     const transporter = nodemailer.createTransport({
@@ -758,7 +759,8 @@ const resetPassword = async (req, res) => {
     const fullName = `${user.NOMBRES} ${user.APELLIDOS}`;
     emailTemplate = emailTemplate
       .replace("{{fullName}}", fullName)
-      .replace("{{newPassword}}", newPassword);
+      .replace("{{newPassword}}", newPassword)
+      .replace("${process.env.FRONTEND_URL}", process.env.FRONTEND_URL || "http://localhost:5173");
 
     // Enviar correo con la nueva contraseña
     const transporter = nodemailer.createTransport({

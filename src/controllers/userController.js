@@ -22,8 +22,12 @@ const sendPasswordEmail = async (email, password, fullName) => {
       "utf8"
     );
     const htmlContent = htmlTemplate
-      .replace("{{initialPassword}}", password) // Cambiado de {{newPassword}} a {{initialPassword}}
-      .replace("{{fullName}}", fullName);
+      .replace("{{initialPassword}}", password)
+      .replace("{{fullName}}", fullName)
+      .replace(
+        "${process.env.FRONTEND_URL}",
+        process.env.FRONTEND_URL || "http://localhost:5173"
+      );
 
     const mailOptions = {
       from: process.env.NAME_USER,
@@ -648,15 +652,12 @@ const getUserRoles = async (req, res) => {
   }
 };
 
-
 const getFotoPersona = async (req, res) => {
   try {
     const { id } = req.params;
     const pool = await poolPromise;
 
-    const result = await pool.request()
-      .input("ID_PERSONA", sql.Int, id)
-      .query(`
+    const result = await pool.request().input("ID_PERSONA", sql.Int, id).query(`
         SELECT FOTO FROM MAE_PERSONA_FOTO WHERE ID_PERSONA = @ID_PERSONA
       `);
 
@@ -665,7 +666,9 @@ const getFotoPersona = async (req, res) => {
     }
 
     const fotoBuffer = result.recordset[0].FOTO;
-    const fotoBase64 = `data:image/jpeg;base64,${fotoBuffer.toString('base64')}`;
+    const fotoBase64 = `data:image/jpeg;base64,${fotoBuffer.toString(
+      "base64"
+    )}`;
 
     res.json({ fotoBase64 });
   } catch (error) {
@@ -673,8 +676,6 @@ const getFotoPersona = async (req, res) => {
     res.status(500).json({ message: "Error al obtener la foto" });
   }
 };
-
-
 
 module.exports = {
   register,

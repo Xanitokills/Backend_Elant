@@ -22,7 +22,11 @@ const sendPasswordEmail = async (email, password, fullName) => {
     );
     const htmlContent = htmlTemplate
       .replace("{{initialPassword}}", password)
-      .replace("{{fullName}}", fullName);
+      .replace("{{fullName}}", fullName)
+      .replace(
+        "${process.env.FRONTEND_URL}",
+        process.env.FRONTEND_URL || "http://localhost:5173"
+      );
 
     const mailOptions = {
       from: process.env.NAME_USER,
@@ -59,109 +63,110 @@ const listPersons = async (req, res) => {
 };
 
 const getPersonDetails = async (req, res) => {
-    const { id } = req.params;
-    try {
-      const pool = await poolPromise;
-  
-      const result = await pool
-        .request()
-        .input("ID_PERSONA", sql.Int, id)
-        .execute("SP_OBTENER_PERSONA_DETALLE");
-  
-      const [basicInfo, residentInfo, workerInfo, roles] = result.recordsets;
-  
-      // 🔹 Obtener la foto
-      const fotoResult = await pool
-        .request()
-        .input("ID_PERSONA", sql.Int, id)
-        .execute("SP_OBTENER_FOTO_PERSONA");
-  
-      const foto = fotoResult.recordset[0]
-        ? {
-            FOTO: fotoResult.recordset[0].FOTO.toString("base64"),
-            FORMATO: fotoResult.recordset[0].FORMATO,
-          }
-        : {
-            FOTO: null,
-            FORMATO: null,
-          };
-  
-      // 🔹 Enviar toda la data unificada
-      res.status(200).json({
-        basicInfo: {
-          ...basicInfo[0],
-          ...foto,
-        },
-        residentInfo,
-        workerInfo,
-        roles,
-      });
-    } catch (error) {
-      logger.error(
-        `❌ Error al obtener detalles de persona ${id}: ${error.message}`
-      );
-      logger.error(`📍 Stack Trace:\n${error.stack}`);
-      res.status(500).json({ message: "Error del servidor" });
-    }
-  };
-  
+  const { id } = req.params;
+  try {
+    const pool = await poolPromise;
 
-  const updatePerson = async (req, res) => {
-    const { id } = req.params;
-    const { basicInfo, residentInfo, workerInfo, photo } = req.body;
-  
-    try {
-      const pool = await poolPromise;
-      const request = pool
+    const result = await pool
+      .request()
+      .input("ID_PERSONA", sql.Int, id)
+      .execute("SP_OBTENER_PERSONA_DETALLE");
+
+    const [basicInfo, residentInfo, workerInfo, roles] = result.recordsets;
+
+    // 🔹 Obtener la foto
+    const fotoResult = await pool
+      .request()
+      .input("ID_PERSONA", sql.Int, id)
+      .execute("SP_OBTENER_FOTO_PERSONA");
+
+    const foto = fotoResult.recordset[0]
+      ? {
+          FOTO: fotoResult.recordset[0].FOTO.toString("base64"),
+          FORMATO: fotoResult.recordset[0].FORMATO,
+        }
+      : {
+          FOTO: null,
+          FORMATO: null,
+        };
+
+    // 🔹 Enviar toda la data unificada
+    res.status(200).json({
+      basicInfo: {
+        ...basicInfo[0],
+        ...foto,
+      },
+      residentInfo,
+      workerInfo,
+      roles,
+    });
+  } catch (error) {
+    logger.error(
+      `❌ Error al obtener detalles de persona ${id}: ${error.message}`
+    );
+    logger.error(`📍 Stack Trace:\n${error.stack}`);
+    res.status(500).json({ message: "Error del servidor" });
+  }
+};
+
+const updatePerson = async (req, res) => {
+  const { id } = req.params;
+  const { basicInfo, residentInfo, workerInfo, photo } = req.body;
+
+  try {
+    const pool = await poolPromise;
+    const request = pool
+      .request()
+      .input("ID_PERSONA", sql.Int, id)
+      .input("NOMBRES", sql.VarChar(50), basicInfo.nombres)
+      .input("APELLIDOS", sql.VarChar(50), basicInfo.apellidos)
+      .input("DNI", sql.VarChar(12), basicInfo.dni)
+      .input("CORREO", sql.VarChar(100), basicInfo.correo)
+      .input("CELULAR", sql.VarChar(9), basicInfo.celular)
+      .input(
+        "CONTACTO_EMERGENCIA",
+        sql.VarChar(9),
+        basicInfo.contacto_emergencia
+      )
+      .input("FECHA_NACIMIENTO", sql.Date, basicInfo.fecha_nacimiento)
+      .input("ID_SEXO", sql.Int, basicInfo.id_sexo)
+      .input("ID_PERFIL", sql.Int, basicInfo.id_perfil)
+      .input(
+        "RESIDENTES",
+        sql.NVarChar(sql.MAX),
+        residentInfo ? JSON.stringify(residentInfo) : null
+      )
+      .input(
+        "FASES_TRABAJADOR",
+        sql.NVarChar(sql.MAX),
+        workerInfo ? JSON.stringify(workerInfo.map((w) => w.id_fase)) : null
+      );
+
+    await request.execute("SP_ACTUALIZAR_PERSONA");
+
+    if (photo) {
+      await pool
         .request()
         .input("ID_PERSONA", sql.Int, id)
-        .input("NOMBRES", sql.VarChar(50), basicInfo.nombres)
-        .input("APELLIDOS", sql.VarChar(50), basicInfo.apellidos)
-        .input("DNI", sql.VarChar(12), basicInfo.dni)
-        .input("CORREO", sql.VarChar(100), basicInfo.correo)
-        .input("CELULAR", sql.VarChar(9), basicInfo.celular)
         .input(
-          "CONTACTO_EMERGENCIA",
-          sql.VarChar(9),
-          basicInfo.contacto_emergencia
+          "FOTO",
+          sql.VarBinary(sql.MAX),
+          Buffer.from(photo.foto, "base64")
         )
-        .input("FECHA_NACIMIENTO", sql.Date, basicInfo.fecha_nacimiento)
-        .input("ID_SEXO", sql.Int, basicInfo.id_sexo)
-        .input("ID_PERFIL", sql.Int, basicInfo.id_perfil)
-        .input(
-          "RESIDENTES",
-          sql.NVarChar(sql.MAX),
-          residentInfo ? JSON.stringify(residentInfo) : null
-        )
-        .input(
-          "FASES_TRABAJADOR",
-          sql.NVarChar(sql.MAX),
-          workerInfo ? JSON.stringify(workerInfo.map((w) => w.id_fase)) : null
-        );
-  
-      await request.execute("SP_ACTUALIZAR_PERSONA");
-  
-      if (photo) {
-        await pool
-          .request()
-          .input("ID_PERSONA", sql.Int, id)
-          .input("FOTO", sql.VarBinary(sql.MAX), Buffer.from(photo.foto, "base64"))
-          .input("FORMATO", sql.VarChar(10), photo.formato)
-          .execute("SP_SUBIR_FOTO_PERSONA");
-      }
-  
-      res.status(200).json({ message: "Persona actualizada exitosamente" });
-    } catch (error) {
-      logger.error(`❌ Error al actualizar persona ${id}: ${error.message}`);
-      logger.error(`📍 Stack Trace:\n${error.stack}`);
-      res.status(500).json({
-        message: error.message || "Error del servidor",
-        stack: error.stack,
-      });
+        .input("FORMATO", sql.VarChar(10), photo.formato)
+        .execute("SP_SUBIR_FOTO_PERSONA");
     }
-  };
-  
-  
+
+    res.status(200).json({ message: "Persona actualizada exitosamente" });
+  } catch (error) {
+    logger.error(`❌ Error al actualizar persona ${id}: ${error.message}`);
+    logger.error(`📍 Stack Trace:\n${error.stack}`);
+    res.status(500).json({
+      message: error.message || "Error del servidor",
+      stack: error.stack,
+    });
+  }
+};
 
 const updateEmail = async (req, res) => {
   const { id } = req.params;
@@ -327,25 +332,25 @@ const manageRoles = async (req, res) => {
 };
 
 const uploadPersonPhoto = async (req, res) => {
-    const { id } = req.params;
-    const { photo, formato } = req.body;
-  
-    try {
-      const pool = await poolPromise;
-      await pool
-        .request()
-        .input("ID_PERSONA", sql.Int, id)
-        .input("FOTO", sql.VarBinary(sql.MAX), Buffer.from(photo, "base64"))
-        .input("FORMATO", sql.VarChar(10), formato)
-        .execute("SP_SUBIR_FOTO_PERSONA");
-  
-      res.status(200).json({ message: "Foto subida exitosamente" });
-    } catch (error) {
-      logger.error(`Error al subir foto para persona ${id}: ${error.message}`);
-      res.status(500).json({ message: "Error al subir foto" });
-    }
-  };
-  
+  const { id } = req.params;
+  const { photo, formato } = req.body;
+
+  try {
+    const pool = await poolPromise;
+    await pool
+      .request()
+      .input("ID_PERSONA", sql.Int, id)
+      .input("FOTO", sql.VarBinary(sql.MAX), Buffer.from(photo, "base64"))
+      .input("FORMATO", sql.VarChar(10), formato)
+      .execute("SP_SUBIR_FOTO_PERSONA");
+
+    res.status(200).json({ message: "Foto subida exitosamente" });
+  } catch (error) {
+    logger.error(`Error al subir foto para persona ${id}: ${error.message}`);
+    res.status(500).json({ message: "Error al subir foto" });
+  }
+};
+
 const getPersonPhoto = async (req, res) => {
   const { id } = req.params;
   try {
@@ -493,7 +498,6 @@ const activatePerson = async (req, res) => {
     res.status(500).json({ message: "Error al activar persona" });
   }
 };
-
 
 module.exports = {
   listPersons,
