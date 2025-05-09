@@ -282,12 +282,10 @@ const forgotPassword = async (req, res) => {
       logger.error(
         `Error al enviar correo a ${user.CORREO}: ${emailError.message}`
       );
-      return res
-        .status(500)
-        .json({
-          message:
-            "Error al enviar el correo de verificación. Verifique la configuración del correo.",
-        });
+      return res.status(500).json({
+        message:
+          "Error al enviar el correo de verificación. Verifique la configuración del correo.",
+      });
     }
     res
       .status(200)
@@ -296,12 +294,10 @@ const forgotPassword = async (req, res) => {
     logger.error(
       `Error al procesar forgotPassword para DNI ${dni}: ${error.message}`
     );
-    res
-      .status(500)
-      .json({
-        message: "Error del servidor al procesar la solicitud",
-        error: error.message,
-      });
+    res.status(500).json({
+      message: "Error del servidor al procesar la solicitud",
+      error: error.message,
+    });
   }
 };
 
@@ -312,8 +308,7 @@ const verifyCode = async (req, res) => {
 
   try {
     const pool = await poolPromise;
-    const result = await pool.request()
-      .input("dni", sql.VarChar(12), dni)
+    const result = await pool.request().input("dni", sql.VarChar(12), dni)
       .query(`
         SELECT u.ID_USUARIO, u.CODIGO_VERIFICACION, u.CODIGO_VERIFICACION_EXPIRA, u.INTENTOS_CODIGO_FALLIDO
         FROM MAE_USUARIO u
@@ -323,21 +318,22 @@ const verifyCode = async (req, res) => {
 
     const user = result.recordset[0];
     if (!user) {
-      return res.status(404).json({ success: false, message: "Usuario no encontrado" });
+      return res
+        .status(404)
+        .json({ success: false, message: "Usuario no encontrado" });
     }
 
     const intentosFallidos = user.INTENTOS_CODIGO_FALLIDO || 0;
 
-    const codigoExpirado = new Date(user.CODIGO_VERIFICACION_EXPIRA) < new Date();
+    const codigoExpirado =
+      new Date(user.CODIGO_VERIFICACION_EXPIRA) < new Date();
     const codigoIncorrecto = user.CODIGO_VERIFICACION !== code;
 
     if (codigoExpirado || codigoIncorrecto) {
       const nuevosIntentos = intentosFallidos + 1;
 
       if (nuevosIntentos >= 3) {
-        await pool.request()
-          .input("id", sql.Int, user.ID_USUARIO)
-          .query(`
+        await pool.request().input("id", sql.Int, user.ID_USUARIO).query(`
             UPDATE MAE_USUARIO 
             SET CODIGO_VERIFICACION = NULL,
                 CODIGO_VERIFICACION_EXPIRA = NULL,
@@ -349,10 +345,10 @@ const verifyCode = async (req, res) => {
           message: "Código inválido. Se ha superado el número de intentos.",
         });
       } else {
-        await pool.request()
+        await pool
+          .request()
           .input("id", sql.Int, user.ID_USUARIO)
-          .input("intentos", sql.Int, nuevosIntentos)
-          .query(`
+          .input("intentos", sql.Int, nuevosIntentos).query(`
             UPDATE MAE_USUARIO 
             SET INTENTOS_CODIGO_FALLIDO = @intentos
             WHERE ID_USUARIO = @id
@@ -365,9 +361,7 @@ const verifyCode = async (req, res) => {
     }
 
     // Código válido
-    await pool.request()
-      .input("id", sql.Int, user.ID_USUARIO)
-      .query(`
+    await pool.request().input("id", sql.Int, user.ID_USUARIO).query(`
         UPDATE MAE_USUARIO 
         SET CODIGO_VERIFICACION = NULL,
             CODIGO_VERIFICACION_EXPIRA = NULL,
@@ -379,7 +373,9 @@ const verifyCode = async (req, res) => {
 
     res.status(200).json({ success: true, message: "Código verificado" });
   } catch (error) {
-    logger.error(`Error al verificar código para DNI: ${dni}: ${error.message}`);
+    logger.error(
+      `Error al verificar código para DNI: ${dni}: ${error.message}`
+    );
     res.status(500).json({
       success: false,
       message: "Error al verificar código",
@@ -387,8 +383,6 @@ const verifyCode = async (req, res) => {
     });
   }
 };
-
-
 
 const validate = async (req, res) => {
   const authHeader = req.headers.authorization;
