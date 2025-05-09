@@ -7,6 +7,8 @@ const express = require("express");
 const upload = require("../config/multerConfig");
 const logger = require("../config/logger");
 const sql = require("mssql");
+const fs = require("fs").promises;
+const path = require("path");
 
 const validateDNI = (dni) => {
   const dniRegex = /^[a-zA-Z0-9]{1,12}$/;
@@ -267,16 +269,38 @@ const forgotPassword = async (req, res) => {
       UPDATE MAE_USUARIO SET CODIGO_VERIFICACION = @code, CODIGO_VERIFICACION_EXPIRA = DATEADD(minute, 15, GETDATE()),
       INTENTOS_CODIGO_SOLICITUD = ISNULL(INTENTOS_CODIGO_SOLICITUD, 0) + 1, ULTIMA_CODIGO_SOLICITUD = GETDATE() WHERE ID_USUARIO = @id
     `);
+
+    // Leer el template de correo
+    const templatePath = path.join(__dirname, "../../html/verificationCodeEmail.html");
+    let emailTemplate;
+    try {
+      emailTemplate = await fs.readFile(templatePath, "utf-8");
+    } catch (error) {
+      logger.error(`Error al leer el template de correo: ${error.message}`);
+      return res.status(500).json({
+        message: "Error al preparar el correo de verificación",
+        error: error.message,
+      });
+    }
+
+    // Reemplazar placeholders
+    const fullName = `${user.NOMBRES} ${user.APELLIDOS}`;
+    emailTemplate = emailTemplate
+      .replace("{{fullName}}", fullName)
+      .replace("{{code}}", code);
+
+    // Enviar correo con el código de verificación
     const transporter = nodemailer.createTransport({
       service: "gmail",
       auth: { user: process.env.MAIL_USER, pass: process.env.MAIL_PASS },
     });
+
     try {
       await transporter.sendMail({
-        from: process.env.MAIL_USER,
+        from: `"Softhome" <${process.env.MAIL_USER}>`,
         to: user.CORREO,
         subject: "Código de Verificación",
-        text: `Su código de verificación es: ${code}`,
+        html: emailTemplate,
       });
     } catch (emailError) {
       logger.error(
@@ -308,9 +332,10 @@ const verifyCode = async (req, res) => {
 
   try {
     const pool = await poolPromise;
-    const result = await pool.request().input("dni", sql.VarChar(12), dni)
+    const result = await pool.request()
+      .input("dni", sql.VarChar(12), dni)
       .query(`
-        SELECT u.ID_USUARIO, u.CODIGO_VERIFICACION, u.CODIGO_VERIFICACION_EXPIRA, u.INTENTOS_CODIGO_FALLIDO
+        SELECT u.ID_USUARIO, u.CODIGO_VERIFICACION, u.CODIGO_VERIFICACION_EXPIRA, u.INTENTOS_CODIGO_FALLIDO, p.CORREO, p.NOMBRES, p.APELLIDOS
         FROM MAE_USUARIO u
         JOIN MAE_PERSONA p ON u.ID_PERSONA = p.ID_PERSONA
         WHERE p.DNI = @dni AND u.ESTADO = 1
@@ -318,22 +343,20 @@ const verifyCode = async (req, res) => {
 
     const user = result.recordset[0];
     if (!user) {
-      return res
-        .status(404)
-        .json({ success: false, message: "Usuario no encontrado" });
+      return res.status(404).json({ success: false, message: "Usuario no encontrado" });
     }
 
     const intentosFallidos = user.INTENTOS_CODIGO_FALLIDO || 0;
-
-    const codigoExpirado =
-      new Date(user.CODIGO_VERIFICACION_EXPIRA) < new Date();
+    const codigoExpirado = new Date(user.CODIGO_VERIFICACION_EXPIRA) < new Date();
     const codigoIncorrecto = user.CODIGO_VERIFICACION !== code;
 
     if (codigoExpirado || codigoIncorrecto) {
       const nuevosIntentos = intentosFallidos + 1;
 
       if (nuevosIntentos >= 3) {
-        await pool.request().input("id", sql.Int, user.ID_USUARIO).query(`
+        await pool.request()
+          .input("id", sql.Int, user.ID_USUARIO)
+          .query(`
             UPDATE MAE_USUARIO 
             SET CODIGO_VERIFICACION = NULL,
                 CODIGO_VERIFICACION_EXPIRA = NULL,
@@ -345,10 +368,10 @@ const verifyCode = async (req, res) => {
           message: "Código inválido. Se ha superado el número de intentos.",
         });
       } else {
-        await pool
-          .request()
+        await pool.request()
           .input("id", sql.Int, user.ID_USUARIO)
-          .input("intentos", sql.Int, nuevosIntentos).query(`
+          .input("intentos", sql.Int, nuevosIntentos)
+          .query(`
             UPDATE MAE_USUARIO 
             SET INTENTOS_CODIGO_FALLIDO = @intentos
             WHERE ID_USUARIO = @id
@@ -360,22 +383,76 @@ const verifyCode = async (req, res) => {
       }
     }
 
-    // Código válido
-    await pool.request().input("id", sql.Int, user.ID_USUARIO).query(`
+    // Código válido: generar nueva contraseña
+    const newPassword = crypto.randomBytes(4).toString("hex"); // Genera una contraseña de 8 caracteres
+    const salt = await bcrypt.genSalt(10);
+    const hashedPassword = await bcrypt.hash(newPassword, salt);
+
+    // Actualizar la contraseña en la base de datos
+    await pool.request()
+      .input("id", sql.Int, user.ID_USUARIO)
+      .input("CONTRASENA_HASH", sql.VarChar(255), hashedPassword)
+      .input("CONTRASENA_SALT", sql.VarChar(50), salt)
+      .query(`
         UPDATE MAE_USUARIO 
         SET CODIGO_VERIFICACION = NULL,
             CODIGO_VERIFICACION_EXPIRA = NULL,
             INTENTOS_CODIGO_FALLIDO = 0,
             INTENTOS_CODIGO_SOLICITUD = 0,
-            ULTIMA_CODIGO_SOLICITUD = NULL
+            ULTIMA_CODIGO_SOLICITUD = NULL,
+            CONTRASENA_HASH = @CONTRASENA_HASH,
+            CONTRASENA_SALT = @CONTRASENA_SALT
         WHERE ID_USUARIO = @id
       `);
 
-    res.status(200).json({ success: true, message: "Código verificado" });
+    // Leer el template de correo
+    const templatePath = path.join(__dirname, "../../html/resetPasswordEmail.html");
+    let emailTemplate;
+    try {
+      emailTemplate = await fs.readFile(templatePath, "utf-8");
+    } catch (error) {
+      logger.error(`Error al leer el template de correo: ${error.message}`);
+      return res.status(500).json({
+        success: false,
+        message: "Error al preparar el correo de restablecimiento",
+        error: error.message,
+      });
+    }
+
+    // Reemplazar placeholders
+    const fullName = `${user.NOMBRES} ${user.APELLIDOS}`;
+    emailTemplate = emailTemplate
+      .replace("{{fullName}}", fullName)
+      .replace("{{newPassword}}", newPassword);
+
+    // Enviar correo con la nueva contraseña
+    const transporter = nodemailer.createTransport({
+      service: "gmail",
+      auth: { user: process.env.MAIL_USER, pass: process.env.MAIL_PASS },
+    });
+
+    try {
+      await transporter.sendMail({
+        from: `"Softhome" <${process.env.MAIL_USER}>`,
+        to: user.CORREO,
+        subject: "Restablecimiento de Contraseña",
+        html: emailTemplate,
+      });
+    } catch (emailError) {
+      logger.error(`Error al enviar correo a ${user.CORREO}: ${emailError.message}`);
+      return res.status(500).json({
+        success: false,
+        message: "Error al enviar el correo de restablecimiento",
+        error: emailError.message,
+      });
+    }
+
+    res.status(200).json({
+      success: true,
+      message: "Código verificado. Nueva contraseña enviada al correo.",
+    });
   } catch (error) {
-    logger.error(
-      `Error al verificar código para DNI: ${dni}: ${error.message}`
-    );
+    logger.error(`Error al verificar código para DNI: ${dni}: ${error.message}`);
     res.status(500).json({
       success: false,
       message: "Error al verificar código",
@@ -664,19 +741,47 @@ const resetPassword = async (req, res) => {
       UPDATE MAE_USUARIO SET CONTRASENA_HASH = @CONTRASENA_HASH, CONTRASENA_SALT = @CONTRASENA_SALT WHERE ID_USUARIO = @id
     `);
 
+    // Leer el template de correo
+    const templatePath = path.join(__dirname, "../../html/resetPasswordEmail.html");
+    let emailTemplate;
+    try {
+      emailTemplate = await fs.readFile(templatePath, "utf-8");
+    } catch (error) {
+      logger.error(`Error al leer el template de correo: ${error.message}`);
+      return res.status(500).json({
+        message: "Error al preparar el correo de restablecimiento",
+        error: error.message,
+      });
+    }
+
+    // Reemplazar placeholders
+    const fullName = `${user.NOMBRES} ${user.APELLIDOS}`;
+    emailTemplate = emailTemplate
+      .replace("{{fullName}}", fullName)
+      .replace("{{newPassword}}", newPassword);
+
+    // Enviar correo con la nueva contraseña
     const transporter = nodemailer.createTransport({
       service: "gmail",
-      auth: { user: process.env.MAIL_USER, pass: process.env.EMAIL_PASS },
+      auth: { user: process.env.MAIL_USER, pass: process.env.MAIL_PASS },
     });
-    await transporter.sendMail({
-      from: process.env.MAIL_USER,
-      to: user.CORREO,
-      subject: "Nueva Contraseña",
-      text: `Su nueva contraseña es: ${newPassword}. Por favor, inicie sesión y cámbiela por seguridad.`,
-    });
-    res
-      .status(200)
-      .json({ message: "Contraseña restablecida y enviada al correo" });
+
+    try {
+      await transporter.sendMail({
+        from: `"Softhome" <${process.env.MAIL_USER}>`,
+        to: user.CORREO,
+        subject: "Restablecimiento de Contraseña",
+        html: emailTemplate,
+      });
+    } catch (emailError) {
+      logger.error(`Error al enviar correo a ${user.CORREO}: ${emailError.message}`);
+      return res.status(500).json({
+        message: "Error al enviar el correo de restablecimiento",
+        error: emailError.message,
+      });
+    }
+
+    res.status(200).json({ message: "Contraseña restablecida y enviada al correo" });
   } catch (error) {
     logger.error(
       `Error al restablecer contraseña para DNI: ${dni}: ${error.message}`
