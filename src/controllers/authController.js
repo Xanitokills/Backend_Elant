@@ -48,15 +48,13 @@ const getUserPermissions = async (userId) => {
     });
     rows.forEach((row) => {
       if (row.Tipo === "Submenú" && menusMap.has(row.ID))
-        menusMap
-          .get(row.ID)
-          .submenus.push({
-            id: row.ID_SUBMENU,
-            nombre: row.SUBMENU_NOMBRE,
-            url: row.SUBMENU_URL,
-            icono: row.SUBMENU_ICONO,
-            orden: row.SUBMENU_ORDEN,
-          });
+        menusMap.get(row.ID).submenus.push({
+          id: row.ID_SUBMENU,
+          nombre: row.SUBMENU_NOMBRE,
+          url: row.SUBMENU_URL,
+          icono: row.SUBMENU_ICONO,
+          orden: row.SUBMENU_ORDEN,
+        });
     });
     const permissions = Array.from(menusMap.values())
       .sort((a, b) => a.orden - b.orden)
@@ -79,16 +77,23 @@ const getUserPermissions = async (userId) => {
 const login = async (req, res) => {
   const { dni, password } = req.body;
 
-  if (!dni || !password)
-    return res.status(400).json({ message: "DNI y contraseña son requeridos" });
+  if (!dni || !password) {
+    return res.status(400).json({
+      code: "VALIDATION_ERROR",
+      message: "DNI y contraseña son requeridos",
+    });
+  }
 
-  if (!validateDNI(dni))
-    return res.status(400).json({ message: "Formato de DNI inválido" });
+  if (!validateDNI(dni)) {
+    return res.status(400).json({
+      code: "INVALID_DNI_FORMAT",
+      message: "Formato de DNI inválido",
+    });
+  }
 
   try {
     const pool = await poolPromise;
-    const result = await pool.request()
-      .input("dni", sql.VarChar(12), dni)
+    const result = await pool.request().input("dni", sql.VarChar(12), dni)
       .query(`
         SELECT 
           p.ID_PERSONA, p.NOMBRES, p.APELLIDOS, s.DESCRIPCION AS SEXO,
@@ -96,13 +101,33 @@ const login = async (req, res) => {
         FROM MAE_PERSONA p
         JOIN MAE_SEXO s ON p.ID_SEXO = s.ID_SEXO
         JOIN MAE_USUARIO u ON p.ID_PERSONA = u.ID_PERSONA
-        WHERE p.DNI = @dni AND p.ESTADO = 1 AND u.ESTADO = 1
+        WHERE p.DNI = @dni
       `);
 
     const user = result.recordset[0];
 
-    if (!user)
-      return res.status(401).json({ message: "Usuario no encontrado o inactivo" });
+    if (!user) {
+      return res.status(404).json({
+        code: "USER_NOT_FOUND",
+        message: "Usuario no encontrado",
+      });
+    }
+
+    // Depuración
+    console.log(
+      "DEBUG LOGIN → ESTADO:",
+      user.ESTADO,
+      "INTENTOS:",
+      user.INTENTOS_FALLIDOS_CONTRASEÑA
+    );
+
+    // Validar estado (ahora como booleano)
+    if (!user.ESTADO) {
+      return res.status(403).json({
+        code: "ACCOUNT_LOCKED",
+        message: "Cuenta bloqueada o inactiva. Contacta al administrador.",
+      });
+    }
 
     // Verificar contraseña
     const isMatch = await bcrypt.compare(password, user.CONTRASENA_HASH);
@@ -110,61 +135,70 @@ const login = async (req, res) => {
     if (!isMatch) {
       const newAttempts = (user.INTENTOS_FALLIDOS_CONTRASEÑA || 0) + 1;
 
-      await pool.request()
+      await pool
+        .request()
         .input("id", sql.Int, user.ID_USUARIO)
-        .input("attempts", sql.Int, newAttempts)
-        .query(`
+        .input("attempts", sql.Int, newAttempts).query(`
           UPDATE MAE_USUARIO 
           SET INTENTOS_FALLIDOS_CONTRASEÑA = @attempts 
           WHERE ID_USUARIO = @id
         `);
 
-      // Bloquear usuario si supera los intentos permitidos
       if (newAttempts >= 5) {
-        await pool.request()
+        await pool
+          .request()
           .input("id", sql.Int, user.ID_USUARIO)
           .query(`UPDATE MAE_USUARIO SET ESTADO = 0 WHERE ID_USUARIO = @id`);
+
         return res.status(403).json({
+          code: "ACCOUNT_LOCKED",
           message:
-            "Usuario bloqueado por múltiples intentos fallidos. Comunícate con el administrador.",
+            "Cuenta bloqueada por múltiples intentos fallidos. Contacta al administrador.",
         });
       }
 
-      return res.status(401).json({ message: "Contraseña incorrecta" });
+      return res.status(401).json({
+        code: "INVALID_PASSWORD",
+        message: "Contraseña incorrecta",
+      });
     }
 
-    // Resetear intentos fallidos
-    await pool.request()
+    // Login exitoso: resetear intentos fallidos
+    await pool
+      .request()
       .input("id", sql.Int, user.ID_USUARIO)
-      .query(`UPDATE MAE_USUARIO SET INTENTOS_FALLIDOS_CONTRASEÑA = 0 WHERE ID_USUARIO = @id`);
+      .query(
+        `UPDATE MAE_USUARIO SET INTENTOS_FALLIDOS_CONTRASEÑA = 0 WHERE ID_USUARIO = @id`
+      );
 
-    // Obtener roles del usuario
-    const rolesResult = await pool.request()
-      .input("userId", sql.Int, user.ID_USUARIO)
-      .query(`
+    const rolesResult = await pool
+      .request()
+      .input("userId", sql.Int, user.ID_USUARIO).query(`
         SELECT t.ID_ROL, t.DETALLE_USUARIO 
         FROM MAE_USUARIO_ROL ur 
         JOIN MAE_TIPO_USUARIO t ON ur.ID_ROL = t.ID_ROL 
         WHERE ur.ID_USUARIO = @userId AND t.ESTADO = 1
       `);
+
     const roles = rolesResult.recordset.map((r) => r.DETALLE_USUARIO);
 
-    // Obtener foto del usuario
-    const fotoResult = await pool.request()
-      .input("personaId", sql.Int, user.ID_PERSONA)
-      .query(`
+    const fotoResult = await pool
+      .request()
+      .input("personaId", sql.Int, user.ID_PERSONA).query(`
         SELECT TOP 1 FOTO, FORMATO 
         FROM MAE_PERSONA_FOTO 
         WHERE ID_PERSONA = @personaId AND ESTADO = 1 
         ORDER BY FECHA_SUBIDA DESC
       `);
+
     let fotoBase64 = null;
     if (fotoResult.recordset.length > 0) {
       const { FOTO, FORMATO } = fotoResult.recordset[0];
-      fotoBase64 = `data:image/${FORMATO.toLowerCase()};base64,${Buffer.from(FOTO).toString("base64")}`;
+      fotoBase64 = `data:image/${FORMATO.toLowerCase()};base64,${Buffer.from(
+        FOTO
+      ).toString("base64")}`;
     }
 
-    // Generar token y obtener permisos
     const token = generateToken(user.ID_USUARIO, roles);
     const permissions = await getUserPermissions(user.ID_USUARIO);
 
@@ -182,10 +216,13 @@ const login = async (req, res) => {
       },
       permissions,
     });
-
   } catch (error) {
     logger.error(`Error al iniciar sesión para DNI: ${dni}: ${error.message}`);
-    res.status(500).json({ message: "Error del servidor", error: error.message });
+    res.status(500).json({
+      code: "SERVER_ERROR",
+      message: "Error del servidor",
+      error: error.message,
+    });
   }
 };
 
@@ -211,12 +248,10 @@ const forgotPassword = async (req, res) => {
         now.getTime() - lastRequest.getTime() < 24 * 60 * 60 * 1000 &&
         (user.INTENTOS_CODIGO_SOLICITUD || 0) >= 3
       ) {
-        return res
-          .status(429)
-          .json({
-            message:
-              "Límite de intentos alcanzado. Intente de nuevo en 24 horas o contacte al administrador.",
-          });
+        return res.status(429).json({
+          message:
+            "Límite de intentos alcanzado. Intente de nuevo en 24 horas o contacte al administrador.",
+        });
       }
     }
     if ((user.INTENTOS_CODIGO_SOLICITUD || 0) >= 3) {
@@ -244,17 +279,29 @@ const forgotPassword = async (req, res) => {
         text: `Su código de verificación es: ${code}`,
       });
     } catch (emailError) {
-      logger.error(`Error al enviar correo a ${user.CORREO}: ${emailError.message}`);
-      return res.status(500).json({ message: "Error al enviar el correo de verificación. Verifique la configuración del correo." });
+      logger.error(
+        `Error al enviar correo a ${user.CORREO}: ${emailError.message}`
+      );
+      return res
+        .status(500)
+        .json({
+          message:
+            "Error al enviar el correo de verificación. Verifique la configuración del correo.",
+        });
     }
     res
       .status(200)
       .json({ email: user.CORREO, message: "Código enviado con éxito" });
   } catch (error) {
-    logger.error(`Error al procesar forgotPassword para DNI ${dni}: ${error.message}`);
+    logger.error(
+      `Error al procesar forgotPassword para DNI ${dni}: ${error.message}`
+    );
     res
       .status(500)
-      .json({ message: "Error del servidor al procesar la solicitud", error: error.message });
+      .json({
+        message: "Error del servidor al procesar la solicitud",
+        error: error.message,
+      });
   }
 };
 
@@ -262,43 +309,86 @@ const verifyCode = async (req, res) => {
   const { dni, code } = req.body;
   if (!validateDNI(dni))
     return res.status(400).json({ message: "DNI inválido" });
+
   try {
     const pool = await poolPromise;
-    const result = await pool.request().input("dni", sql.VarChar(12), dni)
+    const result = await pool.request()
+      .input("dni", sql.VarChar(12), dni)
       .query(`
-      SELECT u.ID_USUARIO, u.CODIGO_VERIFICACION, u.CODIGO_VERIFICACION_EXPIRA FROM MAE_USUARIO u JOIN MAE_PERSONA p ON u.ID_PERSONA = p.ID_PERSONA
-      WHERE p.DNI = @dni AND u.ESTADO = 1
-    `);
-    const user = result.recordset[0];
-    if (
-      !user ||
-      user.CODIGO_VERIFICACION !== code ||
-      new Date(user.CODIGO_VERIFICACION_EXPIRA) < new Date()
-    ) {
-      await pool.request().input("id", sql.Int, user.ID_USUARIO).query(`
-        UPDATE MAE_USUARIO SET CODIGO_VERIFICACION = NULL WHERE ID_USUARIO = @id
+        SELECT u.ID_USUARIO, u.CODIGO_VERIFICACION, u.CODIGO_VERIFICACION_EXPIRA, u.INTENTOS_CODIGO_FALLIDO
+        FROM MAE_USUARIO u
+        JOIN MAE_PERSONA p ON u.ID_PERSONA = p.ID_PERSONA
+        WHERE p.DNI = @dni AND u.ESTADO = 1
       `);
-      return res
-        .status(400)
-        .json({ success: false, message: "Código inválido o expirado" });
+
+    const user = result.recordset[0];
+    if (!user) {
+      return res.status(404).json({ success: false, message: "Usuario no encontrado" });
     }
-    await pool.request().input("id", sql.Int, user.ID_USUARIO).query(`
-      UPDATE MAE_USUARIO SET CODIGO_VERIFICACION = NULL, INTENTOS_CODIGO_SOLICITUD = 0, ULTIMA_CODIGO_SOLICITUD = NULL WHERE ID_USUARIO = @id
-    `);
+
+    const intentosFallidos = user.INTENTOS_CODIGO_FALLIDO || 0;
+
+    const codigoExpirado = new Date(user.CODIGO_VERIFICACION_EXPIRA) < new Date();
+    const codigoIncorrecto = user.CODIGO_VERIFICACION !== code;
+
+    if (codigoExpirado || codigoIncorrecto) {
+      const nuevosIntentos = intentosFallidos + 1;
+
+      if (nuevosIntentos >= 3) {
+        await pool.request()
+          .input("id", sql.Int, user.ID_USUARIO)
+          .query(`
+            UPDATE MAE_USUARIO 
+            SET CODIGO_VERIFICACION = NULL,
+                CODIGO_VERIFICACION_EXPIRA = NULL,
+                INTENTOS_CODIGO_FALLIDO = 0
+            WHERE ID_USUARIO = @id
+          `);
+        return res.status(400).json({
+          success: false,
+          message: "Código inválido. Se ha superado el número de intentos.",
+        });
+      } else {
+        await pool.request()
+          .input("id", sql.Int, user.ID_USUARIO)
+          .input("intentos", sql.Int, nuevosIntentos)
+          .query(`
+            UPDATE MAE_USUARIO 
+            SET INTENTOS_CODIGO_FALLIDO = @intentos
+            WHERE ID_USUARIO = @id
+          `);
+        return res.status(400).json({
+          success: false,
+          message: `Código inválido. Intento ${nuevosIntentos} de 3.`,
+        });
+      }
+    }
+
+    // Código válido
+    await pool.request()
+      .input("id", sql.Int, user.ID_USUARIO)
+      .query(`
+        UPDATE MAE_USUARIO 
+        SET CODIGO_VERIFICACION = NULL,
+            CODIGO_VERIFICACION_EXPIRA = NULL,
+            INTENTOS_CODIGO_FALLIDO = 0,
+            INTENTOS_CODIGO_SOLICITUD = 0,
+            ULTIMA_CODIGO_SOLICITUD = NULL
+        WHERE ID_USUARIO = @id
+      `);
+
     res.status(200).json({ success: true, message: "Código verificado" });
   } catch (error) {
-    logger.error(
-      `Error al verificar código para DNI: ${dni}: ${error.message}`
-    );
-    res
-      .status(500)
-      .json({
-        success: false,
-        message: "Error al verificar código",
-        error: error.message,
-      });
+    logger.error(`Error al verificar código para DNI: ${dni}: ${error.message}`);
+    res.status(500).json({
+      success: false,
+      message: "Error al verificar código",
+      error: error.message,
+    });
   }
 };
+
+
 
 const validate = async (req, res) => {
   const authHeader = req.headers.authorization;
@@ -329,21 +419,19 @@ const validate = async (req, res) => {
     `);
     const roles = rolesResult.recordset.map((r) => r.DETALLE_USUARIO);
     const permissions = await getUserPermissions(user.ID_USUARIO);
-    res
-      .status(200)
-      .json({
-        message: "Sesión válida",
-        user: {
-          id: user.ID_USUARIO,
-          personaId: user.ID_PERSONA,
-          name: `${user.NOMBRES} ${user.APELLIDOS}`,
-          roles,
-        },
-        userName: `${user.NOMBRES} ${user.APELLIDOS}`,
+    res.status(200).json({
+      message: "Sesión válida",
+      user: {
+        id: user.ID_USUARIO,
+        personaId: user.ID_PERSONA,
+        name: `${user.NOMBRES} ${user.APELLIDOS}`,
         roles,
-        primerInicio: user.PRIMER_INICIO === 1,
-        permissions,
-      });
+      },
+      userName: `${user.NOMBRES} ${user.APELLIDOS}`,
+      roles,
+      primerInicio: user.PRIMER_INICIO === 1,
+      permissions,
+    });
   } catch (error) {
     logger.error("Error al validar el token:", error);
     if (error.name === "TokenExpiredError")
@@ -530,21 +618,19 @@ const refreshToken = async (req, res) => {
     logger.info(
       `Token renovado exitosamente para usuario ID: ${user.ID_USUARIO}`
     );
-    res
-      .status(200)
-      .json({
-        token: newToken,
-        userName: `${user.NOMBRES} ${user.APELLIDOS}`,
+    res.status(200).json({
+      token: newToken,
+      userName: `${user.NOMBRES} ${user.APELLIDOS}`,
+      roles,
+      primerInicio: user.PRIMER_INICIO === 1,
+      user: {
+        id: user.ID_USUARIO,
+        personaId: user.ID_PERSONA,
+        name: `${user.NOMBRES} ${user.APELLIDOS}`,
         roles,
-        primerInicio: user.PRIMER_INICIO === 1,
-        user: {
-          id: user.ID_USUARIO,
-          personaId: user.ID_PERSONA,
-          name: `${user.NOMBRES} ${user.APELLIDOS}`,
-          roles,
-        },
-        permissions,
-      });
+      },
+      permissions,
+    });
   } catch (error) {
     logger.error(`Error al renovar el token: ${error.message}`);
     if (error.name === "TokenExpiredError")
@@ -601,12 +687,10 @@ const resetPassword = async (req, res) => {
     logger.error(
       `Error al restablecer contraseña para DNI: ${dni}: ${error.message}`
     );
-    res
-      .status(500)
-      .json({
-        message: "Error al restablecer contraseña",
-        error: error.message,
-      });
+    res.status(500).json({
+      message: "Error al restablecer contraseña",
+      error: error.message,
+    });
   }
 };
 
