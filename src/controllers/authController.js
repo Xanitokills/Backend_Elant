@@ -165,13 +165,20 @@ const login = async (req, res) => {
       });
     }
 
-    // Login exitoso: resetear intentos fallidos
+    // Login exitoso: resetear campos especificados
     await pool
       .request()
       .input("id", sql.Int, user.ID_USUARIO)
-      .query(
-        `UPDATE MAE_USUARIO SET INTENTOS_FALLIDOS_CONTRASEÑA = 0 WHERE ID_USUARIO = @id`
-      );
+      .query(`
+        UPDATE MAE_USUARIO 
+        SET INTENTOS_FALLIDOS_CONTRASEÑA = NULL,
+            CODIGO_VERIFICACION = NULL,
+            CODIGO_VERIFICACION_EXPIRA = NULL,
+            INTENTOS_CODIGO_SOLICITUD = NULL,
+            ULTIMA_CODIGO_SOLICITUD = NULL,
+            INTENTOS_CODIGO_FALLIDO = 0
+        WHERE ID_USUARIO = @id
+      `);
 
     const rolesResult = await pool
       .request()
@@ -537,11 +544,10 @@ const uploadImage = async (req, res) => {
     const { buffer, originalname, mimetype } = req.file;
     const customName = req.body.customName?.trim();
     const finalName = customName
-      ? `${customName}${
-          originalname.includes(".")
-            ? originalname.slice(originalname.lastIndexOf("."))
-            : ""
-        }`
+      ? `${customName}${originalname.includes(".")
+        ? originalname.slice(originalname.lastIndexOf("."))
+        : ""
+      }`
       : originalname;
     const pool = await poolPromise;
     await pool
