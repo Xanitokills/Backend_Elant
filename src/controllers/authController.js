@@ -258,17 +258,26 @@ const forgotPassword = async (req, res) => {
     }
     if ((user.INTENTOS_CODIGO_SOLICITUD || 0) >= 3) {
       await pool.request().input("id", sql.Int, user.ID_USUARIO).query(`
-        UPDATE MAE_USUARIO SET INTENTOS_CODIGO_SOLICITUD = 0, ULTIMA_CODIGO_SOLICITUD = NULL WHERE ID_USUARIO = @id
+        UPDATE MAE_USUARIO 
+        SET INTENTOS_CODIGO_SOLICITUD = 0, 
+            ULTIMA_CODIGO_SOLICITUD = NULL
+        WHERE ID_USUARIO = @id
       `);
     }
     const code = crypto.randomBytes(3).toString("hex");
     await pool
       .request()
       .input("id", sql.Int, user.ID_USUARIO)
-      .input("code", sql.VarChar(6), code).query(`
-      UPDATE MAE_USUARIO SET CODIGO_VERIFICACION = @code, CODIGO_VERIFICACION_EXPIRA = DATEADD(minute, 15, GETDATE()),
-      INTENTOS_CODIGO_SOLICITUD = ISNULL(INTENTOS_CODIGO_SOLICITUD, 0) + 1, ULTIMA_CODIGO_SOLICITUD = GETDATE() WHERE ID_USUARIO = @id
-    `);
+      .input("code", sql.VarChar(6), code)
+      .query(`
+        UPDATE MAE_USUARIO 
+        SET CODIGO_VERIFICACION = @code, 
+            CODIGO_VERIFICACION_EXPIRA = DATEADD(minute, 15, GETDATE()),
+            INTENTOS_CODIGO_SOLICITUD = ISNULL(INTENTOS_CODIGO_SOLICITUD, 0) + 1, 
+            ULTIMA_CODIGO_SOLICITUD = GETDATE(),
+            INTENTOS_CODIGO_FALLIDO = 0
+        WHERE ID_USUARIO = @id
+      `);
 
     // Leer el template de correo
     const templatePath = path.join(__dirname, "../../html/verificationCodeEmail.html");
