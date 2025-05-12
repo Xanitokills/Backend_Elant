@@ -577,8 +577,10 @@ const getLoginImages = async (req, res) => {
     const result = await pool.request().query(`
       SELECT ID_IMAGEN, RUTA_IMAGEN, NOMBRE_IMAGEN, TIPO_IMAGEN FROM MAE_IMAGENES_LOGIN WHERE ESTADO = 1
     `);
-    if (result.recordset.length === 0)
-      return res.status(404).json({ message: "No se encontraron imágenes" });
+    // Si no hay imágenes, devolver un arreglo vacío con estado 200
+    if (result.recordset.length === 0) {
+      return res.status(200).json({ images: [] });
+    }
     const images = result.recordset.map((image) => {
       const base64Image = Buffer.from(image.RUTA_IMAGEN).toString("base64");
       return {
