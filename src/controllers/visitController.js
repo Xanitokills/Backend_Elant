@@ -7,62 +7,74 @@ const sql = require("mssql");
 // Endpoint para registrar una visita
 const registerVisit = async (req, res) => {
   const {
-    nro_dpto,
     nombre_visitante,
-    dni_visitante,
+    nro_doc_visitante,
+    id_residente,
     fecha_ingreso,
     motivo,
     id_usuario_registro,
-    id_usuario_propietario,
+    id_tipo_doc_visitante,
     estado,
   } = req.body;
 
-  // Validación de campos requeridos
+  // Validar campos requeridos
   if (
     !nombre_visitante ||
-    !dni_visitante ||
+    !nro_doc_visitante ||
+    !id_residente ||
     !fecha_ingreso ||
-    !motivo ||
-    !id_usuario_registro ||
-    !id_usuario_propietario
+    !id_usuario_registro
   ) {
     return res
       .status(400)
       .json({ message: "Todos los campos requeridos deben estar completos" });
   }
 
-  // Validación del DNI (8 dígitos)
-  if (!/^[0-9]{8}$/.test(dni_visitante)) {
-    return res
-      .status(400)
-      .json({ message: "El DNI debe tener exactamente 8 dígitos" });
-  }
-
   try {
     const pool = await poolPromise;
 
-    // Insertar la visita
-    await pool
+    // Validar que id_usuario_registro exista en MAE_USUARIO
+    const userCheck = await pool
       .request()
-      .input("nro_dpto", nro_dpto || null)
+      .input("id_usuario_registro", id_usuario_registro)
+      .query(`
+        SELECT ID_USUARIO
+        FROM [BACKUP_12-05-2025].dbo.MAE_USUARIO
+        WHERE ID_USUARIO = @id_usuario_registro
+      `);
+
+    if (!userCheck.recordset.length) {
+      return res
+        .status(400)
+        .json({ message: "El ID de usuario registro no es válido" });
+    }
+
+    // Insertar la visita
+    const result = await pool
+      .request()
       .input("nombre_visitante", nombre_visitante)
-      .input("dni_visitante", dni_visitante)
+      .input("nro_doc_visitante", nro_doc_visitante)
+      .input("id_residente", id_residente)
       .input("fecha_ingreso", fecha_ingreso)
       .input("motivo", motivo)
       .input("id_usuario_registro", id_usuario_registro)
-      .input("id_usuario_propietario", id_usuario_propietario)
+      .input("id_tipo_doc_visitante", id_tipo_doc_visitante || null)
       .input("estado", estado || 1).query(`
-          INSERT INTO MAE_VISITA (
-            NRO_DPTO, NOMBRE_VISITANTE, DNI_VISITANTE, FECHA_INGRESO, MOTIVO, 
-            ID_USUARIO_REGISTRO, ID_USUARIO_PROPIETARIO, ESTADO
-          )
-          VALUES (
-            @nro_dpto, @nombre_visitante, @dni_visitante, @fecha_ingreso, @motivo, 
-            @id_usuario_registro, @id_usuario_propietario, @estado
-          )
-        `);
+        INSERT INTO MAE_VISITA (
+          NOMBRE_VISITANTE, NRO_DOC_VISITANTE, ID_RESIDENTE, FECHA_INGRESO, 
+          MOTIVO, ID_USUARIO_REGISTRO, ID_TIPO_DOC_VISITANTE, ESTADO
+        )
+        OUTPUT INSERTED.ID_VISITA
+        VALUES (
+          @nombre_visitante, @nro_doc_visitante, @id_residente, @fecha_ingreso, 
+          @motivo, @id_usuario_registro, @id_tipo_doc_visitante, @estado
+        )
+      `);
 
-    res.status(201).json({ message: "Visita registrada exitosamente" });
+    res.status(201).json({
+      message: "Visita registrada exitosamente",
+      ID_VISITA: result.recordset[0].ID_VISITA,
+    });
   } catch (error) {
     console.error("Error al registrar visita:", error);
     res
@@ -70,28 +82,30 @@ const registerVisit = async (req, res) => {
       .json({ message: "Error del servidor", error: error.message });
   }
 };
-
 // Endpoint para listar todas las visitas
 const getAllVisits = async (req, res) => {
   try {
     const pool = await poolPromise;
     const result = await pool.request().query(`
-        SELECT 
-          V.ID_VISITA,
-          V.NRO_DPTO,
-          V.NOMBRE_VISITANTE,
-          V.DNI_VISITANTE,
-          V.FECHA_INGRESO,
-          V.FECHA_SALIDA,
-          V.MOTIVO,
-          V.ID_USUARIO_REGISTRO,
-          V.ID_USUARIO_PROPIETARIO,
-          CONCAT(U.NOMBRES, ' ', U.APELLIDOS) AS NOMBRE_PROPIETARIO,
-          V.ESTADO
-        FROM MAE_VISITA V
-        LEFT JOIN MAE_USUARIO U ON V.ID_USUARIO_PROPIETARIO = U.ID_USUARIO
-        ORDER BY V.FECHA_INGRESO DESC
-      `);
+      SELECT 
+        V.ID_VISITA,
+        D.NRO_DPTO,
+        V.NOMBRE_VISITANTE,
+        V.NRO_DOC_VISITANTE,
+        V.ID_TIPO_DOC_VISITANTE,
+        V.FECHA_INGRESO,
+        V.FECHA_SALIDA,
+        V.MOTIVO,
+        V.ID_USUARIO_REGISTRO,
+        V.ID_RESIDENTE,
+        CONCAT(P.NOMBRES, ' ', P.APELLIDOS) AS NOMBRE_PROPIETARIO,
+        V.ESTADO
+      FROM MAE_VISITA V
+      INNER JOIN MAE_RESIDENTE R ON V.ID_RESIDENTE = R.ID_RESIDENTE
+      INNER JOIN MAE_PERSONA P ON R.ID_PERSONA = P.ID_PERSONA
+      INNER JOIN MAE_DEPARTAMENTO D ON R.ID_DEPARTAMENTO = D.ID_DEPARTAMENTO
+      ORDER BY V.FECHA_INGRESO DESC
+    `);
 
     const visits = result.recordset;
     res.status(200).json(visits);
@@ -151,8 +165,7 @@ const getOwnersByDpto = async (req, res) => {
 
   if (!nro_dpto || isNaN(nro_dpto)) {
     return res.status(400).json({
-      message:
-        "El número de departamento es requerido y debe ser un número válido",
+      message: "El número de departamento es requerido y debe ser un número válido",
     });
   }
 
@@ -161,10 +174,12 @@ const getOwnersByDpto = async (req, res) => {
     const result = await pool.request().input("nro_dpto", sql.Int, nro_dpto)
       .query(`
         SELECT 
-          ID_USUARIO,
-          CONCAT(NOMBRES, ' ', APELLIDOS) AS NOMBRE_COMPLETO
-        FROM MAE_USUARIO
-        WHERE NRO_DPTO = @nro_dpto AND ESTADO = 1
+          R.ID_RESIDENTE,
+          CONCAT(P.NOMBRES, ' ', P.APELLIDOS) AS NOMBRE_COMPLETO
+        FROM MAE_RESIDENTE R
+        INNER JOIN MAE_PERSONA P ON R.ID_PERSONA = P.ID_PERSONA
+        INNER JOIN MAE_DEPARTAMENTO D ON R.ID_DEPARTAMENTO = D.ID_DEPARTAMENTO
+        WHERE D.NRO_DPTO = @nro_dpto AND R.ESTADO = 1
       `);
 
     const owners = result.recordset;
@@ -230,11 +245,12 @@ const registerScheduledVisit = async (req, res) => {
   const {
     nro_dpto,
     dni_visitante,
+    id_tipo_doc_visitante,
     nombre_visitante,
     fecha_llegada,
     hora_llegada,
     motivo,
-    id_usuario_propietario,
+    id_residente,
   } = req.body;
 
   try {
@@ -243,31 +259,36 @@ const registerScheduledVisit = async (req, res) => {
       .request()
       .input("nro_dpto", sql.Int, nro_dpto)
       .input("dni_visitante", sql.VarChar(12), dni_visitante)
+      .input("id_tipo_doc_visitante", sql.Int, id_tipo_doc_visitante || null)
       .input("nombre_visitante", sql.VarChar(100), nombre_visitante)
       .input("fecha_llegada", sql.Date, fecha_llegada)
-      .input("hora_llegada", sql.VarChar(5), hora_llegada || null)
+      .input("hora_llegada", sql.Time, hora_llegada || null)
       .input("motivo", sql.VarChar(100), motivo)
-      .input("id_usuario_propietario", sql.Int, id_usuario_propietario).query(`
+      .input("id_residente", sql.Int, id_residente).query(`
         DECLARE @InsertedID TABLE (ID_VISITA_PROGRAMADA INT);
         INSERT INTO MAE_VISITA_PROGRAMADA (
           NRO_DPTO,
           DNI_VISITANTE,
+          ID_TIPO_DOC_VISITANTE,
           NOMBRE_VISITANTE,
           FECHA_LLEGADA,
           HORA_LLEGADA,
           MOTIVO,
-          ID_USUARIO_PROPIETARIO,
+          ID_RESIDENTE,
+          FECHA_REGISTRO,
           ESTADO
         )
         OUTPUT INSERTED.ID_VISITA_PROGRAMADA INTO @InsertedID
         VALUES (
           @nro_dpto,
           @dni_visitante,
+          @id_tipo_doc_visitante,
           @nombre_visitante,
           @fecha_llegada,
           @hora_llegada,
           @motivo,
-          @id_usuario_propietario,
+          @id_residente,
+          GETDATE(),
           1
         );
         SELECT ID_VISITA_PROGRAMADA FROM @InsertedID;
@@ -342,9 +363,10 @@ const acceptScheduledVisit = async (req, res) => {
           NRO_DPTO,
           NOMBRE_VISITANTE,
           DNI_VISITANTE,
+          ID_TIPO_DOC_VISITANTE,
           FECHA_LLEGADA,
           MOTIVO,
-          ID_USUARIO_PROPIETARIO,
+          ID_RESIDENTE,
           ESTADO
         FROM MAE_VISITA_PROGRAMADA 
         WHERE ID_VISITA_PROGRAMADA = @id_visita_programada
@@ -373,16 +395,6 @@ const acceptScheduledVisit = async (req, res) => {
       .split("T")[0]
       .trim();
 
-    console.log("Backend - today (original):", today.toISOString());
-    console.log("Backend - todayAdjusted:", todayAdjusted.toISOString());
-    console.log("Backend - todayFormatted:", todayFormatted);
-    console.log("Backend - FECHA_LLEGADA raw:", scheduledVisit.FECHA_LLEGADA);
-    console.log("Backend - fechaLlegadaFormatted:", fechaLlegadaFormatted);
-    console.log(
-      "Backend - Comparación:",
-      fechaLlegadaFormatted === todayFormatted
-    );
-
     if (fechaLlegadaFormatted !== todayFormatted) {
       return res.status(400).json({
         message:
@@ -398,22 +410,22 @@ const acceptScheduledVisit = async (req, res) => {
       // Insertar en MAE_VISITA
       const insertResult = await transaction
         .request()
-        .input("nro_dpto", scheduledVisit.NRO_DPTO)
+        .input("id_residente", scheduledVisit.ID_RESIDENTE)
         .input("nombre_visitante", scheduledVisit.NOMBRE_VISITANTE)
-        .input("dni_visitante", scheduledVisit.DNI_VISITANTE)
+        .input("nro_doc_visitante", scheduledVisit.DNI_VISITANTE)
+        .input("id_tipo_doc_visitante", scheduledVisit.ID_TIPO_DOC_VISITANTE)
         .input("fecha_ingreso", new Date())
         .input("motivo", scheduledVisit.MOTIVO)
         .input("id_usuario_registro", id_usuario_registro)
-        .input("id_usuario_propietario", scheduledVisit.ID_USUARIO_PROPIETARIO)
         .input("estado", 1).query(`
           INSERT INTO MAE_VISITA (
-            NRO_DPTO, NOMBRE_VISITANTE, DNI_VISITANTE, FECHA_INGRESO, MOTIVO, 
-            ID_USUARIO_REGISTRO, ID_USUARIO_PROPIETARIO, ESTADO
+            ID_RESIDENTE, NOMBRE_VISITANTE, NRO_DOC_VISITANTE, ID_TIPO_DOC_VISITANTE, 
+            FECHA_INGRESO, MOTIVO, ID_USUARIO_REGISTRO, ESTADO
           )
           OUTPUT INSERTED.ID_VISITA
           VALUES (
-            @nro_dpto, @nombre_visitante, @dni_visitante, @fecha_ingreso, @motivo, 
-            @id_usuario_registro, @id_usuario_propietario, @estado
+            @id_residente, @nombre_visitante, @nro_doc_visitante, @id_tipo_doc_visitante, 
+            @fecha_ingreso, @motivo, @id_usuario_registro, @estado
           )
         `);
 
@@ -565,21 +577,19 @@ const getAllScheduledVisits = async (req, res) => {
         vp.ID_VISITA_PROGRAMADA,
         vp.NRO_DPTO,
         vp.DNI_VISITANTE,
+        vp.ID_TIPO_DOC_VISITANTE,
         vp.NOMBRE_VISITANTE,
         CONVERT(VARCHAR(10), vp.FECHA_LLEGADA, 120) AS FECHA_LLEGADA,
         CONVERT(VARCHAR(5), vp.HORA_LLEGADA, 108) AS HORA_LLEGADA,
         vp.MOTIVO,
-        vp.ID_USUARIO_PROPIETARIO,
-        COALESCE(CONCAT(u.NOMBRES, ' ', u.APELLIDOS), 'Desconocido') AS NOMBRE_PROPIETARIO,
+        vp.ID_RESIDENTE,
+        COALESCE(CONCAT(p.NOMBRES, ' ', p.APELLIDOS), 'Desconocido') AS NOMBRE_PROPIETARIO,
         vp.ESTADO
       FROM MAE_VISITA_PROGRAMADA vp
-      LEFT JOIN MAE_USUARIO u ON vp.ID_USUARIO_PROPIETARIO = u.ID_USUARIO
+      INNER JOIN MAE_RESIDENTE r ON vp.ID_RESIDENTE = r.ID_RESIDENTE
+      INNER JOIN MAE_PERSONA p ON r.ID_PERSONA = p.ID_PERSONA
       WHERE vp.ESTADO = 1
     `);
-    console.log(
-      "SQL result (getAllScheduledVisits):",
-      JSON.stringify(result.recordset, null, 2)
-    );
     res.status(200).json(result.recordset);
   } catch (error) {
     console.error("Error al obtener todas las visitas programadas:", error);
