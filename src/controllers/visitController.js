@@ -33,6 +33,9 @@ const registerVisit = async (req, res) => {
   try {
     const pool = await poolPromise;
 
+    // Log del valor recibido
+    console.log("Valor de id_usuario_registro recibido:", id_usuario_registro);
+
     // Validar que id_usuario_registro exista en MAE_USUARIO
     const userCheck = await pool
       .request()
@@ -42,6 +45,9 @@ const registerVisit = async (req, res) => {
         FROM [BACKUP_12-05-2025].dbo.MAE_USUARIO
         WHERE ID_USUARIO = @id_usuario_registro
       `);
+
+    // Log del resultado de la consulta
+    console.log("Resultado de userCheck:", userCheck.recordset);
 
     if (!userCheck.recordset.length) {
       return res
