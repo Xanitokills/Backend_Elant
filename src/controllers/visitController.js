@@ -288,55 +288,45 @@ const registerScheduledVisit = async (req, res) => {
   console.log("Cuerpo de la solicitud recibida:", req.body);
 
   // Validar campos requeridos
-  if (
-    !nro_dpto ||
-    !dni_visitante ||
-    !nombre_visitante ||
-    !fecha_llegada ||
-    !motivo ||
-    !id_residente
-  ) {
+  if (!nro_dpto || !dni_visitante || !nombre_visitante || !fecha_llegada || !motivo || !id_residente) {
     console.warn("Validación fallida: faltan campos requeridos");
-    return res
-      .status(400)
-      .json({ message: "Todos los campos requeridos deben estar completos" });
+    return res.status(400).json({ message: "Todos los campos requeridos deben estar completos" });
   }
 
   // Validar dni_visitante
   if (dni_visitante.length < 8 || /[^a-zA-Z0-9]/.test(dni_visitante)) {
     console.warn("Validación fallida: DNI inválido");
-    return res
-      .status(400)
-      .json({
-        message: "El DNI debe tener al menos 8 caracteres alfanuméricos",
-      });
+    return res.status(400).json({ message: "El DNI debe tener al menos 8 caracteres alfanuméricos" });
   }
 
   // Validar id_tipo_doc_visitante si se proporciona
-  if (
-    id_tipo_doc_visitante &&
-    ![2, 3, 4, 5, 6].includes(id_tipo_doc_visitante)
-  ) {
+  if (id_tipo_doc_visitante && ![2, 3, 4, 5, 6].includes(id_tipo_doc_visitante)) {
     console.warn("Validación fallida: id_tipo_doc_visitante inválido");
-    return res
-      .status(400)
-      .json({ message: "El tipo de documento no es válido" });
+    return res.status(400).json({ message: "El tipo de documento no es válido" });
   }
 
-  // Validar formato de hora_llegada
-  const timeRegex = /^([0-1][0-9]|2[0-3]):[0-5][0-9](:[0-5][0-9])?$/;
-  if (hora_llegada && !timeRegex.test(hora_llegada)) {
-    console.warn("Validación fallida: hora_llegada inválida");
-    return res
-      .status(400)
-      .json({ message: "Formato de hora_llegada inválido. Debe ser HH:mm:ss" });
+  // Validar y parsear hora_llegada
+  let horaLlegadaParsed = null;
+  if (hora_llegada) {
+    const timeRegex = /^([0-1][0-9]|2[0-3]):[0-5][0-9]:[0-5][0-9]$/;
+    if (!timeRegex.test(hora_llegada)) {
+      console.warn("Validación fallida: hora_llegada inválida");
+      return res.status(400).json({ message: "Formato de hora_llegada inválido. Debe ser HH:mm:ss" });
+    }
+    // Parsear hora_llegada a un objeto Date
+    const [hours, minutes, seconds] = hora_llegada.split(':').map(Number);
+    const date = new Date();
+    date.setHours(hours, minutes, seconds, 0);
+    horaLlegadaParsed = date;
   }
 
   try {
     const pool = await poolPromise;
 
     // Validar que NRO_DPTO existe y obtener ID_DEPARTAMENTO
-    const deptResult = await pool.request().input("nro_dpto", sql.Int, nro_dpto)
+    const deptResult = await pool
+      .request()
+      .input("nro_dpto", sql.Int, nro_dpto)
       .query(`
         SELECT ID_DEPARTAMENTO
         FROM MAE_DEPARTAMENTO
@@ -354,7 +344,8 @@ const registerScheduledVisit = async (req, res) => {
     const residentResult = await pool
       .request()
       .input("id_residente", sql.Int, id_residente)
-      .input("id_departamento", sql.Int, id_departamento).query(`
+      .input("id_departamento", sql.Int, id_departamento)
+      .query(`
         SELECT ID_RESIDENTE
         FROM MAE_RESIDENTE
         WHERE ID_RESIDENTE = @id_residente 
@@ -363,12 +354,9 @@ const registerScheduledVisit = async (req, res) => {
       `);
 
     if (residentResult.recordset.length === 0) {
-      console.warn(
-        `Residente no válido: ID_RESIDENTE=${id_residente}, ID_DEPARTAMENTO=${id_departamento}`
-      );
+      console.warn(`Residente no válido: ID_RESIDENTE=${id_residente}, ID_DEPARTAMENTO=${id_departamento}`);
       return res.status(400).json({
-        message:
-          "El ID_RESIDENTE no está asociado al departamento especificado o no está activo",
+        message: "El ID_RESIDENTE no está asociado al departamento especificado o no está activo",
       });
     }
 
@@ -378,15 +366,12 @@ const registerScheduledVisit = async (req, res) => {
       .input("nro_dpto", sql.Int, nro_dpto)
       .input("dni_visitante", sql.VarChar(12), dni_visitante)
       .input("id_tipo_doc_visitante", sql.Int, id_tipo_doc_visitante || null)
-      .input(
-        "nombre_visitante",
-        sql.VarChar(100),
-        nombre_visitante.toUpperCase()
-      )
+      .input("nombre_visitante", sql.VarChar(100), nombre_visitante.toUpperCase())
       .input("fecha_llegada", sql.Date, fecha_llegada)
-      .input("hora_llegada", sql.Time, hora_llegada || null)
+      .input("hora_llegada", sql.Time, horaLlegadaParsed) // Usar el objeto Date
       .input("motivo", sql.VarChar(100), motivo)
-      .input("id_residente", sql.Int, id_residente).query(`
+      .input("id_residente", sql.Int, id_residente)
+      .query(`
         DECLARE @InsertedID TABLE (ID_VISITA_PROGRAMADA INT);
         INSERT INTO MAE_VISITA_PROGRAMADA (
           NRO_DPTO,
@@ -460,12 +445,10 @@ const getScheduledVisits = async (req, res) => {
     );
 
     if (!hasAllowedRole) {
-      return res
-        .status(403)
-        .json({
-          message: "Acceso denegado: rol no permitido",
-          roles: userRoles,
-        });
+      return res.status(403).json({
+        message: "Acceso denegado: rol no permitido",
+        roles: userRoles,
+      });
     }
 
     // Determinar si el usuario tiene el rol de Sistemas (ID_ROL = 1)
@@ -885,8 +868,7 @@ const getResidentByPersonaAndDepartment = async (req, res) => {
     const result = await pool
       .request()
       .input("id_persona", sql.Int, persona)
-      .input("id_departamento", sql.Int, departamento)
-      .query(`
+      .input("id_departamento", sql.Int, departamento).query(`
         SELECT ID_RESIDENTE
         FROM MAE_RESIDENTE
         WHERE ID_PERSONA = @id_persona AND ID_DEPARTAMENTO = @id_departamento AND ESTADO = 1
