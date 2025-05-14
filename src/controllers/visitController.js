@@ -277,141 +277,74 @@ const registerScheduledVisit = async (req, res) => {
   const {
     nro_dpto,
     dni_visitante,
-    id_tipo_doc_visitante,
     nombre_visitante,
     fecha_llegada,
     hora_llegada,
     motivo,
     id_residente,
+    id_tipo_doc_visitante,
   } = req.body;
 
-  console.log("Cuerpo de la solicitud recibida:", req.body);
-
-  // Validar campos requeridos
-  if (!nro_dpto || !dni_visitante || !nombre_visitante || !fecha_llegada || !motivo || !id_residente) {
-    console.warn("Validación fallida: faltan campos requeridos");
-    return res.status(400).json({ message: "Todos los campos requeridos deben estar completos" });
-  }
-
-  // Validar dni_visitante
-  if (dni_visitante.length < 8 || /[^a-zA-Z0-9]/.test(dni_visitante)) {
-    console.warn("Validación fallida: DNI inválido");
-    return res.status(400).json({ message: "El DNI debe tener al menos 8 caracteres alfanuméricos" });
-  }
-
-  // Validar id_tipo_doc_visitante si se proporciona
-  if (id_tipo_doc_visitante && ![2, 3, 4, 5, 6].includes(id_tipo_doc_visitante)) {
-    console.warn("Validación fallida: id_tipo_doc_visitante inválido");
-    return res.status(400).json({ message: "El tipo de documento no es válido" });
-  }
-
-  // Validar y parsear hora_llegada
-  let horaLlegadaParsed = null;
-  if (hora_llegada) {
-    const timeRegex = /^([0-1][0-9]|2[0-3]):[0-5][0-9]:[0-5][0-9]$/;
-    if (!timeRegex.test(hora_llegada)) {
-      console.warn("Validación fallida: hora_llegada inválida");
-      return res.status(400).json({ message: "Formato de hora_llegada inválido. Debe ser HH:mm:ss" });
-    }
-    // Parsear hora_llegada a un objeto Date
-    const [hours, minutes, seconds] = hora_llegada.split(':').map(Number);
-    const date = new Date();
-    date.setHours(hours, minutes, seconds, 0);
-    horaLlegadaParsed = date;
-  }
-
   try {
-    const pool = await poolPromise;
-
-    // Validar que NRO_DPTO existe y obtener ID_DEPARTAMENTO
-    const deptResult = await pool
-      .request()
-      .input("nro_dpto", sql.Int, nro_dpto)
-      .query(`
-        SELECT ID_DEPARTAMENTO
-        FROM MAE_DEPARTAMENTO
-        WHERE NRO_DPTO = @nro_dpto AND ESTADO = 1
-      `);
-
-    if (deptResult.recordset.length === 0) {
-      console.warn(`Departamento no encontrado: NRO_DPTO=${nro_dpto}`);
-      return res.status(404).json({ message: "Departamento no encontrado" });
+    const pool = await getConnection();
+    if (!pool) {
+      return res
+        .status(500)
+        .json({ message: "Error de conexión a la base de datos" });
     }
 
-    const id_departamento = deptResult.recordset[0].ID_DEPARTAMENTO;
-
-    // Validar que ID_RESIDENTE existe y está asociado a ID_DEPARTAMENTO
-    const residentResult = await pool
-      .request()
-      .input("id_residente", sql.Int, id_residente)
-      .input("id_departamento", sql.Int, id_departamento)
-      .query(`
-        SELECT ID_RESIDENTE
-        FROM MAE_RESIDENTE
-        WHERE ID_RESIDENTE = @id_residente 
-          AND ID_DEPARTAMENTO = @id_departamento 
-          AND ESTADO = 1
-      `);
-
-    if (residentResult.recordset.length === 0) {
-      console.warn(`Residente no válido: ID_RESIDENTE=${id_residente}, ID_DEPARTAMENTO=${id_departamento}`);
-      return res.status(400).json({
-        message: "El ID_RESIDENTE no está asociado al departamento especificado o no está activo",
-      });
+    let horaLlegadaFormatted = null;
+    if (hora_llegada) {
+      const timeRegex = /^([0-1][0-9]|2[0-3]):[0-5][0-9]:[0-5][0-9]$/;
+      if (!timeRegex.test(hora_llegada)) {
+        return res
+          .status(400)
+          .json({
+            message: "Formato de hora_llegada inválido. Debe ser HH:mm:ss",
+          });
+      }
+      horaLlegadaFormatted = hora_llegada; // Usar la cadena directamente
+      console.log("Hora llegada recibida:", hora_llegada); // Log para depuración
     }
 
-    // Insertar la visita programada
     const result = await pool
       .request()
       .input("nro_dpto", sql.Int, nro_dpto)
-      .input("dni_visitante", sql.VarChar(12), dni_visitante)
-      .input("id_tipo_doc_visitante", sql.Int, id_tipo_doc_visitante || null)
-      .input("nombre_visitante", sql.VarChar(100), nombre_visitante.toUpperCase())
+      .input("dni_visitante", sql.VarChar, dni_visitante)
+      .input("nombre_visitante", sql.VarChar, nombre_visitante)
       .input("fecha_llegada", sql.Date, fecha_llegada)
-      .input("hora_llegada", sql.Time, horaLlegadaParsed) // Usar el objeto Date
-      .input("motivo", sql.VarChar(100), motivo)
+      .input(
+        "hora_llegada",
+        sql.Time,
+        horaLlegadaFormatted ? hora_llegadaFormatted : null
+      )
+      .input("motivo", sql.VarChar, motivo)
       .input("id_residente", sql.Int, id_residente)
-      .query(`
-        DECLARE @InsertedID TABLE (ID_VISITA_PROGRAMADA INT);
+      .input("id_tipo_doc_visitante", sql.Int, id_tipo_doc_visitante).query(`
         INSERT INTO MAE_VISITA_PROGRAMADA (
-          NRO_DPTO,
-          DNI_VISITANTE,
-          ID_TIPO_DOC_VISITANTE,
-          NOMBRE_VISITANTE,
-          FECHA_LLEGADA,
-          HORA_LLEGADA,
-          MOTIVO,
-          ID_RESIDENTE,
-          FECHA_REGISTRO,
-          ESTADO
+          NRO_DPTO, DNI_VISITANTE, NOMBRE_VISITANTE, FECHA_LLEGADA, HORA_LLEGADA,
+          MOTIVO, ID_RESIDENTE, FECHA_REGISTRO, ESTADO, ID_TIPO_DOC_VISITANTE
         )
-        OUTPUT INSERTED.ID_VISITA_PROGRAMADA INTO @InsertedID
+        OUTPUT INSERTED.ID_VISITA_PROGRAMADA, INSERTED.HORA_LLEGADA
         VALUES (
-          @nro_dpto,
-          @dni_visitante,
-          @id_tipo_doc_visitante,
-          @nombre_visitante,
-          @fecha_llegada,
-          @hora_llegada,
-          @motivo,
-          @id_residente,
-          GETDATE(),
-          1
-        );
-        SELECT ID_VISITA_PROGRAMADA FROM @InsertedID;
+          @nro_dpto, @dni_visitante, @nombre_visitante, @fecha_llegada, @hora_llegada,
+          @motivo, @id_residente, GETDATE(), 1, @id_tipo_doc_visitante
+        )
       `);
 
-    const insertedId = result.recordset[0].ID_VISITA_PROGRAMADA;
+    console.log(
+      "Visita registrada - HORA_LLEGADA:",
+      result.recordset[0].HORA_LLEGADA
+    ); // Log para depuración
     res.status(201).json({
-      message: "Visita programada registrada correctamente",
-      id: insertedId,
+      message: "Visita programada registrada exitosamente",
+      id_visita_programada: result.recordset[0].ID_VISITA_PROGRAMADA,
     });
   } catch (error) {
-    console.error("Error al registrar visita programada:", error);
-    res.status(400).json({
-      message: "Error al registrar la visita programada",
-      error: error.message,
-    });
+    console.error("Error al registrar la visita programada:", error);
+    res
+      .status(500)
+      .json({ message: "Error al registrar la visita programada" });
   }
 };
 // visitController.js
