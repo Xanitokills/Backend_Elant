@@ -24,7 +24,7 @@ router.get("/dni", authMiddleware, checkPermission({ menuId: 2 }), getDniInfo);
 router.get("/owners", authMiddleware, checkPermission({ menuId: 2 }), getOwnersByDpto);
 router.put("/visits/:id_visita/end", authMiddleware, checkPermission({ menuId: 2 }), endVisit);
 router.post("/scheduled-visits", authMiddleware, checkPermission({ menuId: 2 }), registerScheduledVisit);
-router.get("/scheduled-visits", authMiddleware, checkPermission({ menuId: 2 }), getScheduledVisits);
+router.get("/scheduled-visits", authMiddleware, getScheduledVisits);
 router.get("/departamentosFase", authMiddleware, checkPermission({ menuId: 2 }), getDepartmentsByPhase);
 
 // Rutas protegidas con ID_SUBMENU=10 (Visitas Programadas)

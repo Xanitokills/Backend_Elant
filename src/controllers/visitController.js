@@ -357,26 +357,69 @@ const getScheduledVisits = async (req, res) => {
       return res.status(401).json({ message: "Usuario no autenticado" });
     }
     const pool = await poolPromise;
-    const result = await pool.request().input("id_usuario", sql.Int, userId)
+
+    // Obtener todos los roles del usuario
+    const roleCheck = await pool.request().input("id_usuario", sql.Int, userId)
       .query(`
-        SELECT
-          vp.ID_VISITA_PROGRAMADA,
-          vp.NRO_DPTO,
-          vp.DNI_VISITANTE,
-          vp.NOMBRE_VISITANTE,
-          CONVERT(VARCHAR(10), vp.FECHA_LLEGADA, 120) AS FECHA_LLEGADA,
-          CONVERT(VARCHAR(5), vp.HORA_LLEGADA, 108) AS HORA_LLEGADA,
-          vp.MOTIVO,
-          vp.ID_USUARIO_PROPIETARIO,
-          COALESCE(CONCAT(u.NOMBRES, ' ', u.APELLIDOS), 'Desconocido') AS NOMBRE_PROPIETARIO,
-          vp.ESTADO,
-          f.NOMBRE AS NOMBRE_FASE
-        FROM MAE_VISITA_PROGRAMADA vp
-        LEFT JOIN MAE_USUARIO u ON vp.ID_USUARIO_PROPIETARIO = u.ID_USUARIO
-        INNER JOIN MAE_DEPARTAMENTO d ON vp.NRO_DPTO = d.NRO_DPTO
-        INNER JOIN MAE_FASE f ON d.ID_FASE = f.ID_FASE
-        WHERE vp.ID_USUARIO_PROPIETARIO = @id_usuario
+        SELECT ur.ID_ROL
+        FROM MAE_USUARIO u
+        INNER JOIN MAE_USUARIO_ROL ur ON u.ID_USUARIO = ur.ID_USUARIO
+        WHERE u.ID_USUARIO = @id_usuario AND u.ESTADO = 1
       `);
+
+    // Verificar si el usuario tiene al menos un rol permitido (1, 4, 5)
+    const userRoles = roleCheck.recordset.map((row) => row.ID_ROL);
+    const allowedRoles = [1, 4, 5];
+    const hasAllowedRole = userRoles.some((role) =>
+      allowedRoles.includes(role)
+    );
+
+    if (!hasAllowedRole) {
+      return res
+        .status(403)
+        .json({ message: "Acceso denegado: rol no permitido" });
+    }
+
+    // Determinar si el usuario tiene el rol de Sistemas (ID_ROL = 1)
+    const isSistema = userRoles.includes(1);
+
+    // Consulta para obtener visitas programadas
+    let query = `
+      SELECT
+        vp.ID_VISITA_PROGRAMADA,
+        vp.NRO_DPTO,
+        vp.DNI_VISITANTE,
+        vp.NOMBRE_VISITANTE,
+        CONVERT(VARCHAR(10), vp.FECHA_LLEGADA, 120) AS FECHA_LLEGADA,
+        CONVERT(VARCHAR(5), vp.HORA_LLEGADA, 108) AS HORA_LLEGADA,
+        vp.MOTIVO,
+        vp.ID_RESIDENTE,
+        COALESCE(CONCAT(p.NOMBRES, ' ', p.APELLIDOS), 'Desconocido') AS NOMBRE_PROPIETARIO,
+        vp.ESTADO,
+        f.NOMBRE AS NOMBRE_FASE
+      FROM MAE_VISITA_PROGRAMADA vp
+      INNER JOIN MAE_RESIDENTE r ON vp.ID_RESIDENTE = r.ID_RESIDENTE
+      INNER JOIN MAE_PERSONA p ON r.ID_PERSONA = p.ID_PERSONA
+      INNER JOIN MAE_DEPARTAMENTO d ON vp.NRO_DPTO = d.NRO_DPTO
+      INNER JOIN MAE_FASE f ON d.ID_FASE = f.ID_FASE
+    `;
+
+    // Si NO es rol Sistemas, filtrar por ID_PERSONA del usuario
+    if (!isSistema) {
+      query += `
+        WHERE r.ID_PERSONA = (
+          SELECT ID_PERSONA
+          FROM MAE_USUARIO
+          WHERE ID_USUARIO = @id_usuario
+        )
+      `;
+    }
+
+    const result = await pool
+      .request()
+      .input("id_usuario", sql.Int, userId)
+      .query(query);
+
     res.status(200).json(result.recordset);
   } catch (error) {
     console.error("Error al obtener visitas programadas:", error);
@@ -505,15 +548,14 @@ const getOwnerDepartments = async (req, res) => {
   try {
     const pool = await poolPromise;
     const result = await pool.request().input("id_usuario", sql.Int, id).query(`
-      SELECT NRO_DPTO
-      FROM MAE_USUARIO
-      WHERE ID_USUARIO = @id_usuario AND NRO_DPTO IS NOT NULL AND ESTADO = 1
-      UNION
-      SELECT NRO_DPTO
-      FROM MAE_USUARIO_DEPARTAMENTO
-      WHERE ID_USUARIO = @id_usuario AND ESTADO = 1
-      ORDER BY NRO_DPTO
-    `);
+        SELECT DISTINCT d.NRO_DPTO
+        FROM MAE_DEPARTAMENTO d
+        INNER JOIN MAE_RESIDENTE r ON d.ID_DEPARTAMENTO = r.ID_DEPARTAMENTO
+        INNER JOIN MAE_PERSONA p ON r.ID_PERSONA = p.ID_PERSONA
+        INNER JOIN MAE_USUARIO u ON p.ID_PERSONA = u.ID_PERSONA
+        WHERE u.ID_USUARIO = @id_usuario AND d.ESTADO = 1 AND r.ESTADO = 1
+        ORDER BY d.NRO_DPTO
+      `);
     const departments = result.recordset.map((row) => ({
       NRO_DPTO: row.NRO_DPTO,
     }));
@@ -703,6 +745,73 @@ const getDepartmentsByPhase = async (req, res) => {
   }
 };
 
+const getUserData = async (req, res) => {
+  const { id } = req.params;
+  try {
+    const pool = await poolPromise;
+    const result = await pool.request().input("id_usuario", sql.Int, id).query(`
+        SELECT ID_PERSONA
+        FROM MAE_USUARIO
+        WHERE ID_USUARIO = @id_usuario AND ESTADO = 1
+      `);
+    if (!result.recordset[0]) {
+      return res.status(404).json({ message: "Usuario no encontrado" });
+    }
+    res.status(200).json(result.recordset[0]);
+  } catch (error) {
+    console.error("Error al obtener datos del usuario:", error);
+    res
+      .status(500)
+      .json({ message: "Error del servidor", error: error.message });
+  }
+};
+
+const getDepartmentByNumber = async (req, res) => {
+  const { nro_dpto } = req.query;
+  try {
+    const pool = await poolPromise;
+    const result = await pool.request().input("nro_dpto", sql.Int, nro_dpto)
+      .query(`
+        SELECT ID_DEPARTAMENTO
+        FROM MAE_DEPARTAMENTO
+        WHERE NRO_DPTO = @nro_dpto AND ESTADO = 1
+      `);
+    if (!result.recordset[0]) {
+      return res.status(404).json({ message: "Departamento no encontrado" });
+    }
+    res.status(200).json(result.recordset[0]);
+  } catch (error) {
+    console.error("Error al obtener departamento:", error);
+    res
+      .status(500)
+      .json({ message: "Error del servidor", error: error.message });
+  }
+};
+
+const getResidentByPersonaAndDepartment = async (req, res) => {
+  const { persona, departamento } = req.query;
+  try {
+    const pool = await poolPromise;
+    const result = await pool
+      .request()
+      .input("id_persona", sql.Int, persona)
+      .input("id_departamento", sql.Int, departamento).query(`
+        SELECT ID_RESIDENTE
+        FROM MAE_RESIDENTE
+        WHERE ID_PERSONA = @id_persona AND ID_DEPARTAMENTO = @id_departamento AND ESTADO = 1
+      `);
+    if (!result.recordset[0]) {
+      return res.status(404).json({ message: "Residente no encontrado" });
+    }
+    res.status(200).json(result.recordset[0]);
+  } catch (error) {
+    console.error("Error al obtener residente:", error);
+    res
+      .status(500)
+      .json({ message: "Error del servidor", error: error.message });
+  }
+};
+
 module.exports = {
   registerVisit,
   getAllVisits,
@@ -716,4 +825,7 @@ module.exports = {
   cancelScheduledVisit,
   getAllScheduledVisits,
   getDepartmentsByPhase,
+  getUserData, // Nuevo
+  getDepartmentByNumber, // Nuevo
+  getResidentByPersonaAndDepartment, // Nuevo
 };
