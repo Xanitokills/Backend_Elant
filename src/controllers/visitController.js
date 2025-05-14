@@ -560,16 +560,18 @@ const getOwnerDepartments = async (req, res) => {
   try {
     const pool = await poolPromise;
     const result = await pool.request().input("id_usuario", sql.Int, id).query(`
-        SELECT DISTINCT d.NRO_DPTO
+        SELECT DISTINCT d.NRO_DPTO, f.NOMBRE AS NOMBRE_FASE
         FROM MAE_DEPARTAMENTO d
         INNER JOIN MAE_RESIDENTE r ON d.ID_DEPARTAMENTO = r.ID_DEPARTAMENTO
         INNER JOIN MAE_PERSONA p ON r.ID_PERSONA = p.ID_PERSONA
         INNER JOIN MAE_USUARIO u ON p.ID_PERSONA = u.ID_PERSONA
+        INNER JOIN MAE_FASE f ON d.ID_FASE = f.ID_FASE
         WHERE u.ID_USUARIO = @id_usuario AND d.ESTADO = 1 AND r.ESTADO = 1
-        ORDER BY d.NRO_DPTO
+        ORDER BY f.NOMBRE, d.NRO_DPTO
       `);
     const departments = result.recordset.map((row) => ({
       NRO_DPTO: row.NRO_DPTO,
+      NOMBRE_FASE: row.NOMBRE_FASE,
     }));
     if (departments.length === 0) {
       return res
