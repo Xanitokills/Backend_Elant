@@ -28,7 +28,10 @@ const registerVisit = async (req, res) => {
   ) {
     return res
       .status(400)
-      .json({ message: "Todos los campos requeridos deben estar completos, incluyendo el tipo de documento" });
+      .json({
+        message:
+          "Todos los campos requeridos deben estar completos, incluyendo el tipo de documento",
+      });
   }
 
   try {
@@ -37,8 +40,7 @@ const registerVisit = async (req, res) => {
     // Validar que id_usuario_registro exista en MAE_USUARIO
     const userCheck = await pool
       .request()
-      .input("id_usuario_registro", id_usuario_registro)
-      .query(`
+      .input("id_usuario_registro", id_usuario_registro).query(`
         SELECT ID_USUARIO
         FROM [BACKUP_12-05-2025].dbo.MAE_USUARIO
         WHERE ID_USUARIO = @id_usuario_registro
@@ -152,7 +154,8 @@ const getDniInfo = async (req, res) => {
     }
 
     // Formatear el nombre completo en mayúsculas
-    const nombreCompleto = `${data.nombres} ${data.apellidoPaterno} ${data.apellidoMaterno}`.toUpperCase();
+    const nombreCompleto =
+      `${data.nombres} ${data.apellidoPaterno} ${data.apellidoMaterno}`.toUpperCase();
 
     res.status(200).json({ nombreCompleto });
   } catch (error) {
@@ -168,7 +171,8 @@ const getOwnersByDpto = async (req, res) => {
 
   if (!nro_dpto || isNaN(nro_dpto)) {
     return res.status(400).json({
-      message: "El número de departamento es requerido y debe ser un número válido",
+      message:
+        "El número de departamento es requerido y debe ser un número válido",
     });
   }
 
@@ -194,7 +198,6 @@ const getOwnersByDpto = async (req, res) => {
       .json({ message: "Error del servidor", error: error.message });
   }
 };
-
 
 // Endpoint para terminar una visita
 const endVisit = async (req, res) => {
@@ -258,7 +261,9 @@ const registerScheduledVisit = async (req, res) => {
   } = req.body;
 
   if (!id_tipo_doc_visitante) {
-    return res.status(400).json({ message: "El tipo de documento es requerido" });
+    return res
+      .status(400)
+      .json({ message: "El tipo de documento es requerido" });
   }
 
   try {
@@ -268,7 +273,11 @@ const registerScheduledVisit = async (req, res) => {
       .input("nro_dpto", sql.Int, nro_dpto)
       .input("dni_visitante", sql.VarChar(12), dni_visitante)
       .input("id_tipo_doc_visitante", sql.Int, id_tipo_doc_visitante)
-      .input("nombre_visitante", sql.VarChar(100), nombre_visitante.toUpperCase())
+      .input(
+        "nombre_visitante",
+        sql.VarChar(100),
+        nombre_visitante.toUpperCase()
+      )
       .input("fecha_llegada", sql.Date, fecha_llegada)
       .input("hora_llegada", sql.Time, hora_llegada || null)
       .input("motivo", sql.VarChar(100), motivo)
@@ -609,6 +618,57 @@ const getAllScheduledVisits = async (req, res) => {
   }
 };
 
+const getDepartmentsByPhase = async (req, res) => {
+  logger.info("Iniciando getDepartmentsByPhase");
+  logger.info(`Query completa: ${JSON.stringify(req.query)}`);
+
+  const { id_fase } = req.query;
+
+  logger.info(`Recibido id_fase: ${id_fase}, Tipo: ${typeof id_fase}`);
+
+  if (!id_fase || id_fase.trim() === '' || isNaN(id_fase)) {
+    logger.warn(`Validación fallida: id_fase=${id_fase}`);
+    return res.status(400).json({
+      message: "El ID de la fase es requerido y debe ser un número válido",
+    });
+  }
+
+  try {
+    const pool = await poolPromise;
+    const idFaseNumber = parseInt(id_fase, 10);
+    logger.info(`ID_FASE convertido: ${idFaseNumber}, Tipo: ${typeof idFaseNumber}`);
+
+    if (isNaN(idFaseNumber)) {
+      logger.warn("idFaseNumber es NaN");
+      return res.status(400).json({
+        message: "El ID de la fase debe ser un número válido",
+      });
+    }
+
+    logger.info(`Ejecutando consulta con id_fase=${idFaseNumber}`);
+    const result = await pool.request()
+      .input("id_fase", sql.Int, idFaseNumber)
+      .query(`
+        SELECT 
+          ID_DEPARTAMENTO,
+          NRO_DPTO,
+          DESCRIPCION,
+          ID_FASE
+        FROM MAE_DEPARTAMENTO
+        WHERE ID_FASE = @id_fase AND ESTADO = 1
+        ORDER BY NRO_DPTO
+      `);
+
+    logger.info(`Consulta ejecutada, filas devueltas: ${result.recordset.length}`);
+    logger.debug(`Departamentos devueltos: ${JSON.stringify(result.recordset, null, 2)}`);
+
+    res.status(200).json(result.recordset);
+  } catch (error) {
+    logger.error(`Error al obtener departamentos por fase: ${error.message}`, { error });
+    res.status(500).json({ message: "Error del servidor", error: error.message });
+  }
+};
+
 module.exports = {
   registerVisit,
   getAllVisits,
@@ -621,4 +681,5 @@ module.exports = {
   getOwnerDepartments,
   cancelScheduledVisit,
   getAllScheduledVisits,
+  getDepartmentsByPhase,
 };
