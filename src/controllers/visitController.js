@@ -274,77 +274,150 @@ const endVisit = async (req, res) => {
   }
 };
 const registerScheduledVisit = async (req, res) => {
-  const {
-    nro_dpto,
-    dni_visitante,
-    nombre_visitante,
-    fecha_llegada,
-    hora_llegada,
-    motivo,
-    id_residente,
-    id_tipo_doc_visitante,
-  } = req.body;
-
   try {
-    const pool = await getConnection();
-    if (!pool) {
-      return res
-        .status(500)
-        .json({ message: "Error de conexión a la base de datos" });
+    const {
+      nro_dpto,
+      dni_visitante,
+      id_tipo_doc_visitante,
+      nombre_visitante,
+      fecha_llegada,
+      hora_llegada,
+      motivo,
+      id_residente,
+    } = req.body;
+
+    // Validar campos requeridos
+    if (
+      !nro_dpto ||
+      !dni_visitante ||
+      !id_tipo_doc_visitante ||
+      !nombre_visitante ||
+      !fecha_llegada ||
+      !motivo ||
+      !id_residente
+    ) {
+      return res.status(400).json({ message: "Todos los campos requeridos deben estar completos" });
     }
 
-    let horaLlegadaFormatted = null;
-    if (hora_llegada) {
-      const timeRegex = /^([0-1][0-9]|2[0-3]):[0-5][0-9]:[0-5][0-9]$/;
-      if (!timeRegex.test(hora_llegada)) {
-        return res
-          .status(400)
-          .json({
-            message: "Formato de hora_llegada inválido. Debe ser HH:mm:ss",
-          });
-      }
-      horaLlegadaFormatted = hora_llegada; // Usar la cadena directamente
-      console.log("Hora llegada recibida:", hora_llegada); // Log para depuración
+    // Validar formato y restricciones
+    if (isNaN(nro_dpto)) {
+      return res.status(400).json({ message: "El número de departamento debe ser un número válido" });
+    }
+    if (dni_visitante.length < 8 || !/^[a-zA-Z0-9]+$/.test(dni_visitante)) {
+      return res.status(400).json({
+        message: "El DNI debe tener al menos 8 caracteres y solo contener letras y números",
+      });
+    }
+    if (![2, 3, 4, 5, 6].includes(id_tipo_doc_visitante)) {
+      return res.status(400).json({ message: "El tipo de documento no es válido" });
+    }
+    if (nombre_visitante.trim().length === 0) {
+      return res.status(400).json({ message: "El nombre del visitante no puede estar vacío" });
+    }
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(fecha_llegada)) {
+      return res.status(400).json({ message: "El formato de la fecha de llegada debe ser YYYY-MM-DD" });
+    }
+    if (hora_llegada && !/^\d{2}:\d{2}:\d{2}$/.test(hora_llegada)) {
+      return res.status(400).json({ message: "El formato de la hora de llegada debe ser HH:mm:ss" });
+    }
+    if (motivo.trim().length === 0 || motivo.length > 100) {
+      return res.status(400).json({ message: "El motivo no puede estar vacío y debe tener menos de 100 caracteres" });
     }
 
-    const result = await pool
+    // Validar NRO_DPTO
+    const pool = await poolPromise;
+    const dptoResult = await pool
       .request()
       .input("nro_dpto", sql.Int, nro_dpto)
+      .query("SELECT ID_DEPARTAMENTO FROM MAE_DEPARTAMENTO WHERE NRO_DPTO = @nro_dpto");
+    
+    if (dptoResult.recordset.length === 0) {
+      return res.status(400).json({ message: `El departamento ${nro_dpto} no existe` });
+    }
+
+    // Convertir hora_llegada a un objeto Date para sql.Time
+    let timeValue = null;
+    if (hora_llegada) {
+      try {
+        const [hours, minutes, seconds] = hora_llegada.split(':').map(Number);
+        if (
+          hours < 0 || hours > 23 ||
+          minutes < 0 || minutes > 59 ||
+          seconds < 0 || seconds > 59
+        ) {
+          return res.status(400).json({ message: "Hora de llegada inválida" });
+        }
+        // Crear un objeto Date (usamos una fecha arbitraria como 1970-01-01)
+        timeValue = new Date(1970, 0, 1, hours, minutes, seconds);
+      } catch (err) {
+        console.error("Error al procesar hora_llegada:", err);
+        return res.status(400).json({ message: "Formato de hora de llegada inválido" });
+      }
+    }
+
+    // Log para depuración
+    console.log("Datos para INSERT:", {
+      nro_dpto,
+      dni_visitante,
+      id_tipo_doc_visitante,
+      nombre_visitante,
+      fecha_llegada,
+      hora_llegada: timeValue ? timeValue.toISOString() : null,
+      motivo,
+      id_residente,
+      estado: 1,
+    });
+
+    // Log del valor exacto enviado a sql.Time
+    console.log("Valor enviado a sql.Time para hora_llegada:", timeValue, typeof timeValue);
+
+    // Insertar la visita
+    const request = pool.request()
+      .input("nro_dpto", sql.Int, nro_dpto)
       .input("dni_visitante", sql.VarChar, dni_visitante)
-      .input("nombre_visitante", sql.VarChar, nombre_visitante)
+      .input("id_tipo_doc_visitante", sql.Int, id_tipo_doc_visitante)
+      .input("nombre_visitante", sql.VarChar, nombre_visitante.toUpperCase())
       .input("fecha_llegada", sql.Date, fecha_llegada)
-      .input(
-        "hora_llegada",
-        sql.Time,
-        horaLlegadaFormatted ? hora_llegadaFormatted : null
-      )
       .input("motivo", sql.VarChar, motivo)
       .input("id_residente", sql.Int, id_residente)
-      .input("id_tipo_doc_visitante", sql.Int, id_tipo_doc_visitante).query(`
-        INSERT INTO MAE_VISITA_PROGRAMADA (
-          NRO_DPTO, DNI_VISITANTE, NOMBRE_VISITANTE, FECHA_LLEGADA, HORA_LLEGADA,
-          MOTIVO, ID_RESIDENTE, FECHA_REGISTRO, ESTADO, ID_TIPO_DOC_VISITANTE
-        )
-        OUTPUT INSERTED.ID_VISITA_PROGRAMADA, INSERTED.HORA_LLEGADA
-        VALUES (
-          @nro_dpto, @dni_visitante, @nombre_visitante, @fecha_llegada, @hora_llegada,
-          @motivo, @id_residente, GETDATE(), 1, @id_tipo_doc_visitante
-        )
-      `);
+      .input("estado", sql.Int, 1)      
+      .input("hora_llegada", sql.Time, timeValue);
 
-    console.log(
-      "Visita registrada - HORA_LLEGADA:",
-      result.recordset[0].HORA_LLEGADA
-    ); // Log para depuración
-    res.status(201).json({
-      message: "Visita programada registrada exitosamente",
-      id_visita_programada: result.recordset[0].ID_VISITA_PROGRAMADA,
+    const insertResult = await request.query(`
+      INSERT INTO MAE_VISITA_PROGRAMADA (
+        NRO_DPTO, DNI_VISITANTE, ID_TIPO_DOC_VISITANTE, NOMBRE_VISITANTE,
+        FECHA_LLEGADA, HORA_LLEGADA, MOTIVO, ID_RESIDENTE, ESTADO
+      )
+      OUTPUT INSERTED.ID_VISITA_PROGRAMADA
+      VALUES (
+        @nro_dpto, @dni_visitante, @id_tipo_doc_visitante, @nombre_visitante,
+        @fecha_llegada, @hora_llegada, @motivo, @id_residente, @estado
+      )
+    `);
+
+    res.status(201).json({ 
+      message: "Visita programada registrada con éxito",
+      id_visita_programada: insertResult.recordset[0].ID_VISITA_PROGRAMADA
     });
   } catch (error) {
-    console.error("Error al registrar la visita programada:", error);
-    res
-      .status(500)
-      .json({ message: "Error al registrar la visita programada" });
+    console.error("Error en registerScheduledVisit:", {
+      message: error.message,
+      stack: error.stack,
+      sqlMessage: error.sqlMessage || "No SQL message",
+      sqlState: error.sqlState || "No SQL state",
+      code: error.code || "No error code",
+      originalError: error.originalError || "No original error",
+      hora_llegada: req.body.hora_llegada,
+    });
+    res.status(500).json({
+      message: "Error al registrar la visita programada",
+      error: {
+        message: error.message,
+        sqlMessage: error.sqlMessage || "No SQL message",
+        sqlState: error.sqlState || "No SQL state",
+        code: error.code || "No error code",
+      },
+    });
   }
 };
 // visitController.js
@@ -687,18 +760,20 @@ const getAllScheduledVisits = async (req, res) => {
         vp.MOTIVO,
         vp.ID_RESIDENTE,
         COALESCE(CONCAT(p.NOMBRES, ' ', p.APELLIDOS), 'Desconocido') AS NOMBRE_PROPIETARIO,
-        vp.ESTADO
+        vp.ESTADO,
+        f.NOMBRE AS NOMBRE_FASE
       FROM MAE_VISITA_PROGRAMADA vp
-      INNER JOIN MAE_RESIDENTE r ON vp.ID_RESIDENTE = r.ID_RESIDENTE
-      INNER JOIN MAE_PERSONA p ON r.ID_PERSONA = p.ID_PERSONA
+      LEFT JOIN MAE_RESIDENTE r ON vp.ID_RESIDENTE = r.ID_RESIDENTE
+      LEFT JOIN MAE_PERSONA p ON r.ID_PERSONA = p.ID_PERSONA
+      INNER JOIN MAE_DEPARTAMENTO d ON vp.NRO_DPTO = d.NRO_DPTO
+      INNER JOIN MAE_FASE f ON d.ID_FASE = f.ID_FASE
       WHERE vp.ESTADO = 1
     `);
+    console.log("Visitas programadas devueltas:", result.recordset);
     res.status(200).json(result.recordset);
   } catch (error) {
     console.error("Error al obtener todas las visitas programadas:", error);
-    res
-      .status(500)
-      .json({ message: "Error del servidor", error: error.message });
+    res.status(500).json({ message: "Error del servidor", error: error.message });
   }
 };
 
@@ -874,6 +949,42 @@ const getResidentByPersonaAndDepartment = async (req, res) => {
     res
       .status(500)
       .json({ message: "Error del servidor", error: error.message });
+  }
+};
+
+// Función para obtener ID_RESIDENTE basado en NRO_DPTO
+const fetchResidentId = async (nro_dpto) => {
+  try {
+    const pool = await poolPromise;
+    const result = await pool
+      .request()
+      .input("nro_dpto", sql.Int, nro_dpto)
+      .query(`
+        SELECT r.ID_RESIDENTE, r.ID_PERSONA, d.ID_DEPARTAMENTO
+        FROM MAE_RESIDENTE r
+        INNER JOIN MAE_DEPARTAMENTO d ON r.ID_DEPARTAMENTO = d.ID_DEPARTAMENTO
+        WHERE d.NRO_DPTO = @nro_dpto AND r.ESTADO = 1
+      `);
+
+    console.log(`fetchResidentId - Resultado para NRO_DPTO=${nro_dpto}:`, result.recordset);
+
+    if (result.recordset.length === 0) {
+      throw new Error(`No se encontró un residente para el departamento ${nro_dpto}`);
+    }
+    if (result.recordset.length > 1) {
+      throw new Error(`Múltiples residentes activos encontrados para el departamento ${nro_dpto}`);
+    }
+
+    return result.recordset[0].ID_RESIDENTE;
+  } catch (error) {
+    console.error("Error en fetchResidentId:", {
+      message: error.message,
+      stack: error.stack,
+      sqlMessage: error.sqlMessage || "No SQL message",
+      sqlState: error.sqlState || "No SQL state",
+      code: error.code || "No error code",
+    });
+    throw error;
   }
 };
 
