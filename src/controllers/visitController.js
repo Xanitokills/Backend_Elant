@@ -23,18 +23,16 @@ const registerVisit = async (req, res) => {
     !nro_doc_visitante ||
     !id_residente ||
     !fecha_ingreso ||
-    !id_usuario_registro
+    !id_usuario_registro ||
+    !id_tipo_doc_visitante
   ) {
     return res
       .status(400)
-      .json({ message: "Todos los campos requeridos deben estar completos" });
+      .json({ message: "Todos los campos requeridos deben estar completos, incluyendo el tipo de documento" });
   }
 
   try {
     const pool = await poolPromise;
-
-    // Log del valor recibido
-    console.log("Valor de id_usuario_registro recibido:", id_usuario_registro);
 
     // Validar que id_usuario_registro exista en MAE_USUARIO
     const userCheck = await pool
@@ -46,9 +44,6 @@ const registerVisit = async (req, res) => {
         WHERE ID_USUARIO = @id_usuario_registro
       `);
 
-    // Log del resultado de la consulta
-    console.log("Resultado de userCheck:", userCheck.recordset);
-
     if (!userCheck.recordset.length) {
       return res
         .status(400)
@@ -58,13 +53,13 @@ const registerVisit = async (req, res) => {
     // Insertar la visita
     const result = await pool
       .request()
-      .input("nombre_visitante", nombre_visitante)
+      .input("nombre_visitante", nombre_visitante.toUpperCase())
       .input("nro_doc_visitante", nro_doc_visitante)
       .input("id_residente", id_residente)
       .input("fecha_ingreso", fecha_ingreso)
       .input("motivo", motivo)
       .input("id_usuario_registro", id_usuario_registro)
-      .input("id_tipo_doc_visitante", id_tipo_doc_visitante || null)
+      .input("id_tipo_doc_visitante", id_tipo_doc_visitante)
       .input("estado", estado || 1).query(`
         INSERT INTO MAE_VISITA (
           NOMBRE_VISITANTE, NRO_DOC_VISITANTE, ID_RESIDENTE, FECHA_INGRESO, 
@@ -88,6 +83,7 @@ const registerVisit = async (req, res) => {
       .json({ message: "Error del servidor", error: error.message });
   }
 };
+
 // Endpoint para listar todas las visitas
 const getAllVisits = async (req, res) => {
   try {
@@ -105,11 +101,13 @@ const getAllVisits = async (req, res) => {
         V.ID_USUARIO_REGISTRO,
         V.ID_RESIDENTE,
         CONCAT(P.NOMBRES, ' ', P.APELLIDOS) AS NOMBRE_PROPIETARIO,
-        V.ESTADO
+        V.ESTADO,
+        F.NOMBRE AS NOMBRE_FASE
       FROM MAE_VISITA V
       INNER JOIN MAE_RESIDENTE R ON V.ID_RESIDENTE = R.ID_RESIDENTE
       INNER JOIN MAE_PERSONA P ON R.ID_PERSONA = P.ID_PERSONA
       INNER JOIN MAE_DEPARTAMENTO D ON R.ID_DEPARTAMENTO = D.ID_DEPARTAMENTO
+      INNER JOIN MAE_FASE F ON D.ID_FASE = F.ID_FASE
       ORDER BY V.FECHA_INGRESO DESC
     `);
 
@@ -153,8 +151,8 @@ const getDniInfo = async (req, res) => {
         .json({ message: "No se encontraron datos para el DNI proporcionado" });
     }
 
-    // Formatear el nombre completo
-    const nombreCompleto = `${data.nombres} ${data.apellidoPaterno} ${data.apellidoMaterno}`;
+    // Formatear el nombre completo en mayúsculas
+    const nombreCompleto = `${data.nombres} ${data.apellidoPaterno} ${data.apellidoMaterno}`.toUpperCase();
 
     res.status(200).json({ nombreCompleto });
   } catch (error) {
@@ -164,7 +162,6 @@ const getDniInfo = async (req, res) => {
       .json({ message: "Error al consultar el DNI", error: error.message });
   }
 };
-
 // Endpoint para obtener propietarios por número de departamento
 const getOwnersByDpto = async (req, res) => {
   const { nro_dpto } = req.query;
@@ -197,6 +194,7 @@ const getOwnersByDpto = async (req, res) => {
       .json({ message: "Error del servidor", error: error.message });
   }
 };
+
 
 // Endpoint para terminar una visita
 const endVisit = async (req, res) => {
@@ -259,14 +257,18 @@ const registerScheduledVisit = async (req, res) => {
     id_residente,
   } = req.body;
 
+  if (!id_tipo_doc_visitante) {
+    return res.status(400).json({ message: "El tipo de documento es requerido" });
+  }
+
   try {
     const pool = await poolPromise;
     const result = await pool
       .request()
       .input("nro_dpto", sql.Int, nro_dpto)
       .input("dni_visitante", sql.VarChar(12), dni_visitante)
-      .input("id_tipo_doc_visitante", sql.Int, id_tipo_doc_visitante || null)
-      .input("nombre_visitante", sql.VarChar(100), nombre_visitante)
+      .input("id_tipo_doc_visitante", sql.Int, id_tipo_doc_visitante)
+      .input("nombre_visitante", sql.VarChar(100), nombre_visitante.toUpperCase())
       .input("fecha_llegada", sql.Date, fecha_llegada)
       .input("hora_llegada", sql.Time, hora_llegada || null)
       .input("motivo", sql.VarChar(100), motivo)
@@ -333,12 +335,14 @@ const getScheduledVisits = async (req, res) => {
           vp.MOTIVO,
           vp.ID_USUARIO_PROPIETARIO,
           COALESCE(CONCAT(u.NOMBRES, ' ', u.APELLIDOS), 'Desconocido') AS NOMBRE_PROPIETARIO,
-          vp.ESTADO
+          vp.ESTADO,
+          f.NOMBRE AS NOMBRE_FASE
         FROM MAE_VISITA_PROGRAMADA vp
         LEFT JOIN MAE_USUARIO u ON vp.ID_USUARIO_PROPIETARIO = u.ID_USUARIO
+        INNER JOIN MAE_DEPARTAMENTO d ON vp.NRO_DPTO = d.NRO_DPTO
+        INNER JOIN MAE_FASE f ON d.ID_FASE = f.ID_FASE
         WHERE vp.ID_USUARIO_PROPIETARIO = @id_usuario
       `);
-    console.log("SQL result:", JSON.stringify(result.recordset, null, 2));
     res.status(200).json(result.recordset);
   } catch (error) {
     console.error("Error al obtener visitas programadas:", error);
