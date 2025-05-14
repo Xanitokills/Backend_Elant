@@ -17,6 +17,7 @@ const {
   getUserData, // Nuevo
   getDepartmentByNumber, // Nuevo
   getResidentByPersonaAndDepartment, // Nuevo
+  processScheduledVisit,
 } = require("../controllers/visitController");
 const authMiddleware = require("../middleware/authMiddleware");
 
@@ -33,6 +34,7 @@ router.get("/departamentosFase", authMiddleware, checkPermission({ menuId: 2 }),
 // Rutas protegidas con ID_SUBMENU=10 (Visitas Programadas)
 router.post("/scheduled-visits/:id_visita_programada/accept", authMiddleware, checkPermission({ submenuId: 10 }), acceptScheduledVisit);
 router.put("/scheduled-visits/:id_visita_programada/cancel", authMiddleware, checkPermission({ submenuId: 10 }), cancelScheduledVisit);
+router.put("/scheduled-visits/:id_visita_programada/process", authMiddleware, checkPermission({ submenuId: 10 }), processScheduledVisit); // Added
 router.get("/all-scheduled-visits", authMiddleware, checkPermission({ submenuId: 10 }), getAllScheduledVisits);
 
 // Rutas sin permisos específicos

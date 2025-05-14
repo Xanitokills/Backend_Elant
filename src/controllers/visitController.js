@@ -360,7 +360,9 @@ const getScheduledVisits = async (req, res) => {
     const pool = await poolPromise;
 
     // Obtener todos los roles del usuario
-    const roleCheck = await pool.request().input("id_usuario", sql.Int, userId)
+    const roleCheck = await pool
+      .request()
+      .input("id_usuario", sql.Int, userId)
       .query(`
         SELECT ur.ID_ROL
         FROM MAE_USUARIO u
@@ -419,7 +421,7 @@ const getScheduledVisits = async (req, res) => {
       `;
     }
 
-    console.log("Consulta SQL:", query); // Log para depurar la consulta
+    console.log("Consulta SQL:", query);
     const result = await pool
       .request()
       .input("id_usuario", sql.Int, userId)
@@ -451,7 +453,8 @@ const acceptScheduledVisit = async (req, res) => {
     // Verificar si la visita programada existe y está pendiente
     const visitCheck = await pool
       .request()
-      .input("id_visita_programada", sql.Int, id_visita_programada).query(`
+      .input("id_visita_programada", sql.Int, id_visita_programada)
+      .query(`
         SELECT 
           NRO_DPTO,
           NOMBRE_VISITANTE,
@@ -473,10 +476,10 @@ const acceptScheduledVisit = async (req, res) => {
 
     const scheduledVisit = visitCheck.recordset[0];
 
-    if (scheduledVisit.ESTADO === 0) {
+    if (scheduledVisit.ESTADO !== 1) {
       return res
         .status(400)
-        .json({ message: "La visita programada ya fue procesada o cancelada" });
+        .json({ message: "La visita ya está procesada o cancelada" });
     }
 
     // Validar que FECHA_LLEGADA sea exactamente la fecha actual
@@ -510,7 +513,8 @@ const acceptScheduledVisit = async (req, res) => {
         .input("fecha_ingreso", new Date())
         .input("motivo", scheduledVisit.MOTIVO)
         .input("id_usuario_registro", id_usuario_registro)
-        .input("estado", 1).query(`
+        .input("estado", 1)
+        .query(`
           INSERT INTO MAE_VISITA (
             ID_RESIDENTE, NOMBRE_VISITANTE, NRO_DOC_VISITANTE, ID_TIPO_DOC_VISITANTE, 
             FECHA_INGRESO, MOTIVO, ID_USUARIO_REGISTRO, ESTADO
@@ -525,9 +529,10 @@ const acceptScheduledVisit = async (req, res) => {
       // Actualizar estado de la visita programada
       await transaction
         .request()
-        .input("id_visita_programada", id_visita_programada).query(`
+        .input("id_visita_programada", id_visita_programada)
+        .query(`
           UPDATE MAE_VISITA_PROGRAMADA
-          SET ESTADO = 0
+          SET ESTADO = 2
           WHERE ID_VISITA_PROGRAMADA = @id_visita_programada
         `);
 
@@ -548,6 +553,7 @@ const acceptScheduledVisit = async (req, res) => {
       .json({ message: "Error del servidor", error: error.message });
   }
 };
+
 // visitController.js
 const getOwnerDepartments = async (req, res) => {
   const { id } = req.params;
@@ -591,9 +597,10 @@ const cancelScheduledVisit = async (req, res) => {
       console.log(`Updating visit ${id_visita_programada} with atomic UPDATE`);
       const result = await transaction
         .request()
-        .input("id_visita_programada", sql.Int, id_visita_programada).query(`
+        .input("id_visita_programada", sql.Int, id_visita_programada)
+        .query(`
           UPDATE MAE_VISITA_PROGRAMADA
-          SET ESTADO = 0
+          SET ESTADO = 3
           OUTPUT DELETED.ESTADO AS PreviousEstado
           WHERE ID_VISITA_PROGRAMADA = @id_visita_programada AND ESTADO = 1
         `);
@@ -607,7 +614,8 @@ const cancelScheduledVisit = async (req, res) => {
         );
         const checkVisit = await transaction
           .request()
-          .input("id_visita_programada", sql.Int, id_visita_programada).query(`
+          .input("id_visita_programada", sql.Int, id_visita_programada)
+          .query(`
             SELECT ESTADO
             FROM MAE_VISITA_PROGRAMADA
             WHERE ID_VISITA_PROGRAMADA = @id_visita_programada
@@ -623,7 +631,7 @@ const cancelScheduledVisit = async (req, res) => {
           return res.status(404).json({ message: "Visita no encontrada" });
         }
 
-        if (checkVisit.recordset[0].ESTADO === 0) {
+        if (checkVisit.recordset[0].ESTADO !== 1) {
           console.log(
             `Visit ${id_visita_programada} already processed or canceled`
           );
@@ -656,6 +664,7 @@ const cancelScheduledVisit = async (req, res) => {
       .json({ message: "Error del servidor", error: error.message });
   }
 };
+
 // Endpoint para listar todas las visitas programadas (sin filtro por propietario)
 const getAllScheduledVisits = async (req, res) => {
   try {
@@ -685,6 +694,54 @@ const getAllScheduledVisits = async (req, res) => {
     res.status(200).json(result.recordset);
   } catch (error) {
     console.error("Error al obtener todas las visitas programadas:", error);
+    res
+      .status(500)
+      .json({ message: "Error del servidor", error: error.message });
+  }
+};
+
+const processScheduledVisit = async (req, res) => {
+  const { id_visita_programada } = req.params;
+  try {
+    const pool = await poolPromise;
+    const result = await pool
+      .request()
+      .input("id_visita_programada", sql.Int, id_visita_programada)
+      .query(`
+        UPDATE MAE_VISITA_PROGRAMADA
+        SET ESTADO = 2
+        WHERE ID_VISITA_PROGRAMADA = @id_visita_programada AND ESTADO = 1
+      `);
+
+    if (result.rowsAffected[0] === 0) {
+      const checkVisit = await pool
+        .request()
+        .input("id_visita_programada", sql.Int, id_visita_programada)
+        .query(`
+          SELECT ESTADO
+          FROM MAE_VISITA_PROGRAMADA
+          WHERE ID_VISITA_PROGRAMADA = @id_visita_programada
+        `);
+
+      if (checkVisit.recordset.length === 0) {
+        return res.status(404).json({ message: "Visita no encontrada" });
+      }
+
+      if (checkVisit.recordset[0].ESTADO !== 1) {
+        return res
+          .status(400)
+          .json({ message: "La visita ya está procesada o cancelada" });
+      }
+
+      return res
+        .status(400)
+        .json({ message: "No se pudo procesar la visita: estado no válido" });
+    }
+
+    console.log(`Visita ${id_visita_programada} procesada - ESTADO: 2`);
+    res.status(200).json({ message: "Visita procesada exitosamente" });
+  } catch (error) {
+    console.error("Error al procesar la visita:", error);
     res
       .status(500)
       .json({ message: "Error del servidor", error: error.message });
@@ -834,4 +891,5 @@ module.exports = {
   getUserData, // Nuevo
   getDepartmentByNumber, // Nuevo
   getResidentByPersonaAndDepartment, // Nuevo
+  processScheduledVisit,
 };
