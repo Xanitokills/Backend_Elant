@@ -14,6 +14,9 @@ const {
   cancelScheduledVisit,
   getAllScheduledVisits,
   getDepartmentsByPhase,
+  getUserData, // Nuevo
+  getDepartmentByNumber, // Nuevo
+  getResidentByPersonaAndDepartment, // Nuevo
 } = require("../controllers/visitController");
 const authMiddleware = require("../middleware/authMiddleware");
 
@@ -32,7 +35,10 @@ router.post("/scheduled-visits/:id_visita_programada/accept", authMiddleware, ch
 router.put("/scheduled-visits/:id_visita_programada/cancel", authMiddleware, checkPermission({ submenuId: 10 }), cancelScheduledVisit);
 router.get("/all-scheduled-visits", authMiddleware, checkPermission({ submenuId: 10 }), getAllScheduledVisits);
 
-// Ruta sin permisos específicos
+// Rutas sin permisos específicos
 router.get("/users/:id/departments", authMiddleware, getOwnerDepartments);
+router.get("/users/:id", authMiddleware, getUserData); // Ruta para obtener datos del usuario
+router.get("/departments", authMiddleware, getDepartmentByNumber); // Ruta para obtener departamento por número
+router.get("/residents", authMiddleware, getResidentByPersonaAndDepartment); // Ruta para obtener residente por persona y departamento
 
 module.exports = router;

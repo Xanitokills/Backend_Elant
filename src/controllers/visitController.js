@@ -285,10 +285,24 @@ const registerScheduledVisit = async (req, res) => {
     id_residente,
   } = req.body;
 
-  if (!id_tipo_doc_visitante) {
-    return res
-      .status(400)
-      .json({ message: "El tipo de documento es requerido" });
+  console.log("Cuerpo de la solicitud recibida:", req.body);
+
+  // Validar campos requeridos
+  if (!nro_dpto || !dni_visitante || !nombre_visitante || !fecha_llegada || !motivo || !id_residente) {
+    console.warn("Validación fallida: faltan campos requeridos");
+    return res.status(400).json({ message: "Todos los campos requeridos deben estar completos" });
+  }
+
+  // Validar dni_visitante
+  if (dni_visitante.length < 8 || /[^a-zA-Z0-9]/.test(dni_visitante)) {
+    console.warn("Validación fallida: DNI inválido");
+    return res.status(400).json({ message: "El DNI debe tener al menos 8 caracteres alfanuméricos" });
+  }
+
+  // Validar id_tipo_doc_visitante si se proporciona
+  if (id_tipo_doc_visitante && ![2, 3, 4, 5, 6].includes(id_tipo_doc_visitante)) {
+    console.warn("Validación fallida: id_tipo_doc_visitante inválido");
+    return res.status(400).json({ message: "El tipo de documento no es válido" });
   }
 
   try {
@@ -297,16 +311,13 @@ const registerScheduledVisit = async (req, res) => {
       .request()
       .input("nro_dpto", sql.Int, nro_dpto)
       .input("dni_visitante", sql.VarChar(12), dni_visitante)
-      .input("id_tipo_doc_visitante", sql.Int, id_tipo_doc_visitante)
-      .input(
-        "nombre_visitante",
-        sql.VarChar(100),
-        nombre_visitante.toUpperCase()
-      )
+      .input("id_tipo_doc_visitante", sql.Int, id_tipo_doc_visitante || null)
+      .input("nombre_visitante", sql.VarChar(100), nombre_visitante.toUpperCase())
       .input("fecha_llegada", sql.Date, fecha_llegada)
       .input("hora_llegada", sql.Time, hora_llegada || null)
       .input("motivo", sql.VarChar(100), motivo)
-      .input("id_residente", sql.Int, id_residente).query(`
+      .input("id_residente", sql.Int, id_residente)
+      .query(`
         DECLARE @InsertedID TABLE (ID_VISITA_PROGRAMADA INT);
         INSERT INTO MAE_VISITA_PROGRAMADA (
           NRO_DPTO,
@@ -753,19 +764,17 @@ const getUserData = async (req, res) => {
   try {
     const pool = await poolPromise;
     const result = await pool.request().input("id_usuario", sql.Int, id).query(`
-        SELECT ID_PERSONA
-        FROM MAE_USUARIO
-        WHERE ID_USUARIO = @id_usuario AND ESTADO = 1
-      `);
+      SELECT ID_PERSONA
+      FROM MAE_USUARIO
+      WHERE ID_USUARIO = @id_usuario AND ESTADO = 1
+    `);
     if (!result.recordset[0]) {
       return res.status(404).json({ message: "Usuario no encontrado" });
     }
     res.status(200).json(result.recordset[0]);
   } catch (error) {
     console.error("Error al obtener datos del usuario:", error);
-    res
-      .status(500)
-      .json({ message: "Error del servidor", error: error.message });
+    res.status(500).json({ message: "Error del servidor", error: error.message });
   }
 };
 
