@@ -353,13 +353,18 @@ const registerScheduledVisit = async (req, res) => {
 const getScheduledVisits = async (req, res) => {
   try {
     const userId = req.user ? req.user.userId || req.user.id : null;
+    console.log("Usuario autenticado ID:", userId);
+
     if (!userId) {
       return res.status(401).json({ message: "Usuario no autenticado" });
     }
+
     const pool = await poolPromise;
 
     // Obtener todos los roles del usuario
-    const roleCheck = await pool.request().input("id_usuario", sql.Int, userId)
+    const roleCheck = await pool
+      .request()
+      .input("id_usuario", sql.Int, userId)
       .query(`
         SELECT ur.ID_ROL
         FROM MAE_USUARIO u
@@ -367,17 +372,15 @@ const getScheduledVisits = async (req, res) => {
         WHERE u.ID_USUARIO = @id_usuario AND u.ESTADO = 1
       `);
 
-    // Verificar si el usuario tiene al menos un rol permitido (1, 4, 5)
     const userRoles = roleCheck.recordset.map((row) => row.ID_ROL);
+    console.log("Roles del usuario:", userRoles);
+
+    // Verificar si el usuario tiene al menos un rol permitido (1, 4, 5)
     const allowedRoles = [1, 4, 5];
-    const hasAllowedRole = userRoles.some((role) =>
-      allowedRoles.includes(role)
-    );
+    const hasAllowedRole = userRoles.some((role) => allowedRoles.includes(role));
 
     if (!hasAllowedRole) {
-      return res
-        .status(403)
-        .json({ message: "Acceso denegado: rol no permitido" });
+      return res.status(403).json({ message: "Acceso denegado: rol no permitido", roles: userRoles });
     }
 
     // Determinar si el usuario tiene el rol de Sistemas (ID_ROL = 1)
@@ -415,17 +418,17 @@ const getScheduledVisits = async (req, res) => {
       `;
     }
 
+    console.log("Consulta SQL:", query); // Log para depurar la consulta
     const result = await pool
       .request()
       .input("id_usuario", sql.Int, userId)
       .query(query);
 
+    console.log("Visitas devueltas:", result.recordset.length);
     res.status(200).json(result.recordset);
   } catch (error) {
     console.error("Error al obtener visitas programadas:", error);
-    res
-      .status(500)
-      .json({ message: "Error del servidor", error: error.message });
+    res.status(500).json({ message: "Error del servidor", error: error.message });
   }
 };
 // Endpoint para registrar una visita programada como visita activa
