@@ -26,12 +26,10 @@ const registerVisit = async (req, res) => {
     !id_usuario_registro ||
     !id_tipo_doc_visitante
   ) {
-    return res
-      .status(400)
-      .json({
-        message:
-          "Todos los campos requeridos deben estar completos, incluyendo el tipo de documento",
-      });
+    return res.status(400).json({
+      message:
+        "Todos los campos requeridos deben estar completos, incluyendo el tipo de documento",
+    });
   }
 
   try {
@@ -202,10 +200,18 @@ const getOwnersByDpto = async (req, res) => {
 // Endpoint para terminar una visita
 const endVisit = async (req, res) => {
   const { id_visita } = req.params;
+  const { id_usuario_registro } = req.body;
 
   if (!id_visita || isNaN(id_visita)) {
     return res.status(400).json({
       message: "El ID de la visita es requerido y debe ser un número válido",
+    });
+  }
+
+  if (!id_usuario_registro || isNaN(id_usuario_registro)) {
+    return res.status(400).json({
+      message:
+        "El ID del usuario registro es requerido y debe ser un número válido",
     });
   }
 
@@ -232,10 +238,30 @@ const endVisit = async (req, res) => {
       return res.status(400).json({ message: "La visita ya está terminada" });
     }
 
+    // Validar que id_usuario_registro exista en MAE_USUARIO
+    const userCheck = await pool
+      .request()
+      .input("id_usuario_registro", sql.Int, id_usuario_registro).query(`
+        SELECT ID_USUARIO
+        FROM MAE_USUARIO
+        WHERE ID_USUARIO = @id_usuario_registro
+      `);
+
+    if (!userCheck.recordset.length) {
+      return res
+        .status(400)
+        .json({ message: "El ID de usuario registro no es válido" });
+    }
+
     // Actualizar la visita
-    await pool.request().input("id_visita", sql.Int, id_visita).query(`
+    await pool
+      .request()
+      .input("id_visita", sql.Int, id_visita)
+      .input("id_usuario_registro", sql.Int, id_usuario_registro).query(`
         UPDATE MAE_VISITA
-        SET ESTADO = 0, FECHA_SALIDA = GETDATE()
+        SET ESTADO = 0, 
+            FECHA_SALIDA = GETDATE(),
+            ID_USUARIO_REGISTRO = @id_usuario_registro
         WHERE ID_VISITA = @id_visita
       `);
 
@@ -247,7 +273,6 @@ const endVisit = async (req, res) => {
       .json({ message: "Error del servidor", error: error.message });
   }
 };
-
 const registerScheduledVisit = async (req, res) => {
   const {
     nro_dpto,
@@ -626,7 +651,7 @@ const getDepartmentsByPhase = async (req, res) => {
 
   logger.info(`Recibido id_fase: ${id_fase}, Tipo: ${typeof id_fase}`);
 
-  if (!id_fase || id_fase.trim() === '' || isNaN(id_fase)) {
+  if (!id_fase || id_fase.trim() === "" || isNaN(id_fase)) {
     logger.warn(`Validación fallida: id_fase=${id_fase}`);
     return res.status(400).json({
       message: "El ID de la fase es requerido y debe ser un número válido",
@@ -636,7 +661,9 @@ const getDepartmentsByPhase = async (req, res) => {
   try {
     const pool = await poolPromise;
     const idFaseNumber = parseInt(id_fase, 10);
-    logger.info(`ID_FASE convertido: ${idFaseNumber}, Tipo: ${typeof idFaseNumber}`);
+    logger.info(
+      `ID_FASE convertido: ${idFaseNumber}, Tipo: ${typeof idFaseNumber}`
+    );
 
     if (isNaN(idFaseNumber)) {
       logger.warn("idFaseNumber es NaN");
@@ -646,8 +673,7 @@ const getDepartmentsByPhase = async (req, res) => {
     }
 
     logger.info(`Ejecutando consulta con id_fase=${idFaseNumber}`);
-    const result = await pool.request()
-      .input("id_fase", sql.Int, idFaseNumber)
+    const result = await pool.request().input("id_fase", sql.Int, idFaseNumber)
       .query(`
         SELECT 
           ID_DEPARTAMENTO,
@@ -659,13 +685,21 @@ const getDepartmentsByPhase = async (req, res) => {
         ORDER BY NRO_DPTO
       `);
 
-    logger.info(`Consulta ejecutada, filas devueltas: ${result.recordset.length}`);
-    logger.debug(`Departamentos devueltos: ${JSON.stringify(result.recordset, null, 2)}`);
+    logger.info(
+      `Consulta ejecutada, filas devueltas: ${result.recordset.length}`
+    );
+    logger.debug(
+      `Departamentos devueltos: ${JSON.stringify(result.recordset, null, 2)}`
+    );
 
     res.status(200).json(result.recordset);
   } catch (error) {
-    logger.error(`Error al obtener departamentos por fase: ${error.message}`, { error });
-    res.status(500).json({ message: "Error del servidor", error: error.message });
+    logger.error(`Error al obtener departamentos por fase: ${error.message}`, {
+      error,
+    });
+    res
+      .status(500)
+      .json({ message: "Error del servidor", error: error.message });
   }
 };
 
