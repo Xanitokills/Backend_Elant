@@ -335,41 +335,17 @@ const registerScheduledVisit = async (req, res) => {
       return res.status(400).json({ message: `El departamento ${nro_dpto} no existe` });
     }
 
-    // Convertir hora_llegada a un objeto Date para sql.Time
-    let timeValue = null;
+    // Validar hora_llegada
     if (hora_llegada) {
-      try {
-        const [hours, minutes, seconds] = hora_llegada.split(':').map(Number);
-        if (
-          hours < 0 || hours > 23 ||
-          minutes < 0 || minutes > 59 ||
-          seconds < 0 || seconds > 59
-        ) {
-          return res.status(400).json({ message: "Hora de llegada inválida" });
-        }
-        // Crear un objeto Date (usamos una fecha arbitraria como 1970-01-01)
-        timeValue = new Date(1970, 0, 1, hours, minutes, seconds);
-      } catch (err) {
-        console.error("Error al procesar hora_llegada:", err);
-        return res.status(400).json({ message: "Formato de hora de llegada inválido" });
+      const [hours, minutes, seconds] = hora_llegada.split(':').map(Number);
+      if (
+        hours < 0 || hours > 23 ||
+        minutes < 0 || minutes > 59 ||
+        seconds < 0 || seconds > 59
+      ) {
+        return res.status(400).json({ message: "Hora de llegada inválida" });
       }
     }
-
-    // Log para depuración
-    console.log("Datos para INSERT:", {
-      nro_dpto,
-      dni_visitante,
-      id_tipo_doc_visitante,
-      nombre_visitante,
-      fecha_llegada,
-      hora_llegada: timeValue ? timeValue.toISOString() : null,
-      motivo,
-      id_residente,
-      estado: 1,
-    });
-
-    // Log del valor exacto enviado a sql.Time
-    console.log("Valor enviado a sql.Time para hora_llegada:", timeValue, typeof timeValue);
 
     // Insertar la visita
     const request = pool.request()
@@ -380,8 +356,8 @@ const registerScheduledVisit = async (req, res) => {
       .input("fecha_llegada", sql.Date, fecha_llegada)
       .input("motivo", sql.VarChar, motivo)
       .input("id_residente", sql.Int, id_residente)
-      .input("estado", sql.Int, 1)      
-      .input("hora_llegada", sql.Time, timeValue);
+      .input("estado", sql.Int, 1)
+      .input("hora_llegada", sql.VarChar, hora_llegada || null); // Usar VarChar en lugar de sql.Time
 
     const insertResult = await request.query(`
       INSERT INTO MAE_VISITA_PROGRAMADA (
