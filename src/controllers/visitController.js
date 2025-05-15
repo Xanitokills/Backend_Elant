@@ -303,11 +303,9 @@ const registerScheduledVisit = async (req, res) => {
 
     // Validar formato y restricciones
     if (isNaN(nro_dpto)) {
-      return res
-        .status(400)
-        .json({
-          message: "El número de departamento debe ser un número válido",
-        });
+      return res.status(400).json({
+        message: "El número de departamento debe ser un número válido",
+      });
     }
     if (dni_visitante.length < 8 || !/^[a-zA-Z0-9]+$/.test(dni_visitante)) {
       return res.status(400).json({
@@ -326,26 +324,20 @@ const registerScheduledVisit = async (req, res) => {
         .json({ message: "El nombre del visitante no puede estar vacío" });
     }
     if (!/^\d{4}-\d{2}-\d{2}$/.test(fecha_llegada)) {
-      return res
-        .status(400)
-        .json({
-          message: "El formato de la fecha de llegada debe ser YYYY-MM-DD",
-        });
+      return res.status(400).json({
+        message: "El formato de la fecha de llegada debe ser YYYY-MM-DD",
+      });
     }
     if (hora_llegada && !/^\d{2}:\d{2}:\d{2}$/.test(hora_llegada)) {
-      return res
-        .status(400)
-        .json({
-          message: "El formato de la hora de llegada debe ser HH:mm:ss",
-        });
+      return res.status(400).json({
+        message: "El formato de la hora de llegada debe ser HH:mm:ss",
+      });
     }
     if (motivo.trim().length === 0 || motivo.length > 100) {
-      return res
-        .status(400)
-        .json({
-          message:
-            "El motivo no puede estar vacío y debe tener menos de 100 caracteres",
-        });
+      return res.status(400).json({
+        message:
+          "El motivo no puede estar vacío y debe tener menos de 100 caracteres",
+      });
     }
 
     // Validar NRO_DPTO
@@ -408,15 +400,14 @@ const registerScheduledVisit = async (req, res) => {
     // Obtener detalles completos de la visita programada para emitir
     const visitDetails = await pool
       .request()
-      .input("id_visita_programada", sql.Int, newScheduledVisitId)
-      .query(`
+      .input("id_visita_programada", sql.Int, newScheduledVisitId).query(`
         SELECT 
           VP.ID_VISITA_PROGRAMADA,
           VP.NRO_DPTO,
           VP.DNI_VISITANTE,
           VP.ID_TIPO_DOC_VISITANTE,
           VP.NOMBRE_VISITANTE,
-          VP.FECHA_LLEGADA,
+          CAST(VP.FECHA_LLEGADA AS DATE) AS FECHA_LLEGADA,
           VP.HORA_LLEGADA,
           VP.MOTIVO,
           VP.ID_RESIDENTE,
@@ -431,9 +422,22 @@ const registerScheduledVisit = async (req, res) => {
         WHERE VP.ID_VISITA_PROGRAMADA = @id_visita_programada
       `);
 
+    // Normalizar FECHA_LLEGADA a formato YYYY-MM-DD y HORA_LLEGADA a HH:mm:ss
+    const normalizedVisitDetails = {
+      ...visitDetails.recordset[0],
+      FECHA_LLEGADA:
+        visitDetails.recordset[0].FECHA_LLEGADA.toISOString().split("T")[0],
+      HORA_LLEGADA: visitDetails.recordset[0].HORA_LLEGADA
+        ? new Date(visitDetails.recordset[0].HORA_LLEGADA)
+            .toISOString()
+            .slice(11, 19) // Extrae HH:mm:ss
+        : null,
+    };
+
     // Emitir evento Socket.IO
-    const io = req.app.get("io"); // Obtener la instancia de Socket.IO
-    io.emit("new-scheduled-visit", visitDetails.recordset[0]);
+    console.log("Emitting new-scheduled-visit:", normalizedVisitDetails);
+    const io = req.app.get("io");
+    io.emit("new-scheduled-visit", normalizedVisitDetails);
 
     res.status(201).json({
       message: "Visita programada registrada con éxito",
