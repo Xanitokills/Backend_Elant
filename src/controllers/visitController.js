@@ -708,6 +708,37 @@ const cancelScheduledVisit = async (req, res) => {
     await transaction.begin();
 
     try {
+      // Obtener detalles de la visita antes de cancelarla
+      const visitDetails = await transaction
+        .request()
+        .input("id_visita_programada", sql.Int, id_visita_programada).query(`
+          SELECT 
+            VP.ID_VISITA_PROGRAMADA,
+            VP.NRO_DPTO,
+            VP.DNI_VISITANTE,
+            VP.ID_TIPO_DOC_VISITANTE,
+            VP.NOMBRE_VISITANTE,
+            CAST(VP.FECHA_LLEGADA AS DATE) AS FECHA_LLEGADA,
+            VP.HORA_LLEGADA,
+            VP.MOTIVO,
+            VP.ID_RESIDENTE,
+            VP.ESTADO,
+            CONCAT(P.NOMBRES, ' ', P.APELLIDOS) AS NOMBRE_PROPIETARIO,
+            F.NOMBRE AS NOMBRE_FASE
+          FROM MAE_VISITA_PROGRAMADA VP
+          INNER JOIN MAE_RESIDENTE R ON VP.ID_RESIDENTE = R.ID_RESIDENTE
+          INNER JOIN MAE_PERSONA P ON R.ID_PERSONA = P.ID_PERSONA
+          INNER JOIN MAE_DEPARTAMENTO D ON R.ID_DEPARTAMENTO = D.ID_DEPARTAMENTO
+          INNER JOIN MAE_FASE F ON D.ID_FASE = F.ID_FASE
+          WHERE VP.ID_VISITA_PROGRAMADA = @id_visita_programada
+        `);
+
+      if (visitDetails.recordset.length === 0) {
+        await transaction.rollback();
+        console.log(`Visit ${id_visita_programada} not found`);
+        return res.status(404).json({ message: "Visita no encontrada" });
+      }
+
       console.log(`Updating visit ${id_visita_programada} with atomic UPDATE`);
       const result = await transaction
         .request()
@@ -758,8 +789,24 @@ const cancelScheduledVisit = async (req, res) => {
           .json({ message: "No se pudo cancelar la visita: estado no válido" });
       }
 
+      // Normalizar los detalles de la visita para el evento
+      const normalizedVisitDetails = {
+        ...visitDetails.recordset[0],
+        FECHA_LLEGADA: visitDetails.recordset[0].FECHA_LLEGADA.toISOString().split("T")[0],
+        HORA_LLEGADA: visitDetails.recordset[0].HORA_LLEGADA
+          ? visitDetails.recordset[0].HORA_LLEGADA
+          : null,
+        ESTADO: 3, // Estado actualizado a Cancelada
+      };
+
       await transaction.commit();
       console.log(`Visit ${id_visita_programada} canceled successfully`);
+
+      // Emitir evento Socket.IO
+      console.log("Emitting cancel-scheduled-visit:", normalizedVisitDetails);
+      const io = req.app.get("io");
+      io.emit("cancel-scheduled-visit", normalizedVisitDetails);
+
       res.status(200).json({ message: "Visita cancelada correctamente" });
     } catch (error) {
       await transaction.rollback();
