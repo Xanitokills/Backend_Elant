@@ -296,32 +296,56 @@ const registerScheduledVisit = async (req, res) => {
       !motivo ||
       !id_residente
     ) {
-      return res.status(400).json({ message: "Todos los campos requeridos deben estar completos" });
+      return res
+        .status(400)
+        .json({ message: "Todos los campos requeridos deben estar completos" });
     }
 
     // Validar formato y restricciones
     if (isNaN(nro_dpto)) {
-      return res.status(400).json({ message: "El número de departamento debe ser un número válido" });
+      return res
+        .status(400)
+        .json({
+          message: "El número de departamento debe ser un número válido",
+        });
     }
     if (dni_visitante.length < 8 || !/^[a-zA-Z0-9]+$/.test(dni_visitante)) {
       return res.status(400).json({
-        message: "El DNI debe tener al menos 8 caracteres y solo contener letras y números",
+        message:
+          "El DNI debe tener al menos 8 caracteres y solo contener letras y números",
       });
     }
     if (![2, 3, 4, 5, 6].includes(id_tipo_doc_visitante)) {
-      return res.status(400).json({ message: "El tipo de documento no es válido" });
+      return res
+        .status(400)
+        .json({ message: "El tipo de documento no es válido" });
     }
     if (nombre_visitante.trim().length === 0) {
-      return res.status(400).json({ message: "El nombre del visitante no puede estar vacío" });
+      return res
+        .status(400)
+        .json({ message: "El nombre del visitante no puede estar vacío" });
     }
     if (!/^\d{4}-\d{2}-\d{2}$/.test(fecha_llegada)) {
-      return res.status(400).json({ message: "El formato de la fecha de llegada debe ser YYYY-MM-DD" });
+      return res
+        .status(400)
+        .json({
+          message: "El formato de la fecha de llegada debe ser YYYY-MM-DD",
+        });
     }
     if (hora_llegada && !/^\d{2}:\d{2}:\d{2}$/.test(hora_llegada)) {
-      return res.status(400).json({ message: "El formato de la hora de llegada debe ser HH:mm:ss" });
+      return res
+        .status(400)
+        .json({
+          message: "El formato de la hora de llegada debe ser HH:mm:ss",
+        });
     }
     if (motivo.trim().length === 0 || motivo.length > 100) {
-      return res.status(400).json({ message: "El motivo no puede estar vacío y debe tener menos de 100 caracteres" });
+      return res
+        .status(400)
+        .json({
+          message:
+            "El motivo no puede estar vacío y debe tener menos de 100 caracteres",
+        });
     }
 
     // Validar NRO_DPTO
@@ -329,26 +353,34 @@ const registerScheduledVisit = async (req, res) => {
     const dptoResult = await pool
       .request()
       .input("nro_dpto", sql.Int, nro_dpto)
-      .query("SELECT ID_DEPARTAMENTO FROM MAE_DEPARTAMENTO WHERE NRO_DPTO = @nro_dpto");
-    
+      .query(
+        "SELECT ID_DEPARTAMENTO FROM MAE_DEPARTAMENTO WHERE NRO_DPTO = @nro_dpto"
+      );
+
     if (dptoResult.recordset.length === 0) {
-      return res.status(400).json({ message: `El departamento ${nro_dpto} no existe` });
+      return res
+        .status(400)
+        .json({ message: `El departamento ${nro_dpto} no existe` });
     }
 
     // Validar hora_llegada
     if (hora_llegada) {
-      const [hours, minutes, seconds] = hora_llegada.split(':').map(Number);
+      const [hours, minutes, seconds] = hora_llegada.split(":").map(Number);
       if (
-        hours < 0 || hours > 23 ||
-        minutes < 0 || minutes > 59 ||
-        seconds < 0 || seconds > 59
+        hours < 0 ||
+        hours > 23 ||
+        minutes < 0 ||
+        minutes > 59 ||
+        seconds < 0 ||
+        seconds > 59
       ) {
         return res.status(400).json({ message: "Hora de llegada inválida" });
       }
     }
 
     // Insertar la visita
-    const request = pool.request()
+    const request = pool
+      .request()
       .input("nro_dpto", sql.Int, nro_dpto)
       .input("dni_visitante", sql.VarChar, dni_visitante)
       .input("id_tipo_doc_visitante", sql.Int, id_tipo_doc_visitante)
@@ -371,9 +403,9 @@ const registerScheduledVisit = async (req, res) => {
       )
     `);
 
-    res.status(201).json({ 
+    res.status(201).json({
       message: "Visita programada registrada con éxito",
-      id_visita_programada: insertResult.recordset[0].ID_VISITA_PROGRAMADA
+      id_visita_programada: insertResult.recordset[0].ID_VISITA_PROGRAMADA,
     });
   } catch (error) {
     console.error("Error en registerScheduledVisit:", {
@@ -409,9 +441,7 @@ const getScheduledVisits = async (req, res) => {
     const pool = await poolPromise;
 
     // Obtener todos los roles del usuario
-    const roleCheck = await pool
-      .request()
-      .input("id_usuario", sql.Int, userId)
+    const roleCheck = await pool.request().input("id_usuario", sql.Int, userId)
       .query(`
         SELECT ur.ID_ROL
         FROM MAE_USUARIO u
@@ -502,8 +532,7 @@ const acceptScheduledVisit = async (req, res) => {
     // Verificar si la visita programada existe y está pendiente
     const visitCheck = await pool
       .request()
-      .input("id_visita_programada", sql.Int, id_visita_programada)
-      .query(`
+      .input("id_visita_programada", sql.Int, id_visita_programada).query(`
         SELECT 
           NRO_DPTO,
           NOMBRE_VISITANTE,
@@ -562,8 +591,7 @@ const acceptScheduledVisit = async (req, res) => {
         .input("fecha_ingreso", new Date())
         .input("motivo", scheduledVisit.MOTIVO)
         .input("id_usuario_registro", id_usuario_registro)
-        .input("estado", 1)
-        .query(`
+        .input("estado", 1).query(`
           INSERT INTO MAE_VISITA (
             ID_RESIDENTE, NOMBRE_VISITANTE, NRO_DOC_VISITANTE, ID_TIPO_DOC_VISITANTE, 
             FECHA_INGRESO, MOTIVO, ID_USUARIO_REGISTRO, ESTADO
@@ -578,8 +606,7 @@ const acceptScheduledVisit = async (req, res) => {
       // Actualizar estado de la visita programada
       await transaction
         .request()
-        .input("id_visita_programada", id_visita_programada)
-        .query(`
+        .input("id_visita_programada", id_visita_programada).query(`
           UPDATE MAE_VISITA_PROGRAMADA
           SET ESTADO = 2
           WHERE ID_VISITA_PROGRAMADA = @id_visita_programada
@@ -648,8 +675,7 @@ const cancelScheduledVisit = async (req, res) => {
       console.log(`Updating visit ${id_visita_programada} with atomic UPDATE`);
       const result = await transaction
         .request()
-        .input("id_visita_programada", sql.Int, id_visita_programada)
-        .query(`
+        .input("id_visita_programada", sql.Int, id_visita_programada).query(`
           UPDATE MAE_VISITA_PROGRAMADA
           SET ESTADO = 3
           OUTPUT DELETED.ESTADO AS PreviousEstado
@@ -665,8 +691,7 @@ const cancelScheduledVisit = async (req, res) => {
         );
         const checkVisit = await transaction
           .request()
-          .input("id_visita_programada", sql.Int, id_visita_programada)
-          .query(`
+          .input("id_visita_programada", sql.Int, id_visita_programada).query(`
             SELECT ESTADO
             FROM MAE_VISITA_PROGRAMADA
             WHERE ID_VISITA_PROGRAMADA = @id_visita_programada
@@ -757,11 +782,16 @@ const getAllScheduledVisits = async (req, res) => {
             AND r3.ID_DEPARTAMENTO = d.ID_DEPARTAMENTO
         )
     `);
-    console.log("Visitas programadas devueltas:", JSON.stringify(result.recordset, null, 2));
+    console.log(
+      "Visitas programadas devueltas:",
+      JSON.stringify(result.recordset, null, 2)
+    );
     res.status(200).json(result.recordset);
   } catch (error) {
     console.error("Error al obtener todas las visitas programadas:", error);
-    res.status(500).json({ message: "Error del servidor", error: error.message });
+    res
+      .status(500)
+      .json({ message: "Error del servidor", error: error.message });
   }
 };
 
@@ -771,8 +801,7 @@ const processScheduledVisit = async (req, res) => {
     const pool = await poolPromise;
     const result = await pool
       .request()
-      .input("id_visita_programada", sql.Int, id_visita_programada)
-      .query(`
+      .input("id_visita_programada", sql.Int, id_visita_programada).query(`
         UPDATE MAE_VISITA_PROGRAMADA
         SET ESTADO = 2
         WHERE ID_VISITA_PROGRAMADA = @id_visita_programada AND ESTADO = 1
@@ -781,8 +810,7 @@ const processScheduledVisit = async (req, res) => {
     if (result.rowsAffected[0] === 0) {
       const checkVisit = await pool
         .request()
-        .input("id_visita_programada", sql.Int, id_visita_programada)
-        .query(`
+        .input("id_visita_programada", sql.Int, id_visita_programada).query(`
           SELECT ESTADO
           FROM MAE_VISITA_PROGRAMADA
           WHERE ID_VISITA_PROGRAMADA = @id_visita_programada
@@ -944,9 +972,7 @@ const getResidentByPersonaAndDepartment = async (req, res) => {
 const fetchResidentId = async (nro_dpto) => {
   try {
     const pool = await poolPromise;
-    const result = await pool
-      .request()
-      .input("nro_dpto", sql.Int, nro_dpto)
+    const result = await pool.request().input("nro_dpto", sql.Int, nro_dpto)
       .query(`
         SELECT r.ID_RESIDENTE, r.ID_PERSONA, d.ID_DEPARTAMENTO
         FROM MAE_RESIDENTE r
@@ -954,13 +980,20 @@ const fetchResidentId = async (nro_dpto) => {
         WHERE d.NRO_DPTO = @nro_dpto AND r.ESTADO = 1
       `);
 
-    console.log(`fetchResidentId - Resultado para NRO_DPTO=${nro_dpto}:`, result.recordset);
+    console.log(
+      `fetchResidentId - Resultado para NRO_DPTO=${nro_dpto}:`,
+      result.recordset
+    );
 
     if (result.recordset.length === 0) {
-      throw new Error(`No se encontró un residente para el departamento ${nro_dpto}`);
+      throw new Error(
+        `No se encontró un residente para el departamento ${nro_dpto}`
+      );
     }
     if (result.recordset.length > 1) {
-      throw new Error(`Múltiples residentes activos encontrados para el departamento ${nro_dpto}`);
+      throw new Error(
+        `Múltiples residentes activos encontrados para el departamento ${nro_dpto}`
+      );
     }
 
     return result.recordset[0].ID_RESIDENTE;
