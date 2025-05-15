@@ -725,27 +725,39 @@ const getAllScheduledVisits = async (req, res) => {
     }
     const pool = await poolPromise;
     const result = await pool.request().query(`
-      SELECT
+      SELECT DISTINCT
         vp.ID_VISITA_PROGRAMADA,
         vp.NRO_DPTO,
         vp.DNI_VISITANTE,
         vp.ID_TIPO_DOC_VISITANTE,
         vp.NOMBRE_VISITANTE,
         CONVERT(VARCHAR(10), vp.FECHA_LLEGADA, 120) AS FECHA_LLEGADA,
-        CONVERT(VARCHAR(5), vp.HORA_LLEGADA, 108) AS HORA_LLEGADA,
+        CONVERT(VARCHAR(8), vp.HORA_LLEGADA, 114) AS HORA_LLEGADA,
         vp.MOTIVO,
         vp.ID_RESIDENTE,
-        COALESCE(CONCAT(p.NOMBRES, ' ', p.APELLIDOS), 'Desconocido') AS NOMBRE_PROPIETARIO,
+        COALESCE(
+          (SELECT CONCAT(p2.NOMBRES, ' ', p2.APELLIDOS)
+           FROM MAE_RESIDENTE r2
+           INNER JOIN MAE_PERSONA p2 ON r2.ID_PERSONA = p2.ID_PERSONA
+           WHERE r2.ID_RESIDENTE = vp.ID_RESIDENTE
+             AND r2.ID_DEPARTAMENTO = d.ID_DEPARTAMENTO),
+          'Desconocido'
+        ) AS NOMBRE_PROPIETARIO,
         vp.ESTADO,
         f.NOMBRE AS NOMBRE_FASE
       FROM MAE_VISITA_PROGRAMADA vp
-      LEFT JOIN MAE_RESIDENTE r ON vp.ID_RESIDENTE = r.ID_RESIDENTE
-      LEFT JOIN MAE_PERSONA p ON r.ID_PERSONA = p.ID_PERSONA
       INNER JOIN MAE_DEPARTAMENTO d ON vp.NRO_DPTO = d.NRO_DPTO
       INNER JOIN MAE_FASE f ON d.ID_FASE = f.ID_FASE
+      LEFT JOIN MAE_RESIDENTE r ON vp.ID_RESIDENTE = r.ID_RESIDENTE AND r.ID_DEPARTAMENTO = d.ID_DEPARTAMENTO
       WHERE vp.ESTADO = 1
+        AND EXISTS (
+          SELECT 1
+          FROM MAE_RESIDENTE r3
+          WHERE r3.ID_RESIDENTE = vp.ID_RESIDENTE
+            AND r3.ID_DEPARTAMENTO = d.ID_DEPARTAMENTO
+        )
     `);
-    console.log("Visitas programadas devueltas:", result.recordset);
+    console.log("Visitas programadas devueltas:", JSON.stringify(result.recordset, null, 2));
     res.status(200).json(result.recordset);
   } catch (error) {
     console.error("Error al obtener todas las visitas programadas:", error);
