@@ -852,7 +852,8 @@ const getAllScheduledVisits = async (req, res) => {
           'Desconocido'
         ) AS NOMBRE_PROPIETARIO,
         vp.ESTADO,
-        f.NOMBRE AS NOMBRE_FASE
+        f.NOMBRE AS NOMBRE_FASE,
+        vp.FECHA_LLEGADA AS FECHA_LLEGADA_ORIGINAL
       FROM MAE_VISITA_PROGRAMADA vp
       INNER JOIN MAE_DEPARTAMENTO d ON vp.NRO_DPTO = d.NRO_DPTO
       INNER JOIN MAE_FASE f ON d.ID_FASE = f.ID_FASE
@@ -864,12 +865,18 @@ const getAllScheduledVisits = async (req, res) => {
           WHERE r3.ID_RESIDENTE = vp.ID_RESIDENTE
             AND r3.ID_DEPARTAMENTO = d.ID_DEPARTAMENTO
         )
+      ORDER BY vp.FECHA_LLEGADA ASC
     `);
+    // Transformar el resultado para eliminar FECHA_LLEGADA_ORIGINAL antes de enviar al frontend
+    const transformedResult = result.recordset.map((record) => {
+      const { FECHA_LLEGADA_ORIGINAL, ...rest } = record;
+      return rest;
+    });
     console.log(
       "Visitas programadas devueltas:",
-      JSON.stringify(result.recordset, null, 2)
+      JSON.stringify(transformedResult, null, 2)
     );
-    res.status(200).json(result.recordset);
+    res.status(200).json(transformedResult);
   } catch (error) {
     console.error("Error al obtener todas las visitas programadas:", error);
     res
