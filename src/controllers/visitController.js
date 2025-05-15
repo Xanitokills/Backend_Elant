@@ -749,7 +749,7 @@ const getAllScheduledVisits = async (req, res) => {
       INNER JOIN MAE_DEPARTAMENTO d ON vp.NRO_DPTO = d.NRO_DPTO
       INNER JOIN MAE_FASE f ON d.ID_FASE = f.ID_FASE
       LEFT JOIN MAE_RESIDENTE r ON vp.ID_RESIDENTE = r.ID_RESIDENTE AND r.ID_DEPARTAMENTO = d.ID_DEPARTAMENTO
-      WHERE vp.ESTADO = 1
+      WHERE vp.ESTADO IN (1, 2)
         AND EXISTS (
           SELECT 1
           FROM MAE_RESIDENTE r3
