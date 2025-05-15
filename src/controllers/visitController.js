@@ -389,7 +389,7 @@ const registerScheduledVisit = async (req, res) => {
       .input("motivo", sql.VarChar, motivo)
       .input("id_residente", sql.Int, id_residente)
       .input("estado", sql.Int, 1)
-      .input("hora_llegada", sql.VarChar, hora_llegada || null); // Usar VarChar en lugar de sql.Time
+      .input("hora_llegada", sql.VarChar, hora_llegada || null);
 
     const insertResult = await request.query(`
       INSERT INTO MAE_VISITA_PROGRAMADA (
@@ -403,9 +403,41 @@ const registerScheduledVisit = async (req, res) => {
       )
     `);
 
+    const newScheduledVisitId = insertResult.recordset[0].ID_VISITA_PROGRAMADA;
+
+    // Obtener detalles completos de la visita programada para emitir
+    const visitDetails = await pool
+      .request()
+      .input("id_visita_programada", sql.Int, newScheduledVisitId)
+      .query(`
+        SELECT 
+          VP.ID_VISITA_PROGRAMADA,
+          VP.NRO_DPTO,
+          VP.DNI_VISITANTE,
+          VP.ID_TIPO_DOC_VISITANTE,
+          VP.NOMBRE_VISITANTE,
+          VP.FECHA_LLEGADA,
+          VP.HORA_LLEGADA,
+          VP.MOTIVO,
+          VP.ID_RESIDENTE,
+          VP.ESTADO,
+          CONCAT(P.NOMBRES, ' ', P.APELLIDOS) AS NOMBRE_PROPIETARIO,
+          F.NOMBRE AS NOMBRE_FASE
+        FROM MAE_VISITA_PROGRAMADA VP
+        INNER JOIN MAE_RESIDENTE R ON VP.ID_RESIDENTE = R.ID_RESIDENTE
+        INNER JOIN MAE_PERSONA P ON R.ID_PERSONA = P.ID_PERSONA
+        INNER JOIN MAE_DEPARTAMENTO D ON R.ID_DEPARTAMENTO = D.ID_DEPARTAMENTO
+        INNER JOIN MAE_FASE F ON D.ID_FASE = F.ID_FASE
+        WHERE VP.ID_VISITA_PROGRAMADA = @id_visita_programada
+      `);
+
+    // Emitir evento Socket.IO
+    const io = req.app.get("io"); // Obtener la instancia de Socket.IO
+    io.emit("new-scheduled-visit", visitDetails.recordset[0]);
+
     res.status(201).json({
       message: "Visita programada registrada con éxito",
-      id_visita_programada: insertResult.recordset[0].ID_VISITA_PROGRAMADA,
+      id_visita_programada: newScheduledVisitId,
     });
   } catch (error) {
     console.error("Error en registerScheduledVisit:", {
