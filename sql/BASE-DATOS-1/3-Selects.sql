@@ -1,7 +1,0 @@
------------------
-
-SELECT * FROM MAE_USUARIO WHERE CORREO = 'test@example.com';
-
-SELECT CONTRASENA_HASH FROM MAE_USUARIO WHERE CORREO = 'test@example.com';
-
-SELECT CONTRASENA_HASH FROM MAE_USUARIO WHERE CORREO = 'test@example.com';
