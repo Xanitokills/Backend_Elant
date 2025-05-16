@@ -865,7 +865,7 @@ const getAllScheduledVisits = async (req, res) => {
           WHERE r3.ID_RESIDENTE = vp.ID_RESIDENTE
             AND r3.ID_DEPARTAMENTO = d.ID_DEPARTAMENTO
         )
-      ORDER BY vp.FECHA_LLEGADA ASC
+      ORDER BY vp.FECHA_LLEGADA DESC
     `);
     // Transformar el resultado para eliminar FECHA_LLEGADA_ORIGINAL antes de enviar al frontend
     const transformedResult = result.recordset.map((record) => {
