@@ -21,16 +21,16 @@ const {
   getFotoPersona,
 } = require("../controllers/userController");
 
-router.post("/register", authMiddleware, checkPermission({ menuId: 1 }), register);
-router.get("/users", authMiddleware, checkPermission({ menuId: 1 }), getAllUsers);
-router.put("/users/:id", authMiddleware, checkPermission({ menuId: 1 }), updateUser);
-router.put("/users/change-password/:id", authMiddleware, checkPermission({ menuId: 1 }), changePassword);
-router.post("/users/:id/asignar-comite", authMiddleware, checkPermission({ menuId: 1 }), asignarRolComite);
-router.delete("/users/:id/quitar-comite", authMiddleware, checkPermission({ menuId: 1 }), quitarRolComite);
+router.post("/register", authMiddleware,  register);
+router.get("/users", authMiddleware,  getAllUsers);
+router.put("/users/:id", authMiddleware,  updateUser);
+router.put("/users/change-password/:id", authMiddleware,  changePassword);
+router.post("/users/:id/asignar-comite", authMiddleware,  asignarRolComite);
+router.delete("/users/:id/quitar-comite", authMiddleware,  quitarRolComite);
 
-router.get("/user-types", getUserTypes);
-router.get("/sexes", getSexes);
-router.get("/get-roles", getRoles);
+router.get("/user-types", authMiddleware, getUserTypes);
+router.get("/sexes", authMiddleware, getSexes);
+router.get("/get-roles", authMiddleware, getRoles);
 router.get("/user-roles", authMiddleware, getUserRoles);
 router.get("/sidebar/:id", authMiddleware, getSidebarByUserId);
 router.get('/foto/:id', authMiddleware,getFotoPersona);

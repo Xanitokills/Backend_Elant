@@ -21,23 +21,21 @@ const {
 } = require("../controllers/visitController");
 const authMiddleware = require("../middleware/authMiddleware");
 
-// Rutas protegidas con ID_MENU=2 (Gestión de Ingreso)
-router.post("/visits", authMiddleware, checkPermission({ menuId: 2 }), registerVisit);
-router.get("/visits", authMiddleware, checkPermission({ menuId: 2 }), getAllVisits);
-router.get("/dni", authMiddleware, checkPermission({ menuId: 2 }), getDniInfo);
-router.get("/owners", authMiddleware, checkPermission({ menuId: 2 }), getOwnersByDpto);
-router.put("/visits/:id_visita/end", authMiddleware, checkPermission({ menuId: 2 }), endVisit);
-router.post("/scheduled-visits", authMiddleware, checkPermission({ menuId: 2 }), registerScheduledVisit);
+router.post("/visits", authMiddleware,  registerVisit);
+router.get("/visits", authMiddleware,  getAllVisits);
+router.get("/dni", authMiddleware,  getDniInfo);
+router.get("/owners", authMiddleware,  getOwnersByDpto);
+router.put("/visits/:id_visita/end", authMiddleware,  endVisit);
+router.post("/scheduled-visits", authMiddleware,  registerScheduledVisit);
 router.get("/scheduled-visits", authMiddleware, getScheduledVisits);
-router.get("/departamentosFase", authMiddleware, checkPermission({ menuId: 2 }), getDepartmentsByPhase);
+router.get("/departamentosFase", authMiddleware,  getDepartmentsByPhase);
 
-// Rutas protegidas con ID_SUBMENU=10 (Visitas Programadas)
-router.post("/scheduled-visits/:id_visita_programada/accept", authMiddleware, checkPermission({ submenuId: 10 }), acceptScheduledVisit);
-router.put("/scheduled-visits/:id_visita_programada/cancel", authMiddleware, checkPermission({ submenuId: 10 }), cancelScheduledVisit);
-router.put("/scheduled-visits/:id_visita_programada/process", authMiddleware, checkPermission({ submenuId: 10 }), processScheduledVisit); // Added
-router.get("/all-scheduled-visits", authMiddleware, checkPermission({ submenuId: 10 }), getAllScheduledVisits);
 
-// Rutas sin permisos específicos
+router.post("/scheduled-visits/:id_visita_programada/accept", authMiddleware,  acceptScheduledVisit);
+router.put("/scheduled-visits/:id_visita_programada/cancel", authMiddleware,  cancelScheduledVisit);
+router.put("/scheduled-visits/:id_visita_programada/process", authMiddleware,  processScheduledVisit); // Added
+router.get("/all-scheduled-visits", authMiddleware,  getAllScheduledVisits);
+
 router.get("/users/:id/departments", authMiddleware, getOwnerDepartments);
 router.get("/users/:id", authMiddleware, getUserData); // Ruta para obtener datos del usuario
 router.get("/departments", authMiddleware, getDepartmentByNumber); // Ruta para obtener departamento por número

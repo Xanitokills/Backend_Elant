@@ -14,17 +14,17 @@ const authMiddleware = require("../middleware/authMiddleware");
 const { checkPermission } = require("../middleware/permissions");
 
 // Rutas protegidas con ID_SUBMENU=8 (Reservas)
-router.get("/slots", authMiddleware, checkPermission({ submenuId: 8 }), getSlots);
-router.get("/slots/occupied", authMiddleware, checkPermission({ submenuId: 8 }), getOccupiedSlots);
-router.post("/", authMiddleware, checkPermission({ submenuId: 8 }), createReservation);
-router.get("/user/:userId", authMiddleware, checkPermission({ submenuId: 8 }), getUserReservations);
+router.get("/slots", authMiddleware, getSlots);
+router.get("/slots/occupied", authMiddleware, getOccupiedSlots);
+router.post("/", authMiddleware, createReservation);
+router.get("/user/:userId", authMiddleware, getUserReservations);
 
 // Rutas para áreas, protegidas con autenticación y permisos (ID_SUBMENU=8)
-router.delete("/areas/:areaId", authMiddleware, checkPermission({ submenuId: 8 }), deleteArea);
-router.post("/areas", authMiddleware, checkPermission({ submenuId: 8 }), createArea); // New route for creating areas
-router.put("/areas/:areaId", authMiddleware, checkPermission({ submenuId: 8 }), updateArea); // New route for updating areas
+router.delete("/areas/:areaId", authMiddleware, deleteArea);
+router.post("/areas", authMiddleware, createArea); // New route for creating areas
+router.put("/areas/:areaId", authMiddleware, updateArea); // New route for updating areas
 
 // Ruta sin permisos específicos
-router.get("/areas", getAreas);
+router.get("/areas", authMiddleware,  getAreas);
 
 module.exports = router;
