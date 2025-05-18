@@ -1,6 +1,7 @@
 const jwt = require("jsonwebtoken");
 const { poolPromise } = require("../config/db");
 const logger = require("../config/logger");
+const sql = require("mssql");
 
 const authMiddleware = async (req, res, next) => {
   logger.info("🛡️ authMiddleware ejecutado");
@@ -33,9 +34,10 @@ const authMiddleware = async (req, res, next) => {
     logger.debug("🔌 Conexión a la base de datos establecida");
 
     const result = await pool.request()
-      .input("id", decoded.id)
+      .input("id", sql.Int, decoded.id)
       .query(`
-        SELECT u.ID_USUARIO, u.USUARIO AS NOMBRES, p.CORREO, ur.ID_ROL, t.DETALLE_USUARIO AS role
+        SELECT u.ID_USUARIO, u.USUARIO AS NOMBRES, p.CORREO, ur.ID_ROL, 
+               t.DETALLE_USUARIO AS role, u.INVALIDATION_COUNTER, u.ID_PERSONA
         FROM MAE_USUARIO u
         LEFT JOIN MAE_PERSONA p ON u.ID_PERSONA = p.ID_PERSONA
         LEFT JOIN MAE_USUARIO_ROL ur ON u.ID_USUARIO = ur.ID_USUARIO
@@ -51,14 +53,22 @@ const authMiddleware = async (req, res, next) => {
     }
 
     const user = result.recordset[0];
+    if (user.INVALIDATION_COUNTER !== decoded.invalidationCounter) {
+      logger.warn(`🚫 Token inválido: Contador de invalidación no coincide`);
+      return res.status(401).json({ 
+        message: "Sesión inválida. Por favor, inicia sesión nuevamente." 
+      });
+    }
+
     req.user = {
       id: user.ID_USUARIO,
+      idPersona: user.ID_PERSONA,
       email: user.CORREO || "sin_correo",
       role: user.role || "Sin rol",
       roleId: user.ID_ROL || null,
     };
 
-    logger.info(`✅ Usuario autenticado: ID=${user.ID_USUARIO}, Correo=${user.CORREO || "sin_correo"}, Rol=${user.role || "sin_rol"}, RolID=${user.ID_ROL || "ninguno"}`);
+    logger.info(`✅ Usuario autenticado: ID=${user.ID_USUARIO}, ID_PERSONA=${user.ID_PERSONA}, Correo=${user.CORREO || "sin_correo"}, Rol=${user.role || "sin_rol"}, RolID=${user.ID_ROL || "ninguno"}`);
     next();
   } catch (error) {
     logger.error(`🔥 Error en authMiddleware: ${error.message}`, { stack: error.stack });

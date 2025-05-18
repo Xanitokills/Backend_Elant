@@ -15,11 +15,15 @@ const validateDNI = (dni) => {
   return dniRegex.test(dni);
 };
 
-const generateToken = (userId, roles) => {
+const generateToken = (userId, roles, idPersona, invalidationCounter) => {
   if (!process.env.JWT_SECRET) throw new Error("JWT_SECRET no está definido");
-  return jwt.sign({ id: userId, roles }, process.env.JWT_SECRET, {
-    expiresIn: process.env.ExpiresInToken,
-  });
+  return jwt.sign(
+    { id: userId, roles, idPersona, invalidationCounter },
+    process.env.JWT_SECRET,
+    {
+      expiresIn: process.env.ExpiresInToken,
+    }
+  );
 };
 
 const getUserPermissions = async (userId) => {
@@ -41,7 +45,7 @@ const getUserPermissions = async (userId) => {
       if (row.Tipo === "Menú")
         menusMap.set(row.ID, {
           id: row.ID,
-          nombre: row.Nombre,
+          nombre: row.NOMBRE,
           url: row.URL,
           icono: row.Icono,
           orden: row.Orden,
@@ -99,7 +103,8 @@ const login = async (req, res) => {
       .query(`
         SELECT 
           p.ID_PERSONA, p.NOMBRES, p.APELLIDOS, s.DESCRIPCION AS SEXO,
-          u.ID_USUARIO, u.CONTRASENA_HASH, u.ESTADO, u.INTENTOS_FALLIDOS_CONTRASEÑA
+          u.ID_USUARIO, u.CONTRASENA_HASH, u.ESTADO, u.INTENTOS_FALLIDOS_CONTRASEÑA,
+          u.INVALIDATION_COUNTER
         FROM MAE_PERSONA p
         JOIN MAE_SEXO s ON p.ID_SEXO = s.ID_SEXO
         JOIN MAE_USUARIO u ON p.ID_PERSONA = u.ID_PERSONA
@@ -115,7 +120,6 @@ const login = async (req, res) => {
       });
     }
 
-    // Depuración
     console.log(
       "DEBUG LOGIN → ESTADO:",
       user.ESTADO,
@@ -123,7 +127,6 @@ const login = async (req, res) => {
       user.INTENTOS_FALLIDOS_CONTRASEÑA
     );
 
-    // Validar estado (ahora como booleano)
     if (!user.ESTADO) {
       return res.status(403).json({
         code: "ACCOUNT_LOCKED",
@@ -131,7 +134,6 @@ const login = async (req, res) => {
       });
     }
 
-    // Verificar contraseña
     const isMatch = await bcrypt.compare(password, user.CONTRASENA_HASH);
 
     if (!isMatch) {
@@ -150,7 +152,18 @@ const login = async (req, res) => {
         await pool
           .request()
           .input("id", sql.Int, user.ID_USUARIO)
-          .query(`UPDATE MAE_USUARIO SET ESTADO = 0 WHERE ID_USUARIO = @id`);
+          .query(`
+            UPDATE MAE_USUARIO 
+            SET ESTADO = 0,
+                INVALIDATION_COUNTER = ISNULL(INVALIDATION_COUNTER, 0) + 1
+            WHERE ID_USUARIO = @id
+          `);
+
+        // Notificar a través de Socket.IO
+        const io = req.app.get("io");
+        io.to(`user_${user.ID_PERSONA}`).emit("sessionInvalidated", {
+          message: "Tu sesión ha sido cerrada porque tu cuenta fue bloqueada por múltiples intentos fallidos.",
+        });
 
         return res.status(403).json({
           code: "ACCOUNT_LOCKED",
@@ -165,7 +178,6 @@ const login = async (req, res) => {
       });
     }
 
-    // Login exitoso: resetear campos especificados
     await pool
       .request()
       .input("id", sql.Int, user.ID_USUARIO)
@@ -208,7 +220,12 @@ const login = async (req, res) => {
       ).toString("base64")}`;
     }
 
-    const token = generateToken(user.ID_USUARIO, roles);
+    const token = generateToken(
+      user.ID_USUARIO,
+      roles,
+      user.ID_PERSONA,
+      user.INVALIDATION_COUNTER
+    );
     const permissions = await getUserPermissions(user.ID_USUARIO);
 
     res.status(200).json({
@@ -286,7 +303,6 @@ const forgotPassword = async (req, res) => {
         WHERE ID_USUARIO = @id
       `);
 
-    // Leer el template de correo
     const templatePath = path.join(__dirname, "../../html/verificationCodeEmail.html");
     let emailTemplate;
     try {
@@ -299,13 +315,11 @@ const forgotPassword = async (req, res) => {
       });
     }
 
-    // Reemplazar placeholders
     const fullName = `${user.NOMBRES} ${user.APELLIDOS}`;
     emailTemplate = emailTemplate
       .replace("{{fullName}}", fullName)
       .replace("{{code}}", code);
 
-    // Enviar correo con el código de verificación
     const transporter = nodemailer.createTransport({
       service: "gmail",
       auth: { user: process.env.MAIL_USER, pass: process.env.MAIL_PASS },
@@ -351,7 +365,7 @@ const verifyCode = async (req, res) => {
     const result = await pool.request()
       .input("dni", sql.VarChar(12), dni)
       .query(`
-        SELECT u.ID_USUARIO, u.CODIGO_VERIFICACION, u.CODIGO_VERIFICACION_EXPIRA, u.INTENTOS_CODIGO_FALLIDO, p.CORREO, p.NOMBRES, p.APELLIDOS
+        SELECT u.ID_USUARIO, u.ID_PERSONA, u.CODIGO_VERIFICACION, u.CODIGO_VERIFICACION_EXPIRA, u.INTENTOS_CODIGO_FALLIDO, p.CORREO, p.NOMBRES, p.APELLIDOS
         FROM MAE_USUARIO u
         JOIN MAE_PERSONA p ON u.ID_PERSONA = p.ID_PERSONA
         WHERE p.DNI = @dni AND u.ESTADO = 1
@@ -399,12 +413,10 @@ const verifyCode = async (req, res) => {
       }
     }
 
-    // Código válido: generar nueva contraseña
     const newPassword = crypto.randomBytes(4).toString("hex");
     const salt = await bcrypt.genSalt(10);
     const hashedPassword = await bcrypt.hash(newPassword, salt);
 
-    // Actualizar la contraseña en la base de datos
     await pool.request()
       .input("id", sql.Int, user.ID_USUARIO)
       .input("CONTRASENA_HASH", sql.VarChar(255), hashedPassword)
@@ -417,11 +429,11 @@ const verifyCode = async (req, res) => {
             INTENTOS_CODIGO_SOLICITUD = 0,
             ULTIMA_CODIGO_SOLICITUD = NULL,
             CONTRASENA_HASH = @CONTRASENA_HASH,
-            CONTRASENA_SALT = @CONTRASENA_SALT
+            CONTRASENA_SALT = @CONTRASENA_SALT,
+            INVALIDATION_COUNTER = ISNULL(INVALIDATION_COUNTER, 0) + 1
         WHERE ID_USUARIO = @id
       `);
 
-    // Leer el template de correo
     const templatePath = path.join(__dirname, "../../html/resetPasswordEmail.html");
     let emailTemplate;
     try {
@@ -435,14 +447,12 @@ const verifyCode = async (req, res) => {
       });
     }
 
-    // Reemplazar placeholders
     const fullName = `${user.NOMBRES} ${user.APELLIDOS}`;
     emailTemplate = emailTemplate
       .replace("{{fullName}}", fullName)
       .replace("{{newPassword}}", newPassword)
       .replace("${process.env.FRONTEND_URL}", process.env.FRONTEND_URL || "http://localhost:5173");
 
-    // Enviar correo con la nueva contraseña
     const transporter = nodemailer.createTransport({
       service: "gmail",
       auth: { user: process.env.MAIL_USER, pass: process.env.MAIL_PASS },
@@ -463,6 +473,12 @@ const verifyCode = async (req, res) => {
         error: emailError.message,
       });
     }
+
+    // Notificar a través de Socket.IO
+    const io = req.app.get("io");
+    io.to(`user_${user.ID_PERSONA}`).emit("sessionInvalidated", {
+      message: "Tu sesión ha sido cerrada porque se restableció tu contraseña.",
+    });
 
     res.status(200).json({
       success: true,
@@ -494,16 +510,26 @@ const validate = async (req, res) => {
     const userId = decoded.id;
     const pool = await poolPromise;
     const result = await pool.request().input("id", sql.Int, userId).query(`
-      SELECT u.ID_USUARIO, p.ID_PERSONA, p.NOMBRES, p.APELLIDOS, u.PRIMER_INICIO FROM MAE_USUARIO u JOIN MAE_PERSONA p ON u.ID_PERSONA = p.ID_PERSONA
+      SELECT u.ID_USUARIO, p.ID_PERSONA, p.NOMBRES, p.APELLIDOS, u.PRIMER_INICIO, u.INVALIDATION_COUNTER 
+      FROM MAE_USUARIO u 
+      JOIN MAE_PERSONA p ON u.ID_PERSONA = p.ID_PERSONA
       WHERE u.ID_USUARIO = @id AND u.ESTADO = 1 AND p.ESTADO = 1
     `);
     const user = result.recordset[0];
     if (!user)
       return res.status(401).json({ message: "Usuario no encontrado" });
+    if (user.INVALIDATION_COUNTER !== decoded.invalidationCounter) {
+      return res.status(401).json({
+        message: "Sesión inválida. Por favor, inicia sesión nuevamente.",
+      });
+    }
     const rolesResult = await pool
       .request()
       .input("userId", sql.Int, user.ID_USUARIO).query(`
-      SELECT t.ID_ROL, t.DETALLE_USUARIO FROM MAE_USUARIO_ROL ur JOIN MAE_TIPO_USUARIO t ON ur.ID_ROL = t.ID_ROL WHERE ur.ID_USUARIO = @userId AND t.ESTADO = 1
+      SELECT t.ID_ROL, t.DETALLE_USUARIO 
+      FROM MAE_USUARIO_ROL ur 
+      JOIN MAE_TIPO_USUARIO t ON ur.ID_ROL = t.ID_ROL 
+      WHERE ur.ID_USUARIO = @userId AND t.ESTADO = 1
     `);
     const roles = rolesResult.recordset.map((r) => r.DETALLE_USUARIO);
     const permissions = await getUserPermissions(user.ID_USUARIO);
@@ -544,10 +570,7 @@ const uploadImage = async (req, res) => {
     const { buffer, originalname, mimetype } = req.file;
     const customName = req.body.customName?.trim();
     const finalName = customName
-      ? `${customName}${originalname.includes(".")
-        ? originalname.slice(originalname.lastIndexOf("."))
-        : ""
-      }`
+      ? `${customName}${originalname.includes(".") ? originalname.slice(originalname.lastIndexOf(".")) : ""}`
       : originalname;
     const pool = await poolPromise;
     await pool
@@ -556,7 +579,8 @@ const uploadImage = async (req, res) => {
       .input("imageName", finalName)
       .input("imageType", mimetype)
       .input("userId", userId).query(`
-      INSERT INTO MAE_IMAGENES_LOGIN (RUTA_IMAGEN, NOMBRE_IMAGEN, TIPO_IMAGEN, ID_USUARIO_SUBIDA, ESTADO) VALUES (@imageData, @imageName, @imageType, @userId, 1)
+      INSERT INTO MAE_IMAGENES_LOGIN (RUTA_IMAGEN, NOMBRE_IMAGEN, TIPO_IMAGEN, ID_USUARIO_SUBIDA, ESTADO) 
+      VALUES (@imageData, @imageName, @imageType, @userId, 1)
     `);
     logger.info(
       "Imagen subida correctamente para el usuario con ID: " + userId
@@ -575,9 +599,10 @@ const getLoginImages = async (req, res) => {
     logger.info("Iniciando la obtención de imágenes...");
     const pool = await poolPromise;
     const result = await pool.request().query(`
-      SELECT ID_IMAGEN, RUTA_IMAGEN, NOMBRE_IMAGEN, TIPO_IMAGEN FROM MAE_IMAGENES_LOGIN WHERE ESTADO = 1
+      SELECT ID_IMAGEN, RUTA_IMAGEN, NOMBRE_IMAGEN, TIPO_IMAGEN 
+      FROM MAE_IMAGENES_LOGIN 
+      WHERE ESTADO = 1
     `);
-    // Si no hay imágenes, devolver un arreglo vacío con estado 200
     if (result.recordset.length === 0) {
       return res.status(200).json({ images: [] });
     }
@@ -633,11 +658,13 @@ const changeAuthenticatedUserPassword = async (req, res) => {
     const pool = await poolPromise;
     const result = await pool.request().input("ID_USUARIO", sql.Int, userId)
       .query(`
-      SELECT CONTRASENA_HASH FROM MAE_USUARIO WHERE ID_USUARIO = @ID_USUARIO AND ESTADO = 1
+      SELECT CONTRASENA_HASH, ID_PERSONA 
+      FROM MAE_USUARIO 
+      WHERE ID_USUARIO = @ID_USUARIO AND ESTADO = 1
     `);
     if (result.recordset.length === 0)
       return res.status(404).json({ message: "Usuario no encontrado" });
-    const { CONTRASENA_HASH } = result.recordset[0];
+    const { CONTRASENA_HASH, ID_PERSONA } = result.recordset[0];
     const isValid = await bcrypt.compare(currentPassword, CONTRASENA_HASH);
     if (!isValid)
       return res.status(401).json({ message: "Contraseña actual incorrecta" });
@@ -648,8 +675,20 @@ const changeAuthenticatedUserPassword = async (req, res) => {
       .input("ID_USUARIO", sql.Int, userId)
       .input("CONTRASENA_HASH", sql.VarChar(255), newHashedPassword)
       .input("CONTRASENA_SALT", sql.VarChar(50), salt).query(`
-      UPDATE MAE_USUARIO SET CONTRASENA_HASH = @CONTRASENA_HASH, CONTRASENA_SALT = @CONTRASENA_SALT, PRIMER_INICIO = 0 WHERE ID_USUARIO = @ID_USUARIO
+      UPDATE MAE_USUARIO 
+      SET CONTRASENA_HASH = @CONTRASENA_HASH, 
+          CONTRASENA_SALT = @CONTRASENA_SALT, 
+          PRIMER_INICIO = 0,
+          INVALIDATION_COUNTER = ISNULL(INVALIDATION_COUNTER, 0) + 1
+      WHERE ID_USUARIO = @ID_USUARIO
     `);
+
+    // Notificar a través de Socket.IO
+    const io = req.app.get("io");
+    io.to(`user_${ID_PERSONA}`).emit("sessionInvalidated", {
+      message: "Tu sesión ha sido cerrada porque cambiaste tu contraseña.",
+    });
+
     res.status(200).json({ message: "Contraseña actualizada con éxito" });
   } catch (error) {
     console.error("Error al cambiar la contraseña:", error);
@@ -662,7 +701,10 @@ const getAllMovements = async (req, res) => {
     const pool = await poolPromise;
     const result = await pool.request().query(`
       SELECT m.ID_ACCESO, m.ID_USUARIO, u.NOMBRES, u.CORREO, u.NRO_DPTO, m.FECHA_ACCESO, m.EXITO, m.MOTIVO_FALLO, m.PUERTA
-      FROM MAE_ACCESO m LEFT JOIN MAE_USUARIO u ON m.ID_USUARIO = u.ID_USUARIO WHERE m.ESTADO = 1 ORDER BY m.FECHA_ACCESO DESC
+      FROM MAE_ACCESO m 
+      LEFT JOIN MAE_USUARIO u ON m.ID_USUARIO = u.ID_USUARIO 
+      WHERE m.ESTADO = 1 
+      ORDER BY m.FECHA_ACCESO DESC
     `);
     const movements = result.recordset;
     res.status(200).json(movements);
@@ -690,19 +732,34 @@ const refreshToken = async (req, res) => {
     const userId = decoded.id;
     const pool = await poolPromise;
     const result = await pool.request().input("id", sql.Int, userId).query(`
-      SELECT u.ID_USUARIO, p.ID_PERSONA, p.NOMBRES, p.APELLIDOS, u.PRIMER_INICIO FROM MAE_USUARIO u JOIN MAE_PERSONA p ON u.ID_PERSONA = p.ID_PERSONA
+      SELECT u.ID_USUARIO, p.ID_PERSONA, p.NOMBRES, p.APELLIDOS, u.PRIMER_INICIO, u.INVALIDATION_COUNTER 
+      FROM MAE_USUARIO u 
+      JOIN MAE_PERSONA p ON u.ID_PERSONA = p.ID_PERSONA
       WHERE u.ID_USUARIO = @id AND u.ESTADO = 1 AND p.ESTADO = 1
     `);
     const user = result.recordset[0];
     if (!user)
       return res.status(401).json({ message: "Usuario no encontrado" });
+    if (user.INVALIDATION_COUNTER !== decoded.invalidationCounter) {
+      return res.status(401).json({
+        message: "Sesión inválida. Por favor, inicia sesión nuevamente.",
+      });
+    }
     const rolesResult = await pool
       .request()
       .input("userId", sql.Int, user.ID_USUARIO).query(`
-      SELECT t.ID_ROL, t.DETALLE_USUARIO FROM MAE_USUARIO_ROL ur JOIN MAE_TIPO_USUARIO t ON ur.ID_ROL = t.ID_ROL WHERE ur.ID_USUARIO = @userId AND t.ESTADO = 1
+      SELECT t.ID_ROL, t.DETALLE_USUARIO 
+      FROM MAE_USUARIO_ROL ur 
+      JOIN MAE_TIPO_USUARIO t ON ur.ID_ROL = t.ID_ROL 
+      WHERE ur.ID_USUARIO = @userId AND t.ESTADO = 1
     `);
     const roles = rolesResult.recordset.map((r) => r.DETALLE_USUARIO);
-    const newToken = generateToken(user.ID_USUARIO, roles);
+    const newToken = generateToken(
+      user.ID_USUARIO,
+      roles,
+      user.ID_PERSONA,
+      user.INVALIDATION_COUNTER
+    );
     const permissions = await getUserPermissions(user.ID_USUARIO);
     logger.info(
       `Token renovado exitosamente para usuario ID: ${user.ID_USUARIO}`
@@ -742,7 +799,9 @@ const resetPassword = async (req, res) => {
     const pool = await poolPromise;
     const result = await pool.request().input("dni", sql.VarChar(12), dni)
       .query(`
-      SELECT u.ID_USUARIO, p.CORREO, p.NOMBRES, p.APELLIDOS FROM MAE_USUARIO u JOIN MAE_PERSONA p ON u.ID_PERSONA = p.ID_PERSONA
+      SELECT u.ID_USUARIO, u.ID_PERSONA, p.CORREO, p.NOMBRES, p.APELLIDOS 
+      FROM MAE_USUARIO u 
+      JOIN MAE_PERSONA p ON u.ID_PERSONA = p.ID_PERSONA
       WHERE p.DNI = @dni AND p.ESTADO = 1 AND u.ESTADO = 1
     `);
     const user = result.recordset[0];
@@ -756,10 +815,13 @@ const resetPassword = async (req, res) => {
       .input("id", sql.Int, user.ID_USUARIO)
       .input("CONTRASENA_HASH", sql.VarChar(255), hashedPassword)
       .input("CONTRASENA_SALT", sql.VarChar(50), salt).query(`
-      UPDATE MAE_USUARIO SET CONTRASENA_HASH = @CONTRASENA_HASH, CONTRASENA_SALT = @CONTRASENA_SALT WHERE ID_USUARIO = @id
+      UPDATE MAE_USUARIO 
+      SET CONTRASENA_HASH = @CONTRASENA_HASH, 
+          CONTRASENA_SALT = @CONTRASENA_SALT,
+          INVALIDATION_COUNTER = ISNULL(INVALIDATION_COUNTER, 0) + 1
+      WHERE ID_USUARIO = @id
     `);
 
-    // Leer el template de correo
     const templatePath = path.join(__dirname, "../../html/resetPasswordEmail.html");
     let emailTemplate;
     try {
@@ -772,14 +834,12 @@ const resetPassword = async (req, res) => {
       });
     }
 
-    // Reemplazar placeholders
     const fullName = `${user.NOMBRES} ${user.APELLIDOS}`;
     emailTemplate = emailTemplate
       .replace("{{fullName}}", fullName)
       .replace("{{newPassword}}", newPassword)
       .replace("${process.env.FRONTEND_URL}", process.env.FRONTEND_URL || "http://localhost:5173");
 
-    // Enviar correo con la nueva contraseña
     const transporter = nodemailer.createTransport({
       service: "gmail",
       auth: { user: process.env.MAIL_USER, pass: process.env.MAIL_PASS },
@@ -799,6 +859,12 @@ const resetPassword = async (req, res) => {
         error: emailError.message,
       });
     }
+
+    // Notificar a través de Socket.IO
+    const io = req.app.get("io");
+    io.to(`user_${user.ID_PERSONA}`).emit("sessionInvalidated", {
+      message: "Tu sesión ha sido cerrada porque se restableció tu contraseña.",
+    });
 
     res.status(200).json({ message: "Contraseña restablecida y enviada al correo" });
   } catch (error) {
