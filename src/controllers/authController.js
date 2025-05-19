@@ -520,7 +520,7 @@ const validate = async (req, res) => {
       return res.status(401).json({ message: "Usuario no encontrado" });
     if (user.INVALIDATION_COUNTER !== decoded.invalidationCounter) {
       return res.status(401).json({
-        message: "Sesión inválida. Por favor, inicia sesión nuevamente.",
+        message: "Sesión inválida debido a INVALIDATION_COUNTER. Por favor, inicia sesión nuevamente.",
       });
     }
     const rolesResult = await pool
@@ -540,6 +540,7 @@ const validate = async (req, res) => {
         personaId: user.ID_PERSONA,
         name: `${user.NOMBRES} ${user.APELLIDOS}`,
         roles,
+        invalidationCounter: user.INVALIDATION_COUNTER,
       },
       userName: `${user.NOMBRES} ${user.APELLIDOS}`,
       roles,
@@ -555,7 +556,6 @@ const validate = async (req, res) => {
     res.status(401).json({ message: "Error al validar el token" });
   }
 };
-
 const uploadImage = async (req, res) => {
   if (!req.file)
     return res

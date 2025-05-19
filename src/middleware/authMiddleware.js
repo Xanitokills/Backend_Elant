@@ -56,7 +56,7 @@ const authMiddleware = async (req, res, next) => {
     if (user.INVALIDATION_COUNTER !== decoded.invalidationCounter) {
       logger.warn(`🚫 Token inválido: Contador de invalidación no coincide`);
       return res.status(401).json({ 
-        message: "Sesión inválida. Por favor, inicia sesión nuevamente." 
+        message: "Sesión inválida debido a INVALIDATION_COUNTER. Por favor, inicia sesión nuevamente." 
       });
     }
 

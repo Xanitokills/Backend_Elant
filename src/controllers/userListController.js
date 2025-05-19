@@ -356,13 +356,13 @@ const manageRoles = async (req, res) => {
     const io = req.app.get("io");
     const room = `user_${ID_PERSONA}`;
     const message = "Tus roles han sido actualizados. Por favor, inicia sesión nuevamente.";
+    const socketsInRoom = io.sockets.adapter.rooms.get(room);
+    logger.debug(`Clientes en la sala ${room} antes de emitir: ${socketsInRoom ? socketsInRoom.size : 0}`);
+    if (!socketsInRoom || socketsInRoom.size === 0) {
+      logger.warn(`No hay clientes conectados en la sala ${room} antes de emitir notificación`);
+    }
     io.to(room).emit("sessionInvalidated", { message });
     logger.info(`Notificación Socket.IO enviada a la sala ${room} para actualizar roles`);
-    const socketsInRoom = io.sockets.adapter.rooms.get(room);
-    logger.debug(`Clientes en la sala ${room}: ${socketsInRoom ? socketsInRoom.size : 0}`);
-    if (!socketsInRoom || socketsInRoom.size === 0) {
-      logger.warn(`No hay clientes conectados en la sala ${room}`);
-    }
 
     // Verificar si el usuario tiene roles asignados
     const roleCheck = await pool
@@ -383,12 +383,13 @@ const manageRoles = async (req, res) => {
 
       // Enviar notificación Socket.IO adicional
       const deactivationMessage = "Tu acceso al sistema ha sido desactivado debido a la eliminación de todos los roles. Por favor, contacta al administrador.";
-      io.to(room).emit("sessionInvalidated", { message: deactivationMessage });
-      logger.info(`Notificación Socket.IO enviada a la sala ${room} por desactivación`);
-      logger.debug(`Clientes en la sala ${room}: ${socketsInRoom ? socketsInRoom.size : 0}`);
-      if (!socketsInRoom || socketsInRoom.size === 0) {
+      const socketsInRoomAfter = io.sockets.adapter.rooms.get(room);
+      logger.debug(`Clientes en la sala ${room} antes de emitir desactivación: ${socketsInRoomAfter ? socketsInRoomAfter.size : 0}`);
+      if (!socketsInRoomAfter || socketsInRoomAfter.size === 0) {
         logger.warn(`No hay clientes conectados en la sala ${room} para notificación de desactivación`);
       }
+      io.to(room).emit("sessionInvalidated", { message: deactivationMessage });
+      logger.info(`Notificación Socket.IO enviada a la sala ${room} por desactivación`);
     }
 
     res.status(200).json({ message: "Roles actualizados exitosamente" });
