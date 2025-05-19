@@ -206,7 +206,7 @@ const deletePerson = async (req, res) => {
 };
 
 const manageSystemAccess = async (req, res) => {
-  const { id } = req.params;
+  const { id } = req.params; // ID_PERSONA
   const { usuario, correo, roles, activar, nombres, apellidos } = req.body;
 
   try {
@@ -273,32 +273,48 @@ const manageSystemAccess = async (req, res) => {
         usuario,
       });
     } else {
-      // DESACTIVAR acceso usando el SP actualizado
+      // Verificar si el usuario existe
       const userInfo = await pool
         .request()
         .input("ID_PERSONA", sql.Int, id)
         .query(
-          "SELECT ID_PERSONA FROM MAE_USUARIO WHERE ID_PERSONA = @ID_PERSONA AND ESTADO = 1"
+          "SELECT ID_USUARIO, ID_PERSONA FROM MAE_USUARIO WHERE ID_PERSONA = @ID_PERSONA AND ESTADO = 1"
         );
 
       if (userInfo.recordset.length === 0) {
-        return res.status(404).json({ message: "Usuario no encontrado o ya inactivo" });
+        return res
+          .status(404)
+          .json({ message: "Usuario no encontrado o ya inactivo" });
       }
 
+      const { ID_USUARIO, ID_PERSONA } = userInfo.recordset[0];
+
+      // Desactivar usuario e incrementar INVALIDATION_COUNTER
       await pool
         .request()
         .input("ID_PERSONA", sql.Int, id)
         .execute("SP_QUITAR_ACCESO_SISTEMA");
 
+      // Invalidar sesiones en MAE_SESIONES
+      await pool.request().input("ID_USUARIO", sql.Int, ID_USUARIO).query(`
+          UPDATE MAE_SESIONES
+          SET ESTADO = 0
+          WHERE ID_USUARIO = @ID_USUARIO AND ESTADO = 1
+        `);
+
       // Enviar notificación Socket.IO
       const io = req.app.get("io");
-      const room = `user_${id}`;
-      io.to(room).emit("sessionInvalidated", {
-        message: "Tu acceso al sistema ha sido desactivado. Por favor, inicia sesión nuevamente.",
-      });
-      logger.info(`Notificación Socket.IO enviada a la sala ${room} para desactivar acceso`);
+      const room = `user_${ID_PERSONA}`;
+      const message =
+        "Tu acceso al sistema ha sido desactivado. Por favor, inicia sesión nuevamente.";
+      io.to(room).emit("sessionInvalidated", { message });
+      logger.info(
+        `Notificación Socket.IO enviada a la sala ${room} para desactivar acceso`
+      );
       const socketsInRoom = io.sockets.adapter.rooms.get(room);
-      logger.debug(`Clientes en la sala ${room}: ${socketsInRoom ? socketsInRoom.size : 0}`);
+      logger.debug(
+        `Clientes en la sala ${room}: ${socketsInRoom ? socketsInRoom.size : 0}`
+      );
       if (!socketsInRoom || socketsInRoom.size === 0) {
         logger.warn(`No hay clientes conectados en la sala ${room}`);
       }
@@ -317,7 +333,7 @@ const manageSystemAccess = async (req, res) => {
 };
 
 const manageRoles = async (req, res) => {
-  const { id } = req.params;
+  const { id } = req.params; // ID_USUARIO
   const { roles } = req.body;
 
   try {
@@ -332,7 +348,9 @@ const manageRoles = async (req, res) => {
       );
 
     if (userInfo.recordset.length === 0) {
-      return res.status(404).json({ message: "Usuario no encontrado o inactivo" });
+      return res
+        .status(404)
+        .json({ message: "Usuario no encontrado o inactivo" });
     }
 
     const ID_PERSONA = userInfo.recordset[0].ID_PERSONA;
@@ -352,17 +370,33 @@ const manageRoles = async (req, res) => {
         "UPDATE MAE_USUARIO SET INVALIDATION_COUNTER = ISNULL(INVALIDATION_COUNTER, 0) + 1 WHERE ID_USUARIO = @ID_USUARIO"
       );
 
+    // Invalidar sesiones en MAE_SESIONES
+    await pool.request().input("ID_USUARIO", sql.Int, id).query(`
+        UPDATE MAE_SESIONES
+        SET ESTADO = 0
+        WHERE ID_USUARIO = @ID_USUARIO AND ESTADO = 1
+      `);
+
     // Enviar notificación Socket.IO
     const io = req.app.get("io");
     const room = `user_${ID_PERSONA}`;
-    const message = "Tus roles han sido actualizados. Por favor, inicia sesión nuevamente.";
+    const message =
+      "Tus roles han sido actualizados. Por favor, inicia sesión nuevamente.";
     const socketsInRoom = io.sockets.adapter.rooms.get(room);
-    logger.debug(`Clientes en la sala ${room} antes de emitir: ${socketsInRoom ? socketsInRoom.size : 0}`);
+    logger.debug(
+      `Clientes en la sala ${room} antes de emitir: ${
+        socketsInRoom ? socketsInRoom.size : 0
+      }`
+    );
     if (!socketsInRoom || socketsInRoom.size === 0) {
-      logger.warn(`No hay clientes conectados en la sala ${room} antes de emitir notificación`);
+      logger.warn(
+        `No hay clientes conectados en la sala ${room} antes de emitir notificación`
+      );
     }
     io.to(room).emit("sessionInvalidated", { message });
-    logger.info(`Notificación Socket.IO enviada a la sala ${room} para actualizar roles`);
+    logger.info(
+      `Notificación Socket.IO enviada a la sala ${room} para actualizar roles`
+    );
 
     // Verificar si el usuario tiene roles asignados
     const roleCheck = await pool
@@ -381,15 +415,31 @@ const manageRoles = async (req, res) => {
           "UPDATE MAE_USUARIO SET ESTADO = 0, INVALIDATION_COUNTER = ISNULL(INVALIDATION_COUNTER, 0) + 1 WHERE ID_USUARIO = @ID_USUARIO"
         );
 
+      // Invalidar sesiones nuevamente
+      await pool.request().input("ID_USUARIO", sql.Int, id).query(`
+          UPDATE MAE_SESIONES
+          SET ESTADO = 0
+          WHERE ID_USUARIO = @ID_USUARIO AND ESTADO = 1
+        `);
+
       // Enviar notificación Socket.IO adicional
-      const deactivationMessage = "Tu acceso al sistema ha sido desactivado debido a la eliminación de todos los roles. Por favor, contacta al administrador.";
+      const deactivationMessage =
+        "Tu acceso al sistema ha sido desactivado debido a la eliminación de todos los roles. Por favor, contacta al administrador.";
       const socketsInRoomAfter = io.sockets.adapter.rooms.get(room);
-      logger.debug(`Clientes en la sala ${room} antes de emitir desactivación: ${socketsInRoomAfter ? socketsInRoomAfter.size : 0}`);
+      logger.debug(
+        `Clientes en la sala ${room} antes de emitir desactivación: ${
+          socketsInRoomAfter ? socketsInRoomAfter.size : 0
+        }`
+      );
       if (!socketsInRoomAfter || socketsInRoomAfter.size === 0) {
-        logger.warn(`No hay clientes conectados en la sala ${room} para notificación de desactivación`);
+        logger.warn(
+          `No hay clientes conectados en la sala ${room} para notificación de desactivación`
+        );
       }
       io.to(room).emit("sessionInvalidated", { message: deactivationMessage });
-      logger.info(`Notificación Socket.IO enviada a la sala ${room} por desactivación`);
+      logger.info(
+        `Notificación Socket.IO enviada a la sala ${room} por desactivación`
+      );
     }
 
     res.status(200).json({ message: "Roles actualizados exitosamente" });
@@ -445,7 +495,7 @@ const getPersonPhoto = async (req, res) => {
 };
 
 const changePassword = async (req, res) => {
-  const { id } = req.params;
+  const { id } = req.params; // ID_USUARIO
   const io = req.app.get("io");
 
   try {
@@ -461,7 +511,9 @@ const changePassword = async (req, res) => {
 
     if (userInfo.recordset.length === 0) {
       logger.error(`Usuario no encontrado o inactivo para ID_USUARIO: ${id}`);
-      return res.status(404).json({ message: "Usuario no encontrado o inactivo" });
+      return res
+        .status(404)
+        .json({ message: "Usuario no encontrado o inactivo" });
     }
 
     const { ID_PERSONA, CORREO, NOMBRES, APELLIDOS } = userInfo.recordset[0];
@@ -482,14 +534,25 @@ const changePassword = async (req, res) => {
         "UPDATE MAE_USUARIO SET CONTRASENA_HASH = @CONTRASENA_HASH, CONTRASENA_SALT = @CONTRASENA_SALT, PRIMER_INICIO = 1, INVALIDATION_COUNTER = ISNULL(INVALIDATION_COUNTER, 0) + 1 WHERE ID_USUARIO = @ID_USUARIO"
       );
 
+    // Invalidar sesiones en MAE_SESIONES
+    await pool.request().input("ID_USUARIO", sql.Int, id).query(`
+        UPDATE MAE_SESIONES
+        SET ESTADO = 0
+        WHERE ID_USUARIO = @ID_USUARIO AND ESTADO = 1
+      `);
+
     // Enviar notificación Socket.IO
     const room = `user_${ID_PERSONA}`;
-    io.to(room).emit("sessionInvalidated", {
-      message: "Tu contraseña ha sido restablecida. Por favor, inicia sesión nuevamente.",
-    });
-    logger.info(`Notificación Socket.IO enviada a la sala ${room} para restablecer contraseña`);
+    const message =
+      "Tu contraseña ha sido restablecida. Por favor, inicia sesión nuevamente.";
+    io.to(room).emit("sessionInvalidated", { message });
+    logger.info(
+      `Notificación Socket.IO enviada a la sala ${room} para restablecer contraseña`
+    );
     const socketsInRoom = io.sockets.adapter.rooms.get(room);
-    logger.debug(`Clientes en la sala ${room}: ${socketsInRoom ? socketsInRoom.size : 0}`);
+    logger.debug(
+      `Clientes en la sala ${room}: ${socketsInRoom ? socketsInRoom.size : 0}`
+    );
     if (!socketsInRoom || socketsInRoom.size === 0) {
       logger.warn(`No hay clientes conectados en la sala ${room}`);
     }
