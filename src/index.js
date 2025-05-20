@@ -72,7 +72,7 @@ app.use((req, res, next) => {
 
 // Configuración de Socket.IO mejorada
 io.on("connection", async (socket) => {
-  logger.info(`Nuevo cliente conectado: ${socket.id}`);
+  logger.info(`Nueva conexión: SocketID=${socket.id}, Token=${socket.handshake.auth.token}`);
 
   const token = socket.handshake.auth.token;
   if (!token || !token.startsWith("Bearer ")) {
@@ -147,7 +147,7 @@ io.on("connection", async (socket) => {
       ).join(", ")}`
     );
 
-    // Invalidar sesiones antiguas del mismo usuario con diferente SOCKET_ID o TOKEN
+    // Actualizar SOCKET_ID en la sesión activa
     await pool
       .request()
       .input("ID_USUARIO", sql.Int, decoded.id)
@@ -155,15 +155,14 @@ io.on("connection", async (socket) => {
       .input("TOKEN", sql.VarChar(500), tokenValue)
       .query(`
         UPDATE MAE_SESIONES
-        SET ESTADO = 0, SOCKET_ID = NULL
-        WHERE ID_USUARIO = @ID_USUARIO AND ESTADO = 1 
-          AND (SOCKET_ID IS NOT NULL AND SOCKET_ID != @SOCKET_ID OR TOKEN != @TOKEN)
+        SET SOCKET_ID = @SOCKET_ID
+        WHERE ID_USUARIO = @ID_USUARIO AND TOKEN = @TOKEN AND ESTADO = 1
       `);
     logger.info(
-      `Sesiones antiguas invalidadas para ID_USUARIO: ${decoded.id}, nuevo SOCKET_ID: ${socket.id}`
+      `SOCKET_ID ${socket.id} asignado a la sesión para ID_USUARIO: ${decoded.id}`
     );
 
-    // Verificar si la sesión activa existe antes de asignar SOCKET_ID
+    // Verificar si la sesión activa existe
     const sessionCheck = await pool
       .request()
       .input("TOKEN", sql.VarChar(500), tokenValue)
@@ -181,20 +180,6 @@ io.on("connection", async (socket) => {
       return;
     }
 
-    // Actualizar SOCKET_ID en MAE_SESIONES
-    await pool
-      .request()
-      .input("TOKEN", sql.VarChar(500), tokenValue)
-      .input("SOCKET_ID", sql.VarChar(100), socket.id)
-      .query(`
-        UPDATE MAE_SESIONES
-        SET SOCKET_ID = @SOCKET_ID
-        WHERE TOKEN = @TOKEN AND ESTADO = 1
-      `);
-    logger.info(
-      `SOCKET_ID ${socket.id} asignado a la sesión para ID_PERSONA: ${user.ID_PERSONA}`
-    );
-
     // Manejo de joinRoom
     socket.on("joinRoom", (roomName) => {
       if (roomName === room) {
@@ -210,7 +195,7 @@ io.on("connection", async (socket) => {
 
     // Heartbeat
     let heartbeatFailures = 0;
-    const maxHeartbeatFailures = 3;
+    const maxHeartbeatFailures = 5;
 
     socket.on("heartbeat", async (callback) => {
       try {
@@ -230,8 +215,9 @@ io.on("connection", async (socket) => {
           !sessionResult.recordset[0].ESTADO
         ) {
           logger.warn(
-            `Heartbeat: Sesión inválida o expirada para ${socket.id}, Intento ${heartbeatFailures +
-              1}/${maxHeartbeatFailures}`
+            `Heartbeat: Sesión inválida o expirada para ${socket.id}, Intento ${
+              heartbeatFailures + 1
+            }/${maxHeartbeatFailures}`
           );
           heartbeatFailures++;
           callback({
@@ -284,8 +270,9 @@ io.on("connection", async (socket) => {
         logger.debug(`Heartbeat exitoso para ${socket.id}`);
       } catch (error) {
         logger.error(
-          `Error en heartbeat para ${socket.id}: ${error.message}, Intento ${heartbeatFailures +
-            1}/${maxHeartbeatFailures}`
+          `Error en heartbeat para ${socket.id}: ${error.message}, Intento ${
+            heartbeatFailures + 1
+          }/${maxHeartbeatFailures}`
         );
         heartbeatFailures++;
         callback({
@@ -294,7 +281,7 @@ io.on("connection", async (socket) => {
         });
         if (heartbeatFailures >= maxHeartbeatFailures) {
           socket.disconnect();
-            logger.info(`Cliente ${socket.id} desconectado por fallos en heartbeat`);
+          logger.info(`Cliente ${socket.id} desconectado por fallos en heartbeat`);
         }
       }
     });
