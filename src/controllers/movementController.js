@@ -11,7 +11,8 @@ const getMovements = async (req, res) => {
           p.DNI,
           p.NOMBRES + ' ' + p.APELLIDOS AS nombre,
           p.CORREO,
-          a.NRO_DPTO,
+          a.NRO_DPTO AS id_departamento,
+          d.NRO_DPTO AS numero_dpto,
           d.ID_FASE,
           f.NOMBRE AS nombreFase,
           a.FECHA_ACCESO,
@@ -49,8 +50,8 @@ const getUsuarioPorDNI = async (req, res) => {
           p.NOMBRES + ' ' + p.APELLIDOS AS nombre,
           p.CORREO,
           (
-            SELECT 
-              d.ID_DEPARTAMENTO AS NRO_DPTO,
+            SELECT DISTINCT
+              d.NRO_DPTO AS NRO_DPTO,
               d.ID_FASE,
               f.NOMBRE AS nombreFase
             FROM MAE_RESIDENTE r
@@ -89,7 +90,7 @@ const registrarAccesoPorDNI = async (req, res) => {
       .input("DNI", dni)
       .input("NRO_DPTO", NRO_DPTO)
       .query(`
-        DECLARE @ID_PERSONA INT, @ID_TIPO_REGISTRO INT, @ID_QR INT;
+        DECLARE @ID_PERSONA INT, @ID_TIPO_REGISTRO INT, @ID_QR INT, @ID_DEPARTAMENTO INT;
 
         -- Obtener ID_PERSONA
         SELECT @ID_PERSONA = p.ID_PERSONA
@@ -102,13 +103,24 @@ const registrarAccesoPorDNI = async (req, res) => {
           RETURN;
         END
 
+        -- Obtener ID_DEPARTAMENTO correspondiente a NRO_DPTO
+        SELECT @ID_DEPARTAMENTO = d.ID_DEPARTAMENTO
+        FROM MAE_DEPARTAMENTO d
+        WHERE d.NRO_DPTO = @NRO_DPTO;
+
+        IF @ID_DEPARTAMENTO IS NULL
+        BEGIN
+          RAISERROR ('Departamento no encontrado', 16, 1);
+          RETURN;
+        END
+
         -- Verificar que el departamento pertenezca al usuario
         IF NOT EXISTS (
           SELECT 1
           FROM MAE_RESIDENTE r
           JOIN MAE_DEPARTAMENTO d ON r.ID_DEPARTAMENTO = d.ID_DEPARTAMENTO
           WHERE r.ID_PERSONA = @ID_PERSONA
-            AND d.ID_DEPARTAMENTO = @NRO_DPTO
+            AND d.NRO_DPTO = @NRO_DPTO
             AND r.ESTADO = 1
         )
         BEGIN
@@ -153,7 +165,7 @@ const registrarAccesoPorDNI = async (req, res) => {
           @ID_PERSONA,
           @ID_TIPO_REGISTRO,
           @ID_QR,
-          @NRO_DPTO,
+          @ID_DEPARTAMENTO,
           GETDATE(),
           1,
           NULL
