@@ -131,6 +131,7 @@ io.on("connection", async (socket) => {
           user.INVALIDATION_COUNTER
         }, Token=${decoded.invalidationCounter}, SocketID=${socket.id}`
       );
+      socket.emit("sessionInvalidated", { reason: "invalid_token" });
       socket.disconnect();
       return;
     }
@@ -176,6 +177,7 @@ io.on("connection", async (socket) => {
       logger.warn(
         `No se encontró sesión activa para TOKEN: ${tokenValue}, SocketID: ${socket.id}`
       );
+      socket.emit("sessionInvalidated", { reason: "no_active_session" });
       socket.disconnect();
       return;
     }
@@ -199,6 +201,7 @@ io.on("connection", async (socket) => {
 
     socket.on("heartbeat", async (callback) => {
       try {
+        logger.info(`Intentando conectar a la base de datos para heartbeat, SocketID: ${socket.id}`);
         const sessionResult = await pool
           .request()
           .input("TOKEN", sql.VarChar(500), tokenValue)
@@ -220,11 +223,9 @@ io.on("connection", async (socket) => {
             }/${maxHeartbeatFailures}`
           );
           heartbeatFailures++;
-          callback({
-            valid: false,
-            message: `Sesión inválida o expirada (Intento ${heartbeatFailures}/${maxHeartbeatFailures})`,
-          });
+          callback({ valid: false });
           if (heartbeatFailures >= maxHeartbeatFailures) {
+            socket.emit("sessionInvalidated", { reason: "session_expired" });
             socket.disconnect();
             logger.info(`Cliente ${socket.id} desconectado por fallos en heartbeat`);
           }
@@ -241,11 +242,9 @@ io.on("connection", async (socket) => {
             }, Intento ${heartbeatFailures + 1}/${maxHeartbeatFailures}`
           );
           heartbeatFailures++;
-          callback({
-            valid: false,
-            message: `Sesión inválida (Intento ${heartbeatFailures}/${maxHeartbeatFailures})`,
-          });
+          callback({ valid: false });
           if (heartbeatFailures >= maxHeartbeatFailures) {
+            socket.emit("sessionInvalidated", { reason: "invalidation_counter_mismatch" });
             socket.disconnect();
             logger.info(`Cliente ${socket.id} desconectado por fallos en heartbeat`);
           }
@@ -275,11 +274,9 @@ io.on("connection", async (socket) => {
           }/${maxHeartbeatFailures}`
         );
         heartbeatFailures++;
-        callback({
-          valid: false,
-          message: `Error al validar sesión (Intento ${heartbeatFailures}/${maxHeartbeatFailures})`,
-        });
+        callback({ valid: false });
         if (heartbeatFailures >= maxHeartbeatFailures) {
+          socket.emit("sessionInvalidated", { reason: "server_error" });
           socket.disconnect();
           logger.info(`Cliente ${socket.id} desconectado por fallos en heartbeat`);
         }
