@@ -12,6 +12,7 @@ const {
   forgotPassword,
   verifyCode,
   resetPassword,
+  logout,
 } = require("../controllers/authController");
 const authMiddleware = require("../middleware/authMiddleware");
 const { checkPermission } = require("../middleware/permissions");
@@ -21,8 +22,7 @@ const upload = require("../config/multerConfig");
 router.post("/upload-login-images", authMiddleware, upload.single("image"), uploadImage);
 router.delete("/delete-login-image/:imageId", authMiddleware, deleteLoginImage);
 router.post("/refresh-token", refreshToken);
-router.get("/movements", authMiddleware,  getAllMovements);
-
+router.get("/movements", authMiddleware, getAllMovements);
 
 // Rutas sin permisos de token porque esta afuera en el login
 router.post("/login", login);
@@ -32,4 +32,6 @@ router.put("/auth/change-password", authMiddleware, changeAuthenticatedUserPassw
 router.post("/forgot-password", forgotPassword);
 router.post("/verify-code", verifyCode);
 router.post("/reset-password", resetPassword);
+router.post("/logout", authMiddleware, logout); // Nueva ruta
+
 module.exports = router;

@@ -149,21 +149,31 @@ const login = async (req, res) => {
         `);
 
       if (newAttempts >= 5) {
-        await pool
-          .request()
-          .input("id", sql.Int, user.ID_USUARIO)
-          .query(`
+        await pool.request().input("id", sql.Int, user.ID_USUARIO).query(`
             UPDATE MAE_USUARIO 
             SET ESTADO = 0,
                 INVALIDATION_COUNTER = ISNULL(INVALIDATION_COUNTER, 0) + 1
             WHERE ID_USUARIO = @id
           `);
 
+        // Invalidar sesiones en MAE_SESIONES
+        await pool.request().input("ID_USUARIO", sql.Int, user.ID_USUARIO)
+          .query(`
+            UPDATE MAE_SESIONES
+            SET ESTADO = 0
+            WHERE ID_USUARIO = @ID_USUARIO AND ESTADO = 1
+          `);
+
         // Notificar a través de Socket.IO
         const io = req.app.get("io");
-        io.to(`user_${user.ID_PERSONA}`).emit("sessionInvalidated", {
-          message: "Tu sesión ha sido cerrada porque tu cuenta fue bloqueada por múltiples intentos fallidos.",
+        const room = `user_${user.ID_PERSONA}`;
+        io.to(room).emit("sessionInvalidated", {
+          message:
+            "Tu sesión ha sido cerrada porque tu cuenta fue bloqueada por múltiples intentos fallidos.",
         });
+        logger.info(
+          `Notificación Socket.IO enviada a la sala ${room} por cuenta bloqueada`
+        );
 
         return res.status(403).json({
           code: "ACCOUNT_LOCKED",
@@ -178,10 +188,7 @@ const login = async (req, res) => {
       });
     }
 
-    await pool
-      .request()
-      .input("id", sql.Int, user.ID_USUARIO)
-      .query(`
+    await pool.request().input("id", sql.Int, user.ID_USUARIO).query(`
         UPDATE MAE_USUARIO 
         SET INTENTOS_FALLIDOS_CONTRASEÑA = NULL,
             CODIGO_VERIFICACION = NULL,
@@ -226,6 +233,24 @@ const login = async (req, res) => {
       user.ID_PERSONA,
       user.INVALIDATION_COUNTER
     );
+
+    // Guardar sesión en MAE_SESIONES
+    const fechaCreacion = new Date();
+    const fechaExpiracion = new Date(fechaCreacion.getTime() + 3600 * 1000); // 1 hora
+    await pool
+      .request()
+      .input("ID_USUARIO", sql.Int, user.ID_USUARIO)
+      .input("ID_PERSONA", sql.Int, user.ID_PERSONA)
+      .input("TOKEN", sql.VarChar(500), token)
+      .input("FECHA_CREACION", sql.DateTime, fechaCreacion)
+      .input("FECHA_EXPIRACION", sql.DateTime, fechaExpiracion).query(`
+        INSERT INTO MAE_SESIONES (ID_USUARIO, ID_PERSONA, TOKEN, FECHA_CREACION, FECHA_EXPIRACION, ESTADO)
+        VALUES (@ID_USUARIO, @ID_PERSONA, @TOKEN, @FECHA_CREACION, @FECHA_EXPIRACION, 1)
+      `);
+    logger.info(
+      `Sesión creada para ID_USUARIO: ${user.ID_USUARIO}, ID_PERSONA: ${user.ID_PERSONA}`
+    );
+
     const permissions = await getUserPermissions(user.ID_USUARIO);
 
     res.status(200).json({
@@ -292,8 +317,7 @@ const forgotPassword = async (req, res) => {
     await pool
       .request()
       .input("id", sql.Int, user.ID_USUARIO)
-      .input("code", sql.VarChar(6), code)
-      .query(`
+      .input("code", sql.VarChar(6), code).query(`
         UPDATE MAE_USUARIO 
         SET CODIGO_VERIFICACION = @code, 
             CODIGO_VERIFICACION_EXPIRA = DATEADD(minute, 15, GETDATE()),
@@ -303,7 +327,10 @@ const forgotPassword = async (req, res) => {
         WHERE ID_USUARIO = @id
       `);
 
-    const templatePath = path.join(__dirname, "../../html/verificationCodeEmail.html");
+    const templatePath = path.join(
+      __dirname,
+      "../../html/verificationCodeEmail.html"
+    );
     let emailTemplate;
     try {
       emailTemplate = await fs.readFile(templatePath, "utf-8");
@@ -362,8 +389,7 @@ const verifyCode = async (req, res) => {
 
   try {
     const pool = await poolPromise;
-    const result = await pool.request()
-      .input("dni", sql.VarChar(12), dni)
+    const result = await pool.request().input("dni", sql.VarChar(12), dni)
       .query(`
         SELECT u.ID_USUARIO, u.ID_PERSONA, u.CODIGO_VERIFICACION, u.CODIGO_VERIFICACION_EXPIRA, u.INTENTOS_CODIGO_FALLIDO, p.CORREO, p.NOMBRES, p.APELLIDOS
         FROM MAE_USUARIO u
@@ -373,20 +399,21 @@ const verifyCode = async (req, res) => {
 
     const user = result.recordset[0];
     if (!user) {
-      return res.status(404).json({ success: false, message: "Usuario no encontrado" });
+      return res
+        .status(404)
+        .json({ success: false, message: "Usuario no encontrado" });
     }
 
     const intentosFallidos = user.INTENTOS_CODIGO_FALLIDO || 0;
-    const codigoExpirado = new Date(user.CODIGO_VERIFICACION_EXPIRA) < new Date();
+    const codigoExpirado =
+      new Date(user.CODIGO_VERIFICACION_EXPIRA) < new Date();
     const codigoIncorrecto = user.CODIGO_VERIFICACION !== code;
 
     if (codigoExpirado || codigoIncorrecto) {
       const nuevosIntentos = intentosFallidos + 1;
 
       if (nuevosIntentos >= 3) {
-        await pool.request()
-          .input("id", sql.Int, user.ID_USUARIO)
-          .query(`
+        await pool.request().input("id", sql.Int, user.ID_USUARIO).query(`
             UPDATE MAE_USUARIO 
             SET CODIGO_VERIFICACION = NULL,
                 CODIGO_VERIFICACION_EXPIRA = NULL,
@@ -398,10 +425,10 @@ const verifyCode = async (req, res) => {
           message: "Código inválido. Se ha superado el número de intentos.",
         });
       } else {
-        await pool.request()
+        await pool
+          .request()
           .input("id", sql.Int, user.ID_USUARIO)
-          .input("intentos", sql.Int, nuevosIntentos)
-          .query(`
+          .input("intentos", sql.Int, nuevosIntentos).query(`
             UPDATE MAE_USUARIO 
             SET INTENTOS_CODIGO_FALLIDO = @intentos
             WHERE ID_USUARIO = @id
@@ -417,11 +444,11 @@ const verifyCode = async (req, res) => {
     const salt = await bcrypt.genSalt(10);
     const hashedPassword = await bcrypt.hash(newPassword, salt);
 
-    await pool.request()
+    await pool
+      .request()
       .input("id", sql.Int, user.ID_USUARIO)
       .input("CONTRASENA_HASH", sql.VarChar(255), hashedPassword)
-      .input("CONTRASENA_SALT", sql.VarChar(50), salt)
-      .query(`
+      .input("CONTRASENA_SALT", sql.VarChar(50), salt).query(`
         UPDATE MAE_USUARIO 
         SET CODIGO_VERIFICACION = NULL,
             CODIGO_VERIFICACION_EXPIRA = NULL,
@@ -434,7 +461,10 @@ const verifyCode = async (req, res) => {
         WHERE ID_USUARIO = @id
       `);
 
-    const templatePath = path.join(__dirname, "../../html/resetPasswordEmail.html");
+    const templatePath = path.join(
+      __dirname,
+      "../../html/resetPasswordEmail.html"
+    );
     let emailTemplate;
     try {
       emailTemplate = await fs.readFile(templatePath, "utf-8");
@@ -451,7 +481,10 @@ const verifyCode = async (req, res) => {
     emailTemplate = emailTemplate
       .replace("{{fullName}}", fullName)
       .replace("{{newPassword}}", newPassword)
-      .replace("${process.env.FRONTEND_URL}", process.env.FRONTEND_URL || "http://localhost:5173");
+      .replace(
+        "${process.env.FRONTEND_URL}",
+        process.env.FRONTEND_URL || "http://localhost:5173"
+      );
 
     const transporter = nodemailer.createTransport({
       service: "gmail",
@@ -466,7 +499,9 @@ const verifyCode = async (req, res) => {
         html: emailTemplate,
       });
     } catch (emailError) {
-      logger.error(`Error al enviar correo a ${user.CORREO}: ${emailError.message}`);
+      logger.error(
+        `Error al enviar correo a ${user.CORREO}: ${emailError.message}`
+      );
       return res.status(500).json({
         success: false,
         message: "Error al enviar el correo de restablecimiento",
@@ -485,7 +520,9 @@ const verifyCode = async (req, res) => {
       message: "Código verificado. Nueva contraseña enviada al correo.",
     });
   } catch (error) {
-    logger.error(`Error al verificar código para DNI: ${dni}: ${error.message}`);
+    logger.error(
+      `Error al verificar código para DNI: ${dni}: ${error.message}`
+    );
     res.status(500).json({
       success: false,
       message: "Error al verificar código",
@@ -520,7 +557,8 @@ const validate = async (req, res) => {
       return res.status(401).json({ message: "Usuario no encontrado" });
     if (user.INVALIDATION_COUNTER !== decoded.invalidationCounter) {
       return res.status(401).json({
-        message: "Sesión inválida debido a INVALIDATION_COUNTER. Por favor, inicia sesión nuevamente.",
+        message:
+          "Sesión inválida debido a INVALIDATION_COUNTER. Por favor, inicia sesión nuevamente.",
       });
     }
     const rolesResult = await pool
@@ -556,6 +594,7 @@ const validate = async (req, res) => {
     res.status(401).json({ message: "Error al validar el token" });
   }
 };
+
 const uploadImage = async (req, res) => {
   if (!req.file)
     return res
@@ -570,7 +609,11 @@ const uploadImage = async (req, res) => {
     const { buffer, originalname, mimetype } = req.file;
     const customName = req.body.customName?.trim();
     const finalName = customName
-      ? `${customName}${originalname.includes(".") ? originalname.slice(originalname.lastIndexOf(".")) : ""}`
+      ? `${customName}${
+          originalname.includes(".")
+            ? originalname.slice(originalname.lastIndexOf("."))
+            : ""
+        }`
       : originalname;
     const pool = await poolPromise;
     await pool
@@ -822,7 +865,10 @@ const resetPassword = async (req, res) => {
       WHERE ID_USUARIO = @id
     `);
 
-    const templatePath = path.join(__dirname, "../../html/resetPasswordEmail.html");
+    const templatePath = path.join(
+      __dirname,
+      "../../html/resetPasswordEmail.html"
+    );
     let emailTemplate;
     try {
       emailTemplate = await fs.readFile(templatePath, "utf-8");
@@ -838,7 +884,10 @@ const resetPassword = async (req, res) => {
     emailTemplate = emailTemplate
       .replace("{{fullName}}", fullName)
       .replace("{{newPassword}}", newPassword)
-      .replace("${process.env.FRONTEND_URL}", process.env.FRONTEND_URL || "http://localhost:5173");
+      .replace(
+        "${process.env.FRONTEND_URL}",
+        process.env.FRONTEND_URL || "http://localhost:5173"
+      );
 
     const transporter = nodemailer.createTransport({
       service: "gmail",
@@ -853,7 +902,9 @@ const resetPassword = async (req, res) => {
         html: emailTemplate,
       });
     } catch (emailError) {
-      logger.error(`Error al enviar correo a ${user.CORREO}: ${emailError.message}`);
+      logger.error(
+        `Error al enviar correo a ${user.CORREO}: ${emailError.message}`
+      );
       return res.status(500).json({
         message: "Error al enviar el correo de restablecimiento",
         error: emailError.message,
@@ -866,7 +917,9 @@ const resetPassword = async (req, res) => {
       message: "Tu sesión ha sido cerrada porque se restableció tu contraseña.",
     });
 
-    res.status(200).json({ message: "Contraseña restablecida y enviada al correo" });
+    res
+      .status(200)
+      .json({ message: "Contraseña restablecida y enviada al correo" });
   } catch (error) {
     logger.error(
       `Error al restablecer contraseña para DNI: ${dni}: ${error.message}`
@@ -875,6 +928,51 @@ const resetPassword = async (req, res) => {
       message: "Error al restablecer contraseña",
       error: error.message,
     });
+  }
+};
+
+const logout = async (req, res) => {
+  const authHeader = req.headers.authorization;
+  if (!authHeader || !authHeader.startsWith("Bearer ")) {
+    return res.status(401).json({ message: "Token no proporcionado" });
+  }
+
+  const token = authHeader.split(" ")[1];
+  try {
+    const pool = await poolPromise;
+
+    // Obtener ID_PERSONA para notificar al cliente
+    const sessionResult = await pool
+      .request()
+      .input("TOKEN", sql.VarChar(500), token).query(`
+        SELECT ID_PERSONA
+        FROM MAE_SESIONES
+        WHERE TOKEN = @TOKEN AND ESTADO = 1
+      `);
+
+    const session = sessionResult.recordset[0];
+    if (session && session.ID_PERSONA) {
+      const io = req.app.get("io");
+      io.to(`user_${session.ID_PERSONA}`).emit("sessionInvalidated", {
+        message: "Tu sesión ha sido cerrada.",
+      });
+      logger.info(
+        `Notificación Socket.IO enviada a user_${session.ID_PERSONA} por cierre de sesión`
+      );
+    }
+
+    // Actualizar la sesión para establecer ESTADO = 0 y limpiar SOCKET_ID
+    await pool.request().input("TOKEN", sql.VarChar(500), token).query(`
+        UPDATE MAE_SESIONES
+        SET ESTADO = 0, SOCKET_ID = NULL
+        WHERE TOKEN = @TOKEN AND ESTADO = 1
+      `);
+
+    logger.info(`Sesión cerrada para token: ${token}`);
+    res.status(200).json({ message: "Sesión cerrada exitosamente" });
+  } catch (error) {
+    logger.error(`Error al cerrar sesión: ${error.message}`);
+    res.status(500).json({ message: "Error al cerrar sesión" });
   }
 };
 
@@ -890,4 +988,5 @@ module.exports = {
   forgotPassword,
   verifyCode,
   resetPassword,
+  logout,
 };
