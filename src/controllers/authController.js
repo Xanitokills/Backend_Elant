@@ -761,18 +761,19 @@ const getAllMovements = async (req, res) => {
 
 const refreshToken = async (req, res) => {
   const authHeader = req.headers.authorization;
-  if (!authHeader || !authHeader.startsWith("Bearer "))
-    return res
-      .status(401)
-      .json({ message: "Token no proporcionado o formato inválido" });
+  if (!authHeader || !authHeader.startsWith("Bearer ")) {
+    logger.warn("Token no proporcionado o formato inválido en refreshToken");
+    return res.status(401).json({ message: "Token no proporcionado o formato inválido" });
+  }
   const token = authHeader.split(" ")[1];
-  if (!process.env.JWT_SECRET)
-    return res
-      .status(500)
-      .json({ message: "Error del servidor: JWT_SECRET no está definido" });
+  if (!process.env.JWT_SECRET) {
+    logger.error("JWT_SECRET no está definido en refreshToken");
+    return res.status(500).json({ message: "Error del servidor: JWT_SECRET no está definido" });
+  }
   try {
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
     const userId = decoded.id;
+    logger.info(`Iniciando renovación de token para userId: ${userId}`);
     const pool = await poolPromise;
     const result = await pool.request().input("id", sql.Int, userId).query(`
       SELECT u.ID_USUARIO, p.ID_PERSONA, p.NOMBRES, p.APELLIDOS, u.PRIMER_INICIO, u.INVALIDATION_COUNTER 
@@ -780,17 +781,18 @@ const refreshToken = async (req, res) => {
       JOIN MAE_PERSONA p ON u.ID_PERSONA = p.ID_PERSONA
       WHERE u.ID_USUARIO = @id AND u.ESTADO = 1 AND p.ESTADO = 1
     `);
-    const user = result.recordset[0];
-    if (!user)
+    if (!result.recordset[0]) {
+      logger.warn(`Usuario no encontrado para ID: ${userId}`);
       return res.status(401).json({ message: "Usuario no encontrado" });
+    }
+    const user = result.recordset[0];
     if (user.INVALIDATION_COUNTER !== decoded.invalidationCounter) {
+      logger.warn(`INVALIDATION_COUNTER no coincide para userId ${userId}: DB=${user.INVALIDATION_COUNTER}, Token=${decoded.invalidationCounter}`);
       return res.status(401).json({
         message: "Sesión inválida. Por favor, inicia sesión nuevamente.",
       });
     }
-    const rolesResult = await pool
-      .request()
-      .input("userId", sql.Int, user.ID_USUARIO).query(`
+    const rolesResult = await pool.request().input("userId", sql.Int, user.ID_USUARIO).query(`
       SELECT t.ID_ROL, t.DETALLE_USUARIO 
       FROM MAE_USUARIO_ROL ur 
       JOIN MAE_TIPO_USUARIO t ON ur.ID_ROL = t.ID_ROL 
@@ -804,9 +806,7 @@ const refreshToken = async (req, res) => {
       user.INVALIDATION_COUNTER
     );
     const permissions = await getUserPermissions(user.ID_USUARIO);
-    logger.info(
-      `Token renovado exitosamente para usuario ID: ${user.ID_USUARIO}`
-    );
+    logger.info(`Token renovado para userId: ${user.ID_USUARIO}, INVALIDATION_COUNTER: ${user.INVALIDATION_COUNTER}`);
     res.status(200).json({
       token: newToken,
       userName: `${user.NOMBRES} ${user.APELLIDOS}`,
@@ -821,14 +821,14 @@ const refreshToken = async (req, res) => {
       permissions,
     });
   } catch (error) {
-    logger.error(`Error al renovar el token: ${error.message}`);
-    if (error.name === "TokenExpiredError")
+    logger.error(`Error en refreshToken para token ${token.slice(0, 10)}...: ${error.message}, Stack: ${error.stack}`);
+    if (error.name === "TokenExpiredError") {
       return res.status(401).json({ message: "Token expirado" });
-    if (error.name === "JsonWebTokenError")
+    }
+    if (error.name === "JsonWebTokenError") {
       return res.status(401).json({ message: "Token inválido" });
-    res
-      .status(500)
-      .json({ message: "Error al renovar el token", error: error.message });
+    }
+    res.status(500).json({ message: "Error al renovar el token", error: error.message });
   }
 };
 
