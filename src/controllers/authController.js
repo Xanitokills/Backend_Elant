@@ -775,7 +775,9 @@ const refreshToken = async (req, res) => {
     const userId = decoded.id;
     const pool = await poolPromise;
     const result = await pool.request().input("id", sql.Int, userId).query(`
-      SELECT u.ID_USUARIO, p.ID_PERSONA, p.NOMBRES, p.APELLIDOS, u.PRIMER_INICIO, u.INVALIDATION_COUNTER 
+     
+
+ SELECT u.ID_USUARIO, p.ID_PERSONA, p.NOMBRES, p.APELLIDOS, u.PRIMER_INICIO, u.INVALIDATION_COUNTER 
       FROM MAE_USUARIO u 
       JOIN MAE_PERSONA p ON u.ID_PERSONA = p.ID_PERSONA
       WHERE u.ID_USUARIO = @id AND u.ESTADO = 1 AND p.ESTADO = 1
@@ -803,6 +805,35 @@ const refreshToken = async (req, res) => {
       user.ID_PERSONA,
       user.INVALIDATION_COUNTER
     );
+
+    // Invalidar la sesión anterior
+    await pool
+      .request()
+      .input("TOKEN", sql.VarChar(500), token)
+      .query(`
+        UPDATE MAE_SESIONES
+        SET ESTADO = 0, SOCKET_ID = NULL
+        WHERE TOKEN = @TOKEN AND ESTADO = 1
+      `);
+
+    // Registrar la nueva sesión
+    const fechaCreacion = new Date();
+    const fechaExpiracion = new Date(fechaCreacion.getTime() + 3600 * 1000); // 1 hora
+    await pool
+      .request()
+      .input("ID_USUARIO", sql.Int, user.ID_USUARIO)
+      .input("ID_PERSONA", sql.Int, user.ID_PERSONA)
+      .input("TOKEN", sql.VarChar(500), newToken)
+      .input("FECHA_CREACION", sql.DateTime, fechaCreacion)
+      .input("FECHA_EXPIRACION", sql.DateTime, fechaExpiracion)
+      .query(`
+        INSERT INTO MAE_SESIONES (ID_USUARIO, ID_PERSONA, TOKEN, FECHA_CREACION, FECHA_EXPIRACION, ESTADO)
+        VALUES (@ID_USUARIO, @ID_PERSONA, @TOKEN, @FECHA_CREACION, @FECHA_EXPIRACION, 1)
+      `);
+    logger.info(
+      `Nueva sesión creada tras renovación para ID_USUARIO: ${user.ID_USUARIO}, ID_PERSONA: ${user.ID_PERSONA}`
+    );
+
     const permissions = await getUserPermissions(user.ID_USUARIO);
     logger.info(
       `Token renovado exitosamente para usuario ID: ${user.ID_USUARIO}`
