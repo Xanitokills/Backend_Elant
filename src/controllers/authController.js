@@ -775,9 +775,7 @@ const refreshToken = async (req, res) => {
     const userId = decoded.id;
     const pool = await poolPromise;
     const result = await pool.request().input("id", sql.Int, userId).query(`
-     
-
- SELECT u.ID_USUARIO, p.ID_PERSONA, p.NOMBRES, p.APELLIDOS, u.PRIMER_INICIO, u.INVALIDATION_COUNTER 
+      SELECT u.ID_USUARIO, p.ID_PERSONA, p.NOMBRES, p.APELLIDOS, u.PRIMER_INICIO, u.INVALIDATION_COUNTER 
       FROM MAE_USUARIO u 
       JOIN MAE_PERSONA p ON u.ID_PERSONA = p.ID_PERSONA
       WHERE u.ID_USUARIO = @id AND u.ESTADO = 1 AND p.ESTADO = 1
@@ -803,7 +801,7 @@ const refreshToken = async (req, res) => {
       user.ID_USUARIO,
       roles,
       user.ID_PERSONA,
-      user.INVALIDATION_COUNTER
+      user.INVALIDATION_COUNTER // Mantener el mismo invalidationCounter
     );
 
     // Invalidar la sesión anterior
