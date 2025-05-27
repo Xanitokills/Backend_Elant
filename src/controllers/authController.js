@@ -701,18 +701,21 @@ const changeAuthenticatedUserPassword = async (req, res) => {
     const pool = await poolPromise;
     const result = await pool.request().input("ID_USUARIO", sql.Int, userId)
       .query(`
-      SELECT CONTRASENA_HASH, ID_PERSONA 
-      FROM MAE_USUARIO 
-      WHERE ID_USUARIO = @ID_USUARIO AND ESTADO = 1
+      SELECT u.CONTRASENA_HASH, u.ID_PERSONA, p.NOMBRES, p.APELLIDOS, u.INVALIDATION_COUNTER
+      FROM MAE_USUARIO u
+      JOIN MAE_PERSONA p ON u.ID_PERSONA = p.ID_PERSONA
+      WHERE u.ID_USUARIO = @ID_USUARIO AND u.ESTADO = 1
     `);
     if (result.recordset.length === 0)
       return res.status(404).json({ message: "Usuario no encontrado" });
-    const { CONTRASENA_HASH, ID_PERSONA } = result.recordset[0];
+    const { CONTRASENA_HASH, ID_PERSONA, NOMBRES, APELLIDOS, INVALIDATION_COUNTER } = result.recordset[0];
     const isValid = await bcrypt.compare(currentPassword, CONTRASENA_HASH);
     if (!isValid)
       return res.status(401).json({ message: "Contraseña actual incorrecta" });
     const salt = await bcrypt.genSalt(10);
     const newHashedPassword = await bcrypt.hash(newPassword, salt);
+
+    // Actualizar la contraseña sin incrementar INVALIDATION_COUNTER
     await pool
       .request()
       .input("ID_USUARIO", sql.Int, userId)
@@ -721,18 +724,112 @@ const changeAuthenticatedUserPassword = async (req, res) => {
       UPDATE MAE_USUARIO 
       SET CONTRASENA_HASH = @CONTRASENA_HASH, 
           CONTRASENA_SALT = @CONTRASENA_SALT, 
-          PRIMER_INICIO = 0,
-          INVALIDATION_COUNTER = ISNULL(INVALIDATION_COUNTER, 0) + 1
+          PRIMER_INICIO = 0
       WHERE ID_USUARIO = @ID_USUARIO
     `);
 
-    // Notificar a través de Socket.IO
-    const io = req.app.get("io");
-    io.to(`user_${ID_PERSONA}`).emit("sessionInvalidated", {
-      message: "Tu sesión ha sido cerrada porque cambiaste tu contraseña.",
-    });
+    // Obtener roles del usuario
+    const rolesResult = await pool
+      .request()
+      .input("userId", sql.Int, userId).query(`
+      SELECT t.ID_ROL, t.DETALLE_USUARIO 
+      FROM MAE_USUARIO_ROL ur 
+      JOIN MAE_TIPO_USUARIO t ON ur.ID_ROL = t.ID_ROL 
+      WHERE ur.ID_USUARIO = @userId AND t.ESTADO = 1
+    `);
+    const roles = rolesResult.recordset.map((r) => r.DETALLE_USUARIO);
 
-    res.status(200).json({ message: "Contraseña actualizada con éxito" });
+    // Generar un nuevo token con el mismo INVALIDATION_COUNTER
+    const generateToken = (userId, roles, idPersona, invalidationCounter) => {
+      if (!process.env.JWT_SECRET) throw new Error("JWT_SECRET no está definido");
+      return jwt.sign(
+        { id: userId, roles, idPersona, invalidationCounter },
+        process.env.JWT_SECRET,
+        {
+          expiresIn: process.env.ExpiresInToken,
+        }
+      );
+    };
+    const newToken = generateToken(userId, roles, ID_PERSONA, INVALIDATION_COUNTER);
+
+    // Registrar la nueva sesión con el nuevo token
+    const fechaCreacion = new Date();
+    const fechaExpiracion = new Date(fechaCreacion.getTime() + 3600 * 1000); // 1 hora
+    await pool
+      .request()
+      .input("ID_USUARIO", sql.Int, userId)
+      .input("ID_PERSONA", sql.Int, ID_PERSONA)
+      .input("TOKEN", sql.VarChar(500), newToken)
+      .input("FECHA_CREACION", sql.DateTime, fechaCreacion)
+      .input("FECHA_EXPIRACION", sql.DateTime, fechaExpiracion).query(`
+        INSERT INTO MAE_SESIONES (ID_USUARIO, ID_PERSONA, TOKEN, FECHA_CREACION, FECHA_EXPIRACION, ESTADO)
+        VALUES (@ID_USUARIO, @ID_PERSONA, @TOKEN, @FECHA_CREACION, @FECHA_EXPIRACION, 1)
+      `);
+
+    // Obtener permisos
+    const getUserPermissions = async (userId) => {
+      try {
+        const pool = await poolPromise;
+        const result = await pool.request().input("userId", sql.Int, userId).query(`
+          SELECT 'Menú' AS Tipo, m.ID_MENU AS ID, m.NOMBRE AS Nombre, m.URL AS URL, m.ICONO AS Icono, m.ORDEN AS Orden, NULL AS ID_SUBMENU, NULL AS SUBMENU_NOMBRE, NULL AS SUBMENU_URL, NULL AS SUBMENU_ICONO, NULL AS SUBMENU_ORDEN
+          FROM MAE_ROL_MENU rm JOIN MAE_MENU m ON rm.ID_MENU = m.ID_MENU JOIN MAE_USUARIO_ROL ur ON ur.ID_ROL = rm.ID_ROL
+          WHERE ur.ID_USUARIO = @userId AND m.ESTADO = 1
+          UNION ALL
+          SELECT 'Submenú' AS Tipo, s.ID_MENU AS ID, m.NOMBRE AS Nombre, m.URL AS URL, m.ICONO AS Icono, m.ORDEN AS Orden, s.ID_SUBMENU AS ID_SUBMENU, s.NOMBRE AS SUBMENU_NOMBRE, s.URL AS SUBMENU_URL, s.ICONO AS SUBMENU_ICONO, s.ORDEN AS SUBMENU_ORDEN
+          FROM MAE_ROL_SUBMENU rs JOIN MAE_SUBMENU s ON rs.ID_SUBMENU = s.ID_SUBMENU JOIN MAE_MENU m ON s.ID_MENU = m.ID_MENU JOIN MAE_USUARIO_ROL ur ON ur.ID_ROL = rs.ID_ROL
+          WHERE ur.ID_USUARIO = @userId AND s.ESTADO = 1 AND m.ESTADO = 1
+          ORDER BY Orden ASC, Tipo DESC, SUBMENU_ORDEN ASC
+        `);
+        const rows = result.recordset;
+        const menusMap = new Map();
+        rows.forEach((row) => {
+          if (row.Tipo === "Menú")
+            menusMap.set(row.ID, {
+              id: row.ID,
+              nombre: row.NOMBRE,
+              url: row.URL,
+              icono: row.Icono,
+              orden: row.Orden,
+              submenus: [],
+            });
+        });
+        rows.forEach((row) => {
+          if (row.Tipo === "Submenú" && menusMap.has(row.ID))
+            menusMap.get(row.ID).submenus.push({
+              id: row.ID_SUBMENU,
+              nombre: row.SUBMENU_NOMBRE,
+              url: row.SUBMENU_URL,
+              icono: row.SUBMENU_ICONO,
+              orden: row.SUBMENU_ORDEN,
+            });
+        });
+        const permissions = Array.from(menusMap.values())
+          .sort((a, b) => a.orden - b.orden)
+          .map((menu) => {
+            menu.submenus.sort((a, b) => a.orden - b.orden);
+            return menu;
+          });
+        return permissions;
+      } catch (error) {
+        console.error(`Error al obtener permisos para usuario ${userId}: ${error.message}`);
+        return [];
+      }
+    };
+    const permissions = await getUserPermissions(userId);
+
+    res.status(200).json({
+      message: "Contraseña actualizada con éxito",
+      token: newToken,
+      userName: `${NOMBRES} ${APELLIDOS}`,
+      roles,
+      user: {
+        id: userId,
+        personaId: ID_PERSONA,
+        name: `${NOMBRES} ${APELLIDOS}`,
+        roles,
+      },
+      permissions,
+    });
   } catch (error) {
     console.error("Error al cambiar la contraseña:", error);
     res.status(500).json({ message: "Error del servidor" });
