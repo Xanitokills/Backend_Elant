@@ -72,7 +72,9 @@ app.use((req, res, next) => {
 
 // Configuración de Socket.IO mejorada
 io.on("connection", async (socket) => {
-  logger.info(`Nueva conexión: SocketID=${socket.id}, Token=${socket.handshake.auth.token}`);
+  logger.info(
+    `Nueva conexión: SocketID=${socket.id}, Token=${socket.handshake.auth.token}`
+  );
 
   const token = socket.handshake.auth.token;
   if (!token || !token.startsWith("Bearer ")) {
@@ -86,9 +88,7 @@ io.on("connection", async (socket) => {
   try {
     decoded = jwt.verify(tokenValue, process.env.JWT_SECRET);
     logger.info(
-      `✅ Token Socket.IO decodificado: ID=${decoded.id}, ID_PERSONA=${
-        decoded.idPersona
-      }, INVALIDATION_COUNTER=${decoded.invalidationCounter}, SocketID=${socket.id}`
+      `✅ Token Socket.IO decodificado: ID=${decoded.id}, ID_PERSONA=${decoded.idPersona}, INVALIDATION_COUNTER=${decoded.invalidationCounter}, SocketID=${socket.id}`
     );
   } catch (err) {
     logger.error(
@@ -104,8 +104,7 @@ io.on("connection", async (socket) => {
     const result = await pool
       .request()
       .input("ID_USUARIO", sql.Int, decoded.id)
-      .input("TOKEN", sql.VarChar(500), tokenValue)
-      .query(`
+      .input("TOKEN", sql.VarChar(500), tokenValue).query(`
         SELECT u.ID_USUARIO, u.ID_PERSONA, u.INVALIDATION_COUNTER, s.ESTADO, s.SOCKET_ID
         FROM MAE_USUARIO u
         LEFT JOIN MAE_SESIONES s ON u.ID_USUARIO = s.ID_USUARIO 
@@ -127,9 +126,7 @@ io.on("connection", async (socket) => {
       !user.ESTADO
     ) {
       logger.warn(
-        `🚫 Token Socket.IO inválido: Contador de invalidación no coincide. DB=${
-          user.INVALIDATION_COUNTER
-        }, Token=${decoded.invalidationCounter}, SocketID=${socket.id}`
+        `🚫 Token Socket.IO inválido: Contador de invalidación no coincide. DB=${user.INVALIDATION_COUNTER}, Token=${decoded.invalidationCounter}, SocketID=${socket.id}`
       );
       socket.emit("sessionInvalidated", { reason: "invalid_token" });
       socket.disconnect();
@@ -143,7 +140,9 @@ io.on("connection", async (socket) => {
     // Confirmar unión a la sala
     socket.emit("joinedRoom", { room });
     logger.debug(
-      `Cliente ${socket.id} confirmado en sala ${room}, Salas actuales: ${Array.from(
+      `Cliente ${
+        socket.id
+      } confirmado en sala ${room}, Salas actuales: ${Array.from(
         socket.rooms
       ).join(", ")}`
     );
@@ -153,8 +152,7 @@ io.on("connection", async (socket) => {
       .request()
       .input("ID_USUARIO", sql.Int, decoded.id)
       .input("SOCKET_ID", sql.VarChar(100), socket.id)
-      .input("TOKEN", sql.VarChar(500), tokenValue)
-      .query(`
+      .input("TOKEN", sql.VarChar(500), tokenValue).query(`
         UPDATE MAE_SESIONES
         SET SOCKET_ID = @SOCKET_ID
         WHERE ID_USUARIO = @ID_USUARIO AND TOKEN = @TOKEN AND ESTADO = 1
@@ -166,8 +164,7 @@ io.on("connection", async (socket) => {
     // Verificar si la sesión activa existe
     const sessionCheck = await pool
       .request()
-      .input("TOKEN", sql.VarChar(500), tokenValue)
-      .query(`
+      .input("TOKEN", sql.VarChar(500), tokenValue).query(`
         SELECT ID_USUARIO, ESTADO, SOCKET_ID
         FROM MAE_SESIONES
         WHERE TOKEN = @TOKEN AND ESTADO = 1
@@ -201,12 +198,13 @@ io.on("connection", async (socket) => {
 
     socket.on("heartbeat", async (callback) => {
       try {
-        logger.info(`Intentando conectar a la base de datos para heartbeat, SocketID: ${socket.id}`);
+        logger.info(
+          `Intentando conectar a la base de datos para heartbeat, SocketID: ${socket.id}`
+        );
         const sessionResult = await pool
           .request()
           .input("TOKEN", sql.VarChar(500), tokenValue)
-          .input("ID_USUARIO", sql.Int, decoded.id)
-          .query(`
+          .input("ID_USUARIO", sql.Int, decoded.id).query(`
             SELECT u.INVALIDATION_COUNTER, s.ESTADO, s.SOCKET_ID
             FROM MAE_USUARIO u
             JOIN MAE_SESIONES s ON u.ID_USUARIO = s.ID_USUARIO
@@ -227,7 +225,9 @@ io.on("connection", async (socket) => {
           if (heartbeatFailures >= maxHeartbeatFailures) {
             socket.emit("sessionInvalidated", { reason: "session_expired" });
             socket.disconnect();
-            logger.info(`Cliente ${socket.id} desconectado por fallos en heartbeat`);
+            logger.info(
+              `Cliente ${socket.id} desconectado por fallos en heartbeat`
+            );
           }
           return;
         }
@@ -244,9 +244,13 @@ io.on("connection", async (socket) => {
           heartbeatFailures++;
           callback({ valid: false });
           if (heartbeatFailures >= maxHeartbeatFailures) {
-            socket.emit("sessionInvalidated", { reason: "invalidation_counter_mismatch" });
+            socket.emit("sessionInvalidated", {
+              reason: "invalidation_counter_mismatch",
+            });
             socket.disconnect();
-            logger.info(`Cliente ${socket.id} desconectado por fallos en heartbeat`);
+            logger.info(
+              `Cliente ${socket.id} desconectado por fallos en heartbeat`
+            );
           }
           return;
         }
@@ -255,8 +259,7 @@ io.on("connection", async (socket) => {
           await pool
             .request()
             .input("TOKEN", sql.VarChar(500), tokenValue)
-            .input("SOCKET_ID", sql.VarChar(100), socket.id)
-            .query(`
+            .input("SOCKET_ID", sql.VarChar(100), socket.id).query(`
               UPDATE MAE_SESIONES
               SET SOCKET_ID = @SOCKET_ID
               WHERE TOKEN = @TOKEN AND ESTADO = 1
@@ -278,7 +281,9 @@ io.on("connection", async (socket) => {
         if (heartbeatFailures >= maxHeartbeatFailures) {
           socket.emit("sessionInvalidated", { reason: "server_error" });
           socket.disconnect();
-          logger.info(`Cliente ${socket.id} desconectado por fallos en heartbeat`);
+          logger.info(
+            `Cliente ${socket.id} desconectado por fallos en heartbeat`
+          );
         }
       }
     });
@@ -292,65 +297,41 @@ io.on("connection", async (socket) => {
         }`
       );
 
-      // Verificar la sesión inmediatamente antes de programar la limpieza
-      const sessionCheck = await pool
-        .request()
-        .input("SOCKET_ID", sql.VarChar(100), socket.id)
-        .input("TOKEN", sql.VarChar(500), tokenValue)
-        .query(`
-          SELECT SOCKET_ID, ESTADO
-          FROM MAE_SESIONES
-          WHERE SOCKET_ID = @SOCKET_ID AND TOKEN = @TOKEN AND ESTADO = 1
-        `);
+      try {
+        // Verificar la sesión antes de limpiar
+        const sessionCheck = await pool
+          .request()
+          .input("SOCKET_ID", sql.VarChar(100), socket.id)
+          .input("TOKEN", sql.VarChar(500), tokenValue).query(`
+        SELECT SOCKET_ID, ESTADO
+        FROM MAE_SESIONES
+        WHERE SOCKET_ID = @SOCKET_ID AND TOKEN = @TOKEN AND ESTADO = 1
+      `);
 
-      if (!sessionCheck.recordset.length) {
-        logger.info(
-          `SOCKET_ID ${socket.id} no requiere limpieza: sesión ya inactiva o no encontrada`
-        );
-        return;
-      }
-
-      // Programar limpieza con retraso
-      setTimeout(async () => {
-        try {
-          const activeSessionCheck = await pool
-            .request()
-            .input("SOCKET_ID", sql.VarChar(100), socket.id)
-            .input("TOKEN", sql.VarChar(500), tokenValue)
-            .query(`
-              SELECT SOCKET_ID, ESTADO
-              FROM MAE_SESIONES
-              WHERE SOCKET_ID = @SOCKET_ID AND TOKEN = @TOKEN AND ESTADO = 1
-            `);
-
-          if (
-            !activeSessionCheck.recordset.length ||
-            activeSessionCheck.recordset[0].ESTADO === 0
-          ) {
-            logger.info(
-              `SOCKET_ID ${socket.id} no limpiado: sesión ya inactiva o no encontrada`
-            );
-            return;
-          }
-
-          await pool
-            .request()
-            .input("SOCKET_ID", sql.VarChar(100), socket.id)
-            .input("TOKEN", sql.VarChar(500), tokenValue)
-            .query(`
-              UPDATE MAE_SESIONES
-              SET SOCKET_ID = NULL
-              WHERE SOCKET_ID = @SOCKET_ID AND TOKEN = @TOKEN AND ESTADO = 1
-            `);
+        if (!sessionCheck.recordset.length) {
           logger.info(
-            `SOCKET_ID ${socket.id} limpiado de MAE_SESIONES tras 60 segundos`
+            `SOCKET_ID ${socket.id} no requiere limpieza: sesión ya inactiva o no encontrada`
           );
-        } catch (error) {
-          logger.error(
-            `Error al limpiar SOCKET_ID ${socket.id}: ${error.message}`
-          );
+          return;
         }
-      }, 60000);
+
+        // Limpiar SOCKET_ID y establecer ESTADO = 0 inmediatamente
+        await pool
+          .request()
+          .input("SOCKET_ID", sql.VarChar(100), socket.id)
+          .input("TOKEN", sql.VarChar(500), tokenValue).query(`
+        UPDATE MAE_SESIONES
+        SET SOCKET_ID = NULL, ESTADO = 0
+        WHERE SOCKET_ID = @SOCKET_ID AND TOKEN = @TOKEN AND ESTADO = 1
+      `);
+        logger.info(
+          `SOCKET_ID ${socket.id} y ESTADO limpiados inmediatamente de MAE_SESIONES`
+        );
+      } catch (error) {
+        logger.error(
+          `Error al limpiar SOCKET_ID ${socket.id}: ${error.message}`
+        );
+      }
     });
   } catch (error) {
     logger.error(
