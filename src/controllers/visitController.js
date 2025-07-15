@@ -4,7 +4,6 @@ const jwt = require("jsonwebtoken");
 const logger = require("../config/logger");
 const sql = require("mssql");
 
-// Endpoint para registrar una visita
 const registerVisit = async (req, res) => {
   const {
     nombre_visitante,
@@ -12,23 +11,39 @@ const registerVisit = async (req, res) => {
     id_residente,
     fecha_ingreso,
     motivo,
-    id_usuario_registro,
     id_tipo_doc_visitante,
     estado,
   } = req.body;
 
-  // Validar campos requeridos
+  // Obtener userId del token decodificado
+  const id_usuario_registro = req.user.id;
+
+  // Validar campos requeridos y convertir id_tipo_doc_visitante e id_residente a número
+  const parsedIdTipoDoc = parseInt(id_tipo_doc_visitante, 10);
+  const parsedIdResidente = parseInt(id_residente, 10);
   if (
     !nombre_visitante ||
     !nro_doc_visitante ||
-    !id_residente ||
+    !parsedIdResidente ||
     !fecha_ingreso ||
-    !id_usuario_registro ||
-    !id_tipo_doc_visitante
+    !motivo ||
+    isNaN(parsedIdTipoDoc)
   ) {
     return res.status(400).json({
       message:
         "Todos los campos requeridos deben estar completos, incluyendo el tipo de documento",
+    });
+  }
+
+  // Validar que fecha_ingreso no sea futura
+  const currentDate = new Date();
+  const fechaIngresoDate = new Date(fecha_ingreso);
+  if (fechaIngresoDate > currentDate) {
+    logger.warn(
+      `Intento de registrar visita con fecha_ingreso futura: ${fecha_ingreso}`
+    );
+    return res.status(400).json({
+      message: "La fecha de ingreso no puede ser futura",
     });
   }
 
@@ -38,9 +53,10 @@ const registerVisit = async (req, res) => {
     // Validar que id_usuario_registro exista en MAE_USUARIO
     const userCheck = await pool
       .request()
-      .input("id_usuario_registro", id_usuario_registro).query(`
+      .input("id_usuario_registro", sql.Int, id_usuario_registro)
+      .query(`
         SELECT ID_USUARIO
-        FROM [BACKUP_12-05-2025].dbo.MAE_USUARIO
+        FROM MAE_USUARIO
         WHERE ID_USUARIO = @id_usuario_registro
       `);
 
@@ -50,17 +66,34 @@ const registerVisit = async (req, res) => {
         .json({ message: "El ID de usuario registro no es válido" });
     }
 
+    // Validar que id_residente exista en MAE_RESIDENTE
+    const residentCheck = await pool
+      .request()
+      .input("id_residente", sql.Int, parsedIdResidente)
+      .query(`
+        SELECT ID_RESIDENTE
+        FROM MAE_RESIDENTE
+        WHERE ID_RESIDENTE = @id_residente
+      `);
+
+    if (!residentCheck.recordset.length) {
+      return res
+        .status(400)
+        .json({ message: "El ID del residente no es válido" });
+    }
+
     // Insertar la visita
     const result = await pool
       .request()
-      .input("nombre_visitante", nombre_visitante.toUpperCase())
-      .input("nro_doc_visitante", nro_doc_visitante)
-      .input("id_residente", id_residente)
-      .input("fecha_ingreso", fecha_ingreso)
-      .input("motivo", motivo)
-      .input("id_usuario_registro", id_usuario_registro)
-      .input("id_tipo_doc_visitante", id_tipo_doc_visitante)
-      .input("estado", estado || 1).query(`
+      .input("nombre_visitante", sql.VarChar, nombre_visitante.toUpperCase())
+      .input("nro_doc_visitante", sql.VarChar, nro_doc_visitante)
+      .input("id_residente", sql.Int, parsedIdResidente)
+      .input("fecha_ingreso", sql.DateTime, fecha_ingreso)
+      .input("motivo", sql.VarChar, motivo)
+      .input("id_usuario_registro", sql.Int, id_usuario_registro)
+      .input("id_tipo_doc_visitante", sql.Int, parsedIdTipoDoc)
+      .input("estado", sql.Int, estado || 1)
+      .query(`
         INSERT INTO MAE_VISITA (
           NOMBRE_VISITANTE, NRO_DOC_VISITANTE, ID_RESIDENTE, FECHA_INGRESO, 
           MOTIVO, ID_USUARIO_REGISTRO, ID_TIPO_DOC_VISITANTE, ESTADO
@@ -72,17 +105,25 @@ const registerVisit = async (req, res) => {
         )
       `);
 
+    logger.info(
+      `Visita registrada: ID_VISITA=${result.recordset[0].ID_VISITA}, FECHA_INGRESO=${fecha_ingreso}`
+    );
     res.status(201).json({
       message: "Visita registrada exitosamente",
       ID_VISITA: result.recordset[0].ID_VISITA,
     });
   } catch (error) {
-    console.error("Error al registrar visita:", error);
+    logger.error("Error al registrar visita:", {
+      message: error.message,
+      stack: error.stack,
+      requestBody: req.body,
+    });
     res
       .status(500)
       .json({ message: "Error del servidor", error: error.message });
   }
 };
+
 
 // Endpoint para listar todas las visitas
 const getAllVisits = async (req, res) => {
@@ -200,7 +241,7 @@ const getOwnersByDpto = async (req, res) => {
 // Endpoint para terminar una visita
 const endVisit = async (req, res) => {
   const { id_visita } = req.params;
-  const { id_usuario_registro } = req.body;
+  const id_usuario_registro = req.user.id; // Obtener ID del usuario del token
 
   if (!id_visita || isNaN(id_visita)) {
     return res.status(400).json({
@@ -208,66 +249,93 @@ const endVisit = async (req, res) => {
     });
   }
 
-  if (!id_usuario_registro || isNaN(id_usuario_registro)) {
-    return res.status(400).json({
-      message:
-        "El ID del usuario registro es requerido y debe ser un número válido",
-    });
-  }
-
   try {
     const pool = await poolPromise;
+    const transaction = new sql.Transaction(pool);
+    await transaction.begin();
 
-    // Verificar si la visita existe y está activa
-    const visitCheck = await pool
-      .request()
-      .input("id_visita", sql.Int, id_visita).query(`
-        SELECT ESTADO, FECHA_SALIDA 
-        FROM MAE_VISITA 
-        WHERE ID_VISITA = @id_visita
-      `);
+    try {
+      // Verificar si la visita existe y está activa
+      const visitCheck = await transaction
+        .request()
+        .input("id_visita", sql.Int, id_visita)
+        .query(`
+          SELECT ESTADO, FECHA_INGRESO, FECHA_SALIDA 
+          FROM MAE_VISITA 
+          WHERE ID_VISITA = @id_visita
+        `);
 
-    if (visitCheck.recordset.length === 0) {
-      return res.status(404).json({ message: "Visita no encontrada" });
+      if (visitCheck.recordset.length === 0) {
+        await transaction.rollback();
+        return res.status(404).json({ message: "Visita no encontrada" });
+      }
+
+      const visit = visitCheck.recordset[0];
+      if (visit.ESTADO === 0 || visit.FECHA_SALIDA) {
+        await transaction.rollback();
+        return res.status(400).json({ message: "La visita ya está terminada" });
+      }
+
+      // Validar que id_usuario_registro exista en MAE_USUARIO
+      const userCheck = await transaction
+        .request()
+        .input("id_usuario_registro", sql.Int, id_usuario_registro)
+        .query(`
+          SELECT ID_USUARIO
+          FROM MAE_USUARIO
+          WHERE ID_USUARIO = @id_usuario_registro
+        `);
+
+      if (!userCheck.recordset.length) {
+        await transaction.rollback();
+        return res
+          .status(400)
+          .json({ message: "El ID de usuario registro no es válido" });
+      }
+
+      // Obtener la fecha actual del servidor
+      const currentDate = new Date();
+      const fechaIngreso = new Date(visit.FECHA_INGRESO);
+
+      // Validar que FECHA_SALIDA no sea anterior a FECHA_INGRESO
+      if (currentDate < fechaIngreso) {
+        await transaction.rollback();
+        logger.warn(
+          `Intento de establecer FECHA_SALIDA (${currentDate}) antes de FECHA_INGRESO (${fechaIngreso}) para ID_VISITA=${id_visita}`
+        );
+        return res.status(400).json({
+          message:
+            "La fecha de salida no puede ser anterior a la fecha de ingreso",
+        });
+      }
+
+      // Actualizar la visita
+      await transaction
+        .request()
+        .input("id_visita", sql.Int, id_visita)
+        .input("id_usuario_registro", sql.Int, id_usuario_registro)
+        .input("fecha_salida", sql.DateTime, currentDate)
+        .query(`
+          UPDATE MAE_VISITA
+          SET ESTADO = 0, 
+              FECHA_SALIDA = @fecha_salida,
+              ID_USUARIO_REGISTRO = @id_usuario_registro
+          WHERE ID_VISITA = @id_visita
+        `);
+
+      await transaction.commit();
+      logger.info(`Visita ID=${id_visita} terminada exitosamente`);
+      res.status(200).json({ message: "Visita terminada exitosamente" });
+    } catch (error) {
+      await transaction.rollback();
+      throw error;
     }
-
-    if (
-      visitCheck.recordset[0].ESTADO === 0 ||
-      visitCheck.recordset[0].FECHA_SALIDA
-    ) {
-      return res.status(400).json({ message: "La visita ya está terminada" });
-    }
-
-    // Validar que id_usuario_registro exista en MAE_USUARIO
-    const userCheck = await pool
-      .request()
-      .input("id_usuario_registro", sql.Int, id_usuario_registro).query(`
-        SELECT ID_USUARIO
-        FROM MAE_USUARIO
-        WHERE ID_USUARIO = @id_usuario_registro
-      `);
-
-    if (!userCheck.recordset.length) {
-      return res
-        .status(400)
-        .json({ message: "El ID de usuario registro no es válido" });
-    }
-
-    // Actualizar la visita
-    await pool
-      .request()
-      .input("id_visita", sql.Int, id_visita)
-      .input("id_usuario_registro", sql.Int, id_usuario_registro).query(`
-        UPDATE MAE_VISITA
-        SET ESTADO = 0, 
-            FECHA_SALIDA = GETDATE(),
-            ID_USUARIO_REGISTRO = @id_usuario_registro
-        WHERE ID_VISITA = @id_visita
-      `);
-
-    res.status(200).json({ message: "Visita terminada exitosamente" });
   } catch (error) {
-    console.error("Error al terminar la visita:", error);
+    logger.error("Error al terminar la visita:", {
+      message: error.message,
+      stack: error.stack,
+      id_visita,
+    });
     res
       .status(500)
       .json({ message: "Error del servidor", error: error.message });
