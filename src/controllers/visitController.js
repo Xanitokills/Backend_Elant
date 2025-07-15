@@ -622,11 +622,12 @@ const getScheduledVisits = async (req, res) => {
 // Endpoint para registrar una visita programada como visita activa
 const acceptScheduledVisit = async (req, res) => {
   const { id_visita_programada } = req.params;
-  const { id_usuario_registro } = req.body;
+  const id_usuario_registro = req.user.id; // Obtener id_usuario_registro desde req.user
 
-  if (!id_visita_programada || !id_usuario_registro) {
+  // Validar que id_usuario_registro sea un número válido
+  if (!id_visita_programada || !id_usuario_registro || isNaN(id_usuario_registro)) {
     return res.status(400).json({
-      message: "ID de visita programada y usuario registro son requeridos",
+      message: "ID de visita programada y usuario registro son requeridos y deben ser válidos",
     });
   }
 
@@ -694,7 +695,7 @@ const acceptScheduledVisit = async (req, res) => {
         .input("id_tipo_doc_visitante", scheduledVisit.ID_TIPO_DOC_VISITANTE)
         .input("fecha_ingreso", new Date())
         .input("motivo", scheduledVisit.MOTIVO)
-        .input("id_usuario_registro", id_usuario_registro)
+        .input("id_usuario_registro", sql.Int, id_usuario_registro)
         .input("estado", 1).query(`
           INSERT INTO MAE_VISITA (
             ID_RESIDENTE, NOMBRE_VISITANTE, NRO_DOC_VISITANTE, ID_TIPO_DOC_VISITANTE, 
@@ -736,8 +737,13 @@ const acceptScheduledVisit = async (req, res) => {
 
 // visitController.js
 const getOwnerDepartments = async (req, res) => {
-  const { id } = req.params;
+  const id = req.user.id; // Obtener el id directamente de req.user
   try {
+    // Validar que id sea un número válido
+    if (!id || isNaN(id)) {
+      return res.status(400).json({ message: "ID de usuario no válido" });
+    }
+
     const pool = await poolPromise;
     const result = await pool.request().input("id_usuario", sql.Int, id).query(`
         SELECT DISTINCT d.NRO_DPTO, f.NOMBRE AS NOMBRE_FASE
@@ -749,15 +755,18 @@ const getOwnerDepartments = async (req, res) => {
         WHERE u.ID_USUARIO = @id_usuario AND d.ESTADO = 1 AND r.ESTADO = 1
         ORDER BY f.NOMBRE, d.NRO_DPTO
       `);
+
     const departments = result.recordset.map((row) => ({
       NRO_DPTO: row.NRO_DPTO,
       NOMBRE_FASE: row.NOMBRE_FASE,
     }));
+
     if (departments.length === 0) {
       return res
         .status(404)
         .json({ message: "No se encontraron departamentos para este usuario" });
     }
+
     res.status(200).json(departments);
   } catch (error) {
     console.error("Error al obtener departamentos:", error);
@@ -1060,17 +1069,24 @@ const getDepartmentsByPhase = async (req, res) => {
 };
 
 const getUserData = async (req, res) => {
-  const { id } = req.params;
+  const id = req.user.id; // Obtener el id desde req.user
   try {
+    // Validar que id sea un número válido
+    if (!id || isNaN(id)) {
+      return res.status(400).json({ message: "ID de usuario no válido" });
+    }
+
     const pool = await poolPromise;
     const result = await pool.request().input("id_usuario", sql.Int, id).query(`
       SELECT ID_PERSONA
       FROM MAE_USUARIO
       WHERE ID_USUARIO = @id_usuario AND ESTADO = 1
     `);
+
     if (!result.recordset[0]) {
       return res.status(404).json({ message: "Usuario no encontrado" });
     }
+
     res.status(200).json(result.recordset[0]);
   } catch (error) {
     console.error("Error al obtener datos del usuario:", error);
