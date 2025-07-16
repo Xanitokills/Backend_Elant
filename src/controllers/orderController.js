@@ -77,6 +77,23 @@ const searchPersons = async (req, res) => {
   }
 };
 
+const getAllPhases = async (req, res) => {
+  try {
+    const pool = await poolPromise;
+    const result = await pool
+      .request()
+      .execute("sp_GetAllPhases");
+
+    const raw = result.recordset?.[0];
+    const responseData = raw ? JSON.parse(raw[Object.keys(raw)[0]]) : [];
+
+    res.status(200).json(responseData);
+  } catch (err) {
+    logger.error(`Error en getAllPhases: ${err.message}`);
+    res.status(500).json({ message: "Error del servidor", error: err.message });
+  }
+};
+
 const getPhasesByDepartmentNumber = async (req, res) => {
   try {
     const { nroDpto } = req.query;
@@ -121,7 +138,7 @@ const registerOrder = async (req, res) => {
 
     try {
       const { description, personId, department } = req.body;
-      const authUserId = req.user.ID_USUARIO;
+      const authUserId = req.user.id;
       const photo = req.file;
 
       if (!description || description.trim().length < 5) {
@@ -227,6 +244,7 @@ const markOrderDelivered = async (req, res) => {
 
 module.exports = {
   searchPersons,
+  getAllPhases,
   getPhasesByDepartmentNumber,
   getAllOrders,
   registerOrder,
