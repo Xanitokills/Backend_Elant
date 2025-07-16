@@ -23,7 +23,7 @@ const upload = multer({
 
 const searchPersons = async (req, res) => {
   try {
-    const { criteria, query } = req.query;
+    const { criteria, query, phase } = req.query;
 
     if (!criteria || !["name", "dni", "department"].includes(criteria)) {
       return res.status(400).json({ message: "Criterio de búsqueda inválido" });
@@ -46,35 +46,57 @@ const searchPersons = async (req, res) => {
       .request()
       .input("Criteria", sql.VarChar, criteria)
       .input("Query", sql.VarChar, query)
+      .input("Phase", sql.VarChar, phase || null)
       .execute("sp_SearchPersonsForOrder");
 
     const raw = result.recordset?.[0];
-    let responseData = raw ? JSON.parse(raw[Object.keys(raw)[0]]) : [];
+    const responseData = raw ? JSON.parse(raw[Object.keys(raw)[0]]) : [];
 
-    if (criteria === "department") {
-      responseData = responseData.map(dept => ({
-        NRO_DPTO: dept.NRO_DPTO,
-        USUARIOS: dept.USUARIOS.map(user => ({
-          ID_PERSONA: user.ID_PERSONA,
-          NOMBRES: user.NOMBRES,
-          APELLIDOS: user.APELLIDOS,
-          DNI: user.DNI,
-          NRO_DPTO: user.NRO_DPTO,
-        })),
-      }));
-    } else {
-      responseData = responseData.map(person => ({
-        ID_PERSONA: person.ID_PERSONA,
-        NOMBRES: person.NOMBRES,
-        APELLIDOS: person.APELLIDOS, // Corregido: user.APELLIDOS -> person.APELLIDOS
-        DNI: person.DNI,
-        NRO_DPTO: person.NRO_DPTO,
-      }));
+    const formattedData = responseData.map(person => ({
+      ID_PERSONA: person.ID_PERSONA,
+      NOMBRES: person.NOMBRES,
+      APELLIDOS: person.APELLIDOS,
+      DNI: person.DNI,
+      ID_DEPARTAMENTO: person.ID_DEPARTAMENTO,
+      NRO_DPTO: person.NRO_DPTO,
+      FASE: person.FASE,
+      ES_PROPIETARIO: person.ID_CLASIFICACION === 1,
+      USUARIOS_ASOCIADOS: person.USUARIOS_ASOCIADOS.map(user => ({
+        ID_PERSONA: user.ID_PERSONA,
+        NOMBRES: user.NOMBRES,
+        APELLIDOS: user.APELLIDOS,
+        DNI: user.DNI,
+        ES_PROPIETARIO: user.ID_CLASIFICACION === 1,
+      })),
+    }));
+
+    res.status(200).json(formattedData);
+  } catch (err) {
+    logger.error(`Error en searchPersons: ${err.message}`);
+    res.status(500).json({ message: "Error del servidor", error: err.message });
+  }
+};
+
+const getPhasesByDepartmentNumber = async (req, res) => {
+  try {
+    const { nroDpto } = req.query;
+
+    if (!nroDpto || isNaN(nroDpto)) {
+      return res.status(400).json({ message: "El número de departamento debe ser válido" });
     }
+
+    const pool = await poolPromise;
+    const result = await pool
+      .request()
+      .input("NroDpto", sql.VarChar, nroDpto)
+      .execute("sp_GetPhasesByDepartmentNumber");
+
+    const raw = result.recordset?.[0];
+    const responseData = raw ? JSON.parse(raw[Object.keys(raw)[0]]) : [];
 
     res.status(200).json(responseData);
   } catch (err) {
-    logger.error(`Error en searchPersons: ${err.message}`);
+    logger.error(`Error en getPhasesByDepartmentNumber: ${err.message}`);
     res.status(500).json({ message: "Error del servidor", error: err.message });
   }
 };
@@ -99,27 +121,26 @@ const registerOrder = async (req, res) => {
 
     try {
       const { description, personId, department } = req.body;
-      const authUserId = req.user.id;
+      const authUserId = req.user.ID_USUARIO;
       const photo = req.file;
 
       if (!description || description.trim().length < 5) {
         return res.status(400).json({ message: "La descripción debe tener al menos 5 caracteres" });
       }
-      if (!personId && !department) {
-        return res.status(400).json({ message: "Debe especificar una persona o departamento" });
+      if (!personId || !department) {
+        return res.status(400).json({ message: "Debe especificar una persona y un departamento" });
       }
 
-      // Validar que personId exista en MAE_RESIDENTE si se proporciona
-      if (personId) {
-        const pool = await poolPromise;
-        const result = await pool
-          .request()
-          .input("PersonId", sql.Int, personId)
-          .query("SELECT ID_RESIDENTE FROM MAE_RESIDENTE WHERE ID_PERSONA = @PersonId");
-        
-        if (result.recordset.length === 0) {
-          return res.status(400).json({ message: "La persona seleccionada no está registrada como residente" });
-        }
+      // Validar que personId exista en MAE_RESIDENTE
+      const pool = await poolPromise;
+      const result = await pool
+        .request()
+        .input("PersonId", sql.Int, personId)
+        .input("DepartmentId", sql.Int, department)
+        .query("SELECT ID_RESIDENTE FROM MAE_RESIDENTE WHERE ID_PERSONA = @PersonId AND ID_DEPARTAMENTO = @DepartmentId AND ESTADO = 1");
+      
+      if (result.recordset.length === 0) {
+        return res.status(400).json({ message: "La persona seleccionada no está registrada como residente activo en el departamento especificado" });
       }
 
       let photoBuffer = null;
@@ -132,12 +153,11 @@ const registerOrder = async (req, res) => {
         photoFormat = "jpg";
       }
 
-      const pool = await poolPromise;
-      const result = await pool
+      const resultOrder = await pool
         .request()
         .input("Description", sql.VarChar, description.trim())
-        .input("PersonId", sql.Int, personId || null)
-        .input("Department", sql.Int, department || null)
+        .input("PersonId", sql.Int, personId)
+        .input("Department", sql.Int, department)
         .input("ReceptionistId", sql.Int, authUserId)
         .input("Photo", sql.VarBinary, photoBuffer)
         .input("PhotoFormat", sql.VarChar, photoFormat)
@@ -145,7 +165,7 @@ const registerOrder = async (req, res) => {
 
       res.status(200).json({
         message: "Encargo registrado exitosamente",
-        data: result.recordset,
+        data: resultOrder.recordset,
       });
     } catch (err) {
       logger.error(`Error en registerOrder: ${err.message}`);
@@ -207,6 +227,7 @@ const markOrderDelivered = async (req, res) => {
 
 module.exports = {
   searchPersons,
+  getPhasesByDepartmentNumber,
   getAllOrders,
   registerOrder,
   markOrderDelivered,
