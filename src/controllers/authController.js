@@ -384,8 +384,13 @@ const forgotPassword = async (req, res) => {
 
 const verifyCode = async (req, res) => {
   const { dni, code } = req.body;
+  
+  // Log de entrada para depuración
+  console.log(`DNI recibido: ${dni}, Código recibido: ${code}`);
+  console.log(`Hora actual del servidor: ${new Date().toISOString()}`);
+
   if (!validateDNI(dni))
-    return res.status(400).json({ message: "DNI inválido" });
+    return res.status(400).json({ success: false, message: "DNI inválido" });
 
   try {
     const pool = await poolPromise;
@@ -398,6 +403,8 @@ const verifyCode = async (req, res) => {
       `);
 
     const user = result.recordset[0];
+    console.log(`Usuario encontrado: ${JSON.stringify(user)}`);
+
     if (!user) {
       return res
         .status(404)
@@ -405,9 +412,22 @@ const verifyCode = async (req, res) => {
     }
 
     const intentosFallidos = user.INTENTOS_CODIGO_FALLIDO || 0;
-    const codigoExpirado =
-      new Date(user.CODIGO_VERIFICACION_EXPIRA) < new Date();
-    const codigoIncorrecto = user.CODIGO_VERIFICACION !== code;
+    // Ajustar la fecha de expiración para la zona horaria de Perú (UTC-5)
+    const expirationDate = new Date(user.CODIGO_VERIFICACION_EXPIRA);
+    const expirationTime = expirationDate.getTime() + (5 * 60 * 60 * 1000); // Sumar 5 horas para ajustar de UTC a UTC-5
+    const currentTime = Date.now();
+    const codigoExpirado = expirationTime < currentTime;
+    const codigoIncorrecto =
+      !code ||
+      code.length !== 6 ||
+      String(user.CODIGO_VERIFICACION).toLowerCase() !== code.toLowerCase();
+
+    // Log para depurar las condiciones de error
+    console.log(`Código almacenado: ${user.CODIGO_VERIFICACION}`);
+    console.log(`Fecha de expiración (original): ${user.CODIGO_VERIFICACION_EXPIRA}`);
+    console.log(`Fecha de expiración (ajustada, UTC-5): ${new Date(expirationTime).toISOString()}`);
+    console.log(`Hora actual (UTC): ${new Date(currentTime).toISOString()}`);
+    console.log(`Código expirado: ${codigoExpirado}, Código incorrecto: ${codigoIncorrecto}`);
 
     if (codigoExpirado || codigoIncorrecto) {
       const nuevosIntentos = intentosFallidos + 1;
@@ -708,7 +728,13 @@ const changeAuthenticatedUserPassword = async (req, res) => {
     `);
     if (result.recordset.length === 0)
       return res.status(404).json({ message: "Usuario no encontrado" });
-    const { CONTRASENA_HASH, ID_PERSONA, NOMBRES, APELLIDOS, INVALIDATION_COUNTER } = result.recordset[0];
+    const {
+      CONTRASENA_HASH,
+      ID_PERSONA,
+      NOMBRES,
+      APELLIDOS,
+      INVALIDATION_COUNTER,
+    } = result.recordset[0];
     const isValid = await bcrypt.compare(currentPassword, CONTRASENA_HASH);
     if (!isValid)
       return res.status(401).json({ message: "Contraseña actual incorrecta" });
@@ -729,9 +755,8 @@ const changeAuthenticatedUserPassword = async (req, res) => {
     `);
 
     // Obtener roles del usuario
-    const rolesResult = await pool
-      .request()
-      .input("userId", sql.Int, userId).query(`
+    const rolesResult = await pool.request().input("userId", sql.Int, userId)
+      .query(`
       SELECT t.ID_ROL, t.DETALLE_USUARIO 
       FROM MAE_USUARIO_ROL ur 
       JOIN MAE_TIPO_USUARIO t ON ur.ID_ROL = t.ID_ROL 
@@ -741,7 +766,8 @@ const changeAuthenticatedUserPassword = async (req, res) => {
 
     // Generar un nuevo token con el mismo INVALIDATION_COUNTER
     const generateToken = (userId, roles, idPersona, invalidationCounter) => {
-      if (!process.env.JWT_SECRET) throw new Error("JWT_SECRET no está definido");
+      if (!process.env.JWT_SECRET)
+        throw new Error("JWT_SECRET no está definido");
       return jwt.sign(
         { id: userId, roles, idPersona, invalidationCounter },
         process.env.JWT_SECRET,
@@ -750,7 +776,12 @@ const changeAuthenticatedUserPassword = async (req, res) => {
         }
       );
     };
-    const newToken = generateToken(userId, roles, ID_PERSONA, INVALIDATION_COUNTER);
+    const newToken = generateToken(
+      userId,
+      roles,
+      ID_PERSONA,
+      INVALIDATION_COUNTER
+    );
 
     // Registrar la nueva sesión con el nuevo token
     const fechaCreacion = new Date();
@@ -770,7 +801,8 @@ const changeAuthenticatedUserPassword = async (req, res) => {
     const getUserPermissions = async (userId) => {
       try {
         const pool = await poolPromise;
-        const result = await pool.request().input("userId", sql.Int, userId).query(`
+        const result = await pool.request().input("userId", sql.Int, userId)
+          .query(`
           SELECT 'Menú' AS Tipo, m.ID_MENU AS ID, m.NOMBRE AS Nombre, m.URL AS URL, m.ICONO AS Icono, m.ORDEN AS Orden, NULL AS ID_SUBMENU, NULL AS SUBMENU_NOMBRE, NULL AS SUBMENU_URL, NULL AS SUBMENU_ICONO, NULL AS SUBMENU_ORDEN
           FROM MAE_ROL_MENU rm JOIN MAE_MENU m ON rm.ID_MENU = m.ID_MENU JOIN MAE_USUARIO_ROL ur ON ur.ID_ROL = rm.ID_ROL
           WHERE ur.ID_USUARIO = @userId AND m.ESTADO = 1
@@ -811,7 +843,9 @@ const changeAuthenticatedUserPassword = async (req, res) => {
           });
         return permissions;
       } catch (error) {
-        console.error(`Error al obtener permisos para usuario ${userId}: ${error.message}`);
+        console.error(
+          `Error al obtener permisos para usuario ${userId}: ${error.message}`
+        );
         return [];
       }
     };
@@ -902,10 +936,7 @@ const refreshToken = async (req, res) => {
     );
 
     // Invalidar la sesión anterior
-    await pool
-      .request()
-      .input("TOKEN", sql.VarChar(500), token)
-      .query(`
+    await pool.request().input("TOKEN", sql.VarChar(500), token).query(`
         UPDATE MAE_SESIONES
         SET ESTADO = 0, SOCKET_ID = NULL
         WHERE TOKEN = @TOKEN AND ESTADO = 1
@@ -920,8 +951,7 @@ const refreshToken = async (req, res) => {
       .input("ID_PERSONA", sql.Int, user.ID_PERSONA)
       .input("TOKEN", sql.VarChar(500), newToken)
       .input("FECHA_CREACION", sql.DateTime, fechaCreacion)
-      .input("FECHA_EXPIRACION", sql.DateTime, fechaExpiracion)
-      .query(`
+      .input("FECHA_EXPIRACION", sql.DateTime, fechaExpiracion).query(`
         INSERT INTO MAE_SESIONES (ID_USUARIO, ID_PERSONA, TOKEN, FECHA_CREACION, FECHA_EXPIRACION, ESTADO)
         VALUES (@ID_USUARIO, @ID_PERSONA, @TOKEN, @FECHA_CREACION, @FECHA_EXPIRACION, 1)
       `);
