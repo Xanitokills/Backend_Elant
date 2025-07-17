@@ -145,6 +145,14 @@ const registerOrder = async (req, res) => {
       const authUserId = req.user.id;
       const photo = req.file;
 
+      console.log("Datos recibidos en registerOrder:", {
+        description,
+        personId,
+        department,
+        receptionistId: authUserId,
+        hasPhoto: !!photo
+      });
+
       if (!description || description.trim().length < 5) {
         return res.status(400).json({ message: "La descripción debe tener al menos 5 caracteres" });
       }
@@ -152,23 +160,35 @@ const registerOrder = async (req, res) => {
         return res.status(400).json({ message: "Debe especificar una persona y un departamento" });
       }
 
-      // Validar que personId y department existan en MAE_RESIDENTE
       const pool = await poolPromise;
       const result = await pool
         .request()
         .input("PersonId", sql.Int, personId)
         .input("DepartmentId", sql.Int, department)
         .query(`
-          SELECT ID_RESIDENTE 
-          FROM MAE_RESIDENTE 
-          WHERE ID_PERSONA = @PersonId 
-            AND ID_DEPARTAMENTO = @DepartmentId 
-            AND ESTADO = 1
+          SELECT r.ID_RESIDENTE, r.ID_PERSONA, r.ID_DEPARTAMENTO, r.ESTADO AS RESIDENTE_ESTADO, 
+                 p.ESTADO AS PERSONA_ESTADO, d.ESTADO AS DEPARTAMENTO_ESTADO
+          FROM MAE_RESIDENTE r
+          INNER JOIN MAE_DEPARTAMENTO d ON r.ID_DEPARTAMENTO = d.ID_DEPARTAMENTO
+          INNER JOIN MAE_PERSONA p ON r.ID_PERSONA = p.ID_PERSONA
+          WHERE r.ID_PERSONA = @PersonId 
+            AND r.ID_DEPARTAMENTO = @DepartmentId 
+            AND r.ESTADO = 1 
+            AND d.ESTADO = 1
+            AND p.ESTADO = 1
         `);
 
+      console.log("Resultado de la validación en MAE_RESIDENTE:", {
+        personId,
+        department,
+        result: result.recordset
+      });
+
       if (result.recordset.length === 0) {
+        logger.error(`No se encontró residente activo para personId=${personId}, department=${department}`);
         return res.status(400).json({
           message: "La persona seleccionada no está registrada como residente activo en el departamento especificado",
+          details: { personId, department }
         });
       }
 
@@ -195,6 +215,8 @@ const registerOrder = async (req, res) => {
       const responseData = resultOrder.recordset?.[0]
         ? JSON.parse(resultOrder.recordset[0][Object.keys(resultOrder.recordset[0])[0]])
         : [];
+
+      console.log("Respuesta de sp_RegisterOrder:", responseData);
 
       res.status(200).json({
         message: "Encargo registrado exitosamente",
