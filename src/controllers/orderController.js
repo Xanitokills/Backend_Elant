@@ -280,6 +280,46 @@ const markOrderDelivered = async (req, res) => {
   });
 };
 
+const getOrderPhoto = async (req, res) => {
+  try {
+    const { idEncargo } = req.params;
+    const { tipo } = req.query; // 'PAQUETE' or 'ENTREGA'
+
+    if (!idEncargo || isNaN(idEncargo)) {
+      return res.status(400).json({ message: "ID de encargo inválido" });
+    }
+    if (!tipo || !["PAQUETE", "ENTREGA"].includes(tipo)) {
+      return res.status(400).json({ message: "Tipo de foto inválido" });
+    }
+
+    const pool = await poolPromise;
+    const result = await pool
+      .request()
+      .input("IdEncargo", sql.Int, idEncargo)
+      .input("TipoFoto", sql.VarChar, tipo)
+      .query(`
+        SELECT FOTO, FORMATO
+        FROM MAE_ENCARGO_FOTO
+        WHERE ID_ENCARGO = @IdEncargo
+          AND TIPO_FOTO = @TipoFoto
+          AND ESTADO = 1
+      `);
+
+    if (result.recordset.length === 0) {
+      return res.status(404).json({ message: "Foto no encontrada" });
+    }
+
+    const { FOTO, FORMATO } = result.recordset[0];
+    const mimeType = FORMATO === "jpg" ? "image/jpeg" : FORMATO === "png" ? "image/png" : "application/octet-stream";
+
+    res.set("Content-Type", mimeType);
+    res.send(Buffer.from(FOTO));
+  } catch (err) {
+    logger.error(`Error en getOrderPhoto: ${err.message}`);
+    res.status(500).json({ message: "Error del servidor", error: err.message });
+  }
+};
+
 module.exports = {
   searchPersons,
   getAllPhases,
@@ -287,4 +327,5 @@ module.exports = {
   getAllOrders,
   registerOrder,
   markOrderDelivered,
+  getOrderPhoto,
 };
