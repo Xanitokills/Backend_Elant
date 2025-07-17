@@ -152,16 +152,24 @@ const registerOrder = async (req, res) => {
         return res.status(400).json({ message: "Debe especificar una persona y un departamento" });
       }
 
-      // Validar que personId exista en MAE_RESIDENTE
+      // Validar que personId y department existan en MAE_RESIDENTE
       const pool = await poolPromise;
       const result = await pool
         .request()
         .input("PersonId", sql.Int, personId)
         .input("DepartmentId", sql.Int, department)
-        .query("SELECT ID_RESIDENTE FROM MAE_RESIDENTE WHERE ID_PERSONA = @PersonId AND ID_DEPARTAMENTO = @DepartmentId AND ESTADO = 1");
-      
+        .query(`
+          SELECT ID_RESIDENTE 
+          FROM MAE_RESIDENTE 
+          WHERE ID_PERSONA = @PersonId 
+            AND ID_DEPARTAMENTO = @DepartmentId 
+            AND ESTADO = 1
+        `);
+
       if (result.recordset.length === 0) {
-        return res.status(400).json({ message: "La persona seleccionada no está registrada como residente activo en el departamento especificado" });
+        return res.status(400).json({
+          message: "La persona seleccionada no está registrada como residente activo en el departamento especificado",
+        });
       }
 
       let photoBuffer = null;
@@ -184,9 +192,13 @@ const registerOrder = async (req, res) => {
         .input("PhotoFormat", sql.VarChar, photoFormat)
         .execute("sp_RegisterOrder");
 
+      const responseData = resultOrder.recordset?.[0]
+        ? JSON.parse(resultOrder.recordset[0][Object.keys(resultOrder.recordset[0])[0]])
+        : [];
+
       res.status(200).json({
         message: "Encargo registrado exitosamente",
-        data: resultOrder.recordset,
+        data: responseData,
       });
     } catch (err) {
       logger.error(`Error en registerOrder: ${err.message}`);
