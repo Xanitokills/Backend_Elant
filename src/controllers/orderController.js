@@ -50,7 +50,11 @@ const searchPersons = async (req, res) => {
       .execute("sp_SearchPersonsForOrder");
 
     const raw = result.recordset?.[0];
-    const responseData = raw ? JSON.parse(raw[Object.keys(raw)[0]]) : [];
+    const responseData = raw && Object.keys(raw).length > 0 ? JSON.parse(raw[Object.keys(raw)[0]]) : [];
+
+    if (!responseData || responseData.length === 0) {
+      return res.status(200).json([]);
+    }
 
     const formattedData = responseData.map(person => ({
       ID_PERSONA: person.ID_PERSONA,
@@ -61,13 +65,13 @@ const searchPersons = async (req, res) => {
       NRO_DPTO: person.NRO_DPTO,
       FASE: person.FASE,
       ES_PROPIETARIO: person.ID_CLASIFICACION === 1,
-      USUARIOS_ASOCIADOS: person.USUARIOS_ASOCIADOS.map(user => ({
+      USUARIOS_ASOCIADOS: person.USUARIOS_ASOCIADOS ? person.USUARIOS_ASOCIADOS.map(user => ({
         ID_PERSONA: user.ID_PERSONA,
         NOMBRES: user.NOMBRES,
         APELLIDOS: user.APELLIDOS,
         DNI: user.DNI,
         ES_PROPIETARIO: user.ID_CLASIFICACION === 1,
-      })),
+      })) : [],
     }));
 
     res.status(200).json(formattedData);
@@ -85,7 +89,7 @@ const getAllPhases = async (req, res) => {
       .execute("sp_GetAllPhases");
 
     const raw = result.recordset?.[0];
-    const responseData = raw ? JSON.parse(raw[Object.keys(raw)[0]]) : [];
+    const responseData = raw && Object.keys(raw).length > 0 ? JSON.parse(raw[Object.keys(raw)[0]]) : [];
 
     res.status(200).json(responseData);
   } catch (err) {
@@ -109,7 +113,7 @@ const getPhasesByDepartmentNumber = async (req, res) => {
       .execute("sp_GetPhasesByDepartmentNumber");
 
     const raw = result.recordset?.[0];
-    const responseData = raw ? JSON.parse(raw[Object.keys(raw)[0]]) : [];
+    const responseData = raw && Object.keys(raw).length > 0 ? JSON.parse(raw[Object.keys(raw)[0]]) : [];
 
     res.status(200).json(responseData);
   } catch (err) {
@@ -186,7 +190,7 @@ const registerOrder = async (req, res) => {
       });
     } catch (err) {
       logger.error(`Error en registerOrder: ${err.message}`);
-      res.status(500).json({ message: err.message || "Error del servidor", error: err.message });
+      res.status(500).json({ message: "Error del servidor", error: err.message });
     }
   });
 };
@@ -237,7 +241,7 @@ const markOrderDelivered = async (req, res) => {
       });
     } catch (err) {
       logger.error(`Error en markOrderDelivered: ${err.message}`);
-      res.status(500).json({ message: err.message || "Error del servidor", error: err.message });
+      res.status(500).json({ message: "Error del servidor", error: err.message });
     }
   });
 };
