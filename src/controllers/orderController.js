@@ -196,7 +196,7 @@ const registerOrder = async (req, res) => {
       let photoFormat = null;
       if (photo) {
         photoBuffer = await sharp(photo.buffer)
-          .resize({ width: 200, height: 200, fit: "inside" })
+          .resize({ width: 600, height: 600, fit: "inside" })
           .jpeg({ quality: 80 })
           .toBuffer();
         photoFormat = "jpg";
