@@ -50,7 +50,12 @@ const searchPersons = async (req, res) => {
       .execute("sp_SearchPersonsForOrder");
 
     const raw = result.recordset?.[0];
-    const responseData = raw && Object.keys(raw).length > 0 ? JSON.parse(raw[Object.keys(raw)[0]]) : [];
+    let responseData = [];
+    if (raw && Object.keys(raw).length > 0) {
+      const jsonData = raw[Object.keys(raw)[0]];
+      // Verificar si jsonData ya es un objeto (parseado por el driver)
+      responseData = typeof jsonData === 'string' ? JSON.parse(jsonData) : jsonData;
+    }
 
     if (!responseData || responseData.length === 0) {
       return res.status(200).json([]);
@@ -65,13 +70,7 @@ const searchPersons = async (req, res) => {
       NRO_DPTO: person.NRO_DPTO,
       FASE: person.FASE,
       ES_PROPIETARIO: person.ID_CLASIFICACION === 1,
-      USUARIOS_ASOCIADOS: person.USUARIOS_ASOCIADOS ? person.USUARIOS_ASOCIADOS.map(user => ({
-        ID_PERSONA: user.ID_PERSONA,
-        NOMBRES: user.NOMBRES,
-        APELLIDOS: user.APELLIDOS,
-        DNI: user.DNI,
-        ES_PROPIETARIO: user.ID_CLASIFICACION === 1,
-      })) : [],
+      USUARIOS_ASOCIADOS: person.USUARIOS_ASOCIADOS || [], // Ya viene como array de objetos
     }));
 
     res.status(200).json(formattedData);
