@@ -134,6 +134,27 @@ const getAllOrders = async (req, res) => {
 };
 
 const registerOrder = async (req, res) => {
+  const upload = require("multer")({
+    storage: require("multer").memoryStorage(),
+    limits: { fileSize: 5 * 1024 * 1024 }, // Límite de 5MB
+    fileFilter: (req, file, cb) => {
+      console.log("Archivo recibido en multer:", {
+        originalname: file.originalname,
+        mimetype: file.mimetype,
+        size: file.size,
+      });
+      const filetypes = /jpeg|jpg|png/;
+      const mimetype = filetypes.test(file.mimetype);
+      const extname = filetypes.test(
+        require("path").extname(file.originalname).toLowerCase()
+      );
+      if (mimetype && extname) {
+        return cb(null, true);
+      }
+      cb(new Error("Solo se permiten imágenes JPG o PNG"));
+    },
+  }).single("photo");
+
   upload(req, res, async (err) => {
     if (err) {
       logger.error(`Error en upload: ${err.message}`);
@@ -141,30 +162,50 @@ const registerOrder = async (req, res) => {
     }
 
     try {
-      const { description, personId, department } = req.body;
-      const authUserId = req.user.id;
+      const { description, personId, department, receptionistId } = req.body;
+      const authUserId = req.user?.id || parseInt(receptionistId) || 0;
       const photo = req.file;
 
       console.log("Datos recibidos en registerOrder:", {
         description,
         personId,
         department,
-        receptionistId: authUserId,
-        hasPhoto: !!photo
+        receptionistId,
+        authUserId,
+        hasPhoto: !!photo,
+        photoDetails: photo
+          ? {
+              originalname: photo.originalname,
+              mimetype: photo.mimetype,
+              size: photo.size,
+            }
+          : null,
       });
 
       if (!description || description.trim().length < 5) {
-        return res.status(400).json({ message: "La descripción debe tener al menos 5 caracteres" });
+        logger.error("Descripción inválida:", { description });
+        return res.status(400).json({
+          message: "La descripción debe tener al menos 5 caracteres",
+        });
       }
-      if (!personId || !department) {
-        return res.status(400).json({ message: "Debe especificar una persona y un departamento" });
+      if (!personId || isNaN(parseInt(personId))) {
+        logger.error("ID de persona inválido:", { personId });
+        return res.status(400).json({
+          message: "Debe especificar un ID de persona válido",
+        });
+      }
+      if (!department || isNaN(parseInt(department))) {
+        logger.error("ID de departamento inválido:", { department });
+        return res.status(400).json({
+          message: "Debe especificar un departamento válido",
+        });
       }
 
       const pool = await poolPromise;
       const result = await pool
         .request()
-        .input("PersonId", sql.Int, personId)
-        .input("DepartmentId", sql.Int, department)
+        .input("PersonId", sql.Int, parseInt(personId))
+        .input("DepartmentId", sql.Int, parseInt(department))
         .query(`
           SELECT r.ID_RESIDENTE, r.ID_PERSONA, r.ID_DEPARTAMENTO, r.ESTADO AS RESIDENTE_ESTADO, 
                  p.ESTADO AS PERSONA_ESTADO, d.ESTADO AS DEPARTAMENTO_ESTADO
@@ -181,14 +222,17 @@ const registerOrder = async (req, res) => {
       console.log("Resultado de la validación en MAE_RESIDENTE:", {
         personId,
         department,
-        result: result.recordset
+        result: result.recordset,
       });
 
       if (result.recordset.length === 0) {
-        logger.error(`No se encontró residente activo para personId=${personId}, department=${department}`);
+        logger.error(
+          `No se encontró residente activo para personId=${personId}, department=${department}`
+        );
         return res.status(400).json({
-          message: "La persona seleccionada no está registrada como residente activo en el departamento especificado",
-          details: { personId, department }
+          message:
+            "La persona seleccionada no está registrada como residente activo en el departamento especificado",
+          details: { personId, department },
         });
       }
 
@@ -205,15 +249,17 @@ const registerOrder = async (req, res) => {
       const resultOrder = await pool
         .request()
         .input("Description", sql.VarChar, description.trim())
-        .input("PersonId", sql.Int, personId)
-        .input("Department", sql.Int, department)
+        .input("PersonId", sql.Int, parseInt(personId))
+        .input("Department", sql.Int, parseInt(department))
         .input("ReceptionistId", sql.Int, authUserId)
         .input("Photo", sql.VarBinary, photoBuffer)
         .input("PhotoFormat", sql.VarChar, photoFormat)
         .execute("sp_RegisterOrder");
 
       const responseData = resultOrder.recordset?.[0]
-        ? JSON.parse(resultOrder.recordset[0][Object.keys(resultOrder.recordset[0])[0]])
+        ? JSON.parse(
+            resultOrder.recordset[0][Object.keys(resultOrder.recordset[0])[0]]
+          )
         : [];
 
       console.log("Respuesta de sp_RegisterOrder:", responseData);
@@ -228,23 +274,32 @@ const registerOrder = async (req, res) => {
     }
   });
 };
-
 const markOrderDelivered = async (req, res) => {
   const idEncargo = parseInt(req.params.idEncargo);
-  const rawPersonId = req.body.personId; // Acceso directo a personId
+  const rawPersonId = req.body.personId;
   const personId = parseInt(rawPersonId);
-  const authUserId = req.user.id;
+  const authUserId = req.user?.id || 0;
 
-  console.log("Request headers:", req.headers); // Log para depurar headers
-  console.log("req.body:", req.body); // Log para depurar cuerpo
-  console.log("Raw personId received:", rawPersonId);
-  console.log("Parsed personId:", personId, "authUserId:", authUserId);
+  console.log("Datos recibidos en markOrderDelivered:", {
+    idEncargo,
+    rawPersonId,
+    personId,
+    authUserId,
+    hasPhoto: !!req.file,
+    photoDetails: req.file
+      ? {
+          originalname: req.file.originalname,
+          mimetype: req.file.mimetype,
+          size: req.file.size,
+        }
+      : null,
+  });
 
   if (rawPersonId === undefined || rawPersonId === null || rawPersonId === "" || isNaN(personId)) {
     logger.error(`ID de persona inválido: rawPersonId=${rawPersonId}, parsed=${personId}`);
-    return res.status(400).json({ 
+    return res.status(400).json({
       message: "ID de persona inválido",
-      details: { rawPersonId, parsedPersonId: personId }
+      details: { rawPersonId, parsedPersonId: personId },
     });
   }
 
@@ -254,10 +309,11 @@ const markOrderDelivered = async (req, res) => {
 
     if (req.file) {
       const processedImage = await sharp(req.file.buffer)
-        .resize({ width: 600, height: 600 })
+        .resize({ width: 600, height: 600, fit: "inside" })
+        .jpeg({ quality: 80 })
         .toBuffer();
       photoData = processedImage;
-      photoFormat = req.file.mimetype.split("/")[1];
+      photoFormat = "jpg";
     }
 
     const pool = await poolPromise;
@@ -270,16 +326,25 @@ const markOrderDelivered = async (req, res) => {
       .input("PhotoFormat", sql.VarChar, photoFormat)
       .execute("sp_MarkOrderDelivered");
 
-    const responseData = result.recordset?.[0]?.Result ? JSON.parse(result.recordset[0].Result) : {};
+    const responseData = result.recordset?.[0]?.Result
+      ? JSON.parse(result.recordset[0].Result)
+      : {};
+
+    console.log("Respuesta de sp_MarkOrderDelivered:", responseData);
+
     return res.status(200).json({
       message: "Encargo marcado como entregado",
-      data: responseData
+      data: responseData,
     });
   } catch (error) {
-    logger.error(`Error al marcar encargo como entregado: ${error.message}, OrderId: ${idEncargo}, PersonId: ${personId}, UserId: ${authUserId}`);
-    return res.status(error.message.includes('5000') ? 400 : 500).json({ 
-      message: error.message,
-      details: { OrderId: idEncargo, PersonId: personId, UserId: authUserId }
+    logger.error(
+      `Error al marcar encargo como entregado: ${error.message}, OrderId: ${idEncargo}, PersonId: ${personId}, UserId: ${authUserId}`
+    );
+    return res.status(error.message.includes("5000") ? 400 : 500).json({
+      message: error.message.includes("5000")
+        ? "Error de validación en el procedimiento almacenado"
+        : "Error del servidor",
+      details: { OrderId: idEncargo, PersonId: personId, UserId: authUserId, error: error.message },
     });
   }
 };
