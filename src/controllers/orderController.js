@@ -230,56 +230,59 @@ const registerOrder = async (req, res) => {
 };
 
 const markOrderDelivered = async (req, res) => {
-  upload(req, res, async (err) => {
-    if (err) {
-      logger.error(`Error en upload: ${err.message}`);
-      return res.status(400).json({ message: err.message });
+  const idEncargo = parseInt(req.params.idEncargo);
+  const rawPersonId = req.body.personId; // Acceso directo a personId
+  const personId = parseInt(rawPersonId);
+  const authUserId = req.user.id;
+
+  console.log("Request headers:", req.headers); // Log para depurar headers
+  console.log("req.body:", req.body); // Log para depurar cuerpo
+  console.log("Raw personId received:", rawPersonId);
+  console.log("Parsed personId:", personId, "authUserId:", authUserId);
+
+  if (rawPersonId === undefined || rawPersonId === null || rawPersonId === "" || isNaN(personId)) {
+    logger.error(`ID de persona inválido: rawPersonId=${rawPersonId}, parsed=${personId}`);
+    return res.status(400).json({ 
+      message: "ID de persona inválido",
+      details: { rawPersonId, parsedPersonId: personId }
+    });
+  }
+
+  try {
+    let photoData = null;
+    let photoFormat = null;
+
+    if (req.file) {
+      const processedImage = await sharp(req.file.buffer)
+        .resize({ width: 600, height: 600 })
+        .toBuffer();
+      photoData = processedImage;
+      photoFormat = req.file.mimetype.split("/")[1];
     }
 
-    try {
-      const { idEncargo } = req.params;
-      const { personId } = req.body;
-      const authUserId = req.user.ID_USUARIO;
-      const photo = req.file;
+    const pool = await poolPromise;
+    const result = await pool
+      .request()
+      .input("OrderId", sql.Int, idEncargo)
+      .input("PersonId", sql.Int, personId)
+      .input("UserId", sql.Int, authUserId)
+      .input("Photo", sql.VarBinary, photoData)
+      .input("PhotoFormat", sql.VarChar, photoFormat)
+      .execute("sp_MarkOrderDelivered");
 
-      if (!idEncargo || isNaN(idEncargo)) {
-        return res.status(400).json({ message: "ID de encargo inválido" });
-      }
-      if (!personId || isNaN(personId)) {
-        return res.status(400).json({ message: "ID de persona inválido" });
-      }
-
-      let photoBuffer = null;
-      let photoFormat = null;
-      if (photo) {
-        photoBuffer = await sharp(photo.buffer)
-          .resize({ width: 200, height: 200, fit: "inside" })
-          .jpeg({ quality: 80 })
-          .toBuffer();
-        photoFormat = "jpg";
-      }
-
-      const pool = await poolPromise;
-      const result = await pool
-        .request()
-        .input("OrderId", sql.Int, parseInt(idEncargo))
-        .input("PersonId", sql.Int, personId)
-        .input("AuthUserId", sql.Int, authUserId)
-        .input("Photo", sql.VarBinary, photoBuffer)
-        .input("PhotoFormat", sql.VarChar, photoFormat)
-        .execute("sp_MarkOrderDelivered");
-
-      res.status(200).json({
-        message: "Encargo marcado como entregado",
-        data: result.recordset,
-      });
-    } catch (err) {
-      logger.error(`Error en markOrderDelivered: ${err.message}`);
-      res.status(500).json({ message: "Error del servidor", error: err.message });
-    }
-  });
+    const responseData = result.recordset?.[0]?.Result ? JSON.parse(result.recordset[0].Result) : {};
+    return res.status(200).json({
+      message: "Encargo marcado como entregado",
+      data: responseData
+    });
+  } catch (error) {
+    logger.error(`Error al marcar encargo como entregado: ${error.message}, OrderId: ${idEncargo}, PersonId: ${personId}, UserId: ${authUserId}`);
+    return res.status(error.message.includes('5000') ? 400 : 500).json({ 
+      message: error.message,
+      details: { OrderId: idEncargo, PersonId: personId, UserId: authUserId }
+    });
+  }
 };
-
 const getOrderPhoto = async (req, res) => {
   try {
     const { idEncargo } = req.params;
