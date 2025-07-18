@@ -49,18 +49,38 @@ const searchPersons = async (req, res) => {
       .input("Phase", sql.VarChar, phase || null)
       .execute("sp_SearchPersonsForOrder");
 
-    const raw = result.recordset?.[0];
-    let responseData = [];
-    if (raw && Object.keys(raw).length > 0) {
-      const jsonData = raw[Object.keys(raw)[0]];
-      // Verificar si jsonData ya es un objeto (parseado por el driver)
-      responseData = typeof jsonData === 'string' ? JSON.parse(jsonData) : jsonData;
-    }
+    // Log the raw result for debugging
+    logger.info(`Resultado de sp_SearchPersonsForOrder: ${JSON.stringify(result.recordset, null, 2)}`);
 
-    if (!responseData || responseData.length === 0) {
+    // Handle empty or invalid result set
+    if (!result.recordset || result.recordset.length === 0) {
+      logger.info(`No se encontraron resultados para criteria=${criteria}, query=${query}, phase=${phase || 'null'}`);
       return res.status(200).json([]);
     }
 
+    const raw = result.recordset[0];
+    let responseData = [];
+
+    // Check if raw exists and has valid JSON data
+    if (raw && Object.keys(raw).length > 0) {
+      const jsonData = raw[Object.keys(raw)[0]];
+      if (jsonData) {
+        try {
+          responseData = typeof jsonData === 'string' ? JSON.parse(jsonData) : jsonData;
+        } catch (parseError) {
+          logger.error(`Error al parsear JSON en searchPersons: ${parseError.message}`);
+          return res.status(200).json([]); // Return empty array instead of failing
+        }
+      } else {
+        logger.info(`JSON data es nulo o vacío para criteria=${criteria}, query=${query}, phase=${phase || 'null'}`);
+        return res.status(200).json([]);
+      }
+    } else {
+      logger.info(`No hay datos válidos en raw para criteria=${criteria}, query=${query}, phase=${phase || 'null'}`);
+      return res.status(200).json([]);
+    }
+
+    // Format the response data
     const formattedData = responseData.map(person => ({
       ID_PERSONA: person.ID_PERSONA,
       NOMBRES: person.NOMBRES,
@@ -70,16 +90,16 @@ const searchPersons = async (req, res) => {
       NRO_DPTO: person.NRO_DPTO,
       FASE: person.FASE,
       ES_PROPIETARIO: person.ID_CLASIFICACION === 1,
-      USUARIOS_ASOCIADOS: person.USUARIOS_ASOCIADOS || [], // Ya viene como array de objetos
+      USUARIOS_ASOCIADOS: person.USUARIOS_ASOCIADOS || [],
     }));
 
+    logger.info(`Resultados formateados: ${JSON.stringify(formattedData, null, 2)}`);
     res.status(200).json(formattedData);
   } catch (err) {
     logger.error(`Error en searchPersons: ${err.message}`);
     res.status(500).json({ message: "Error del servidor", error: err.message });
   }
 };
-
 const getAllPhases = async (req, res) => {
   try {
     const pool = await poolPromise;
