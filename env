@@ -1,0 +1,38 @@
+# Server configuration
+PORT=4000
+########################################
+# JWT Secret for token generation
+JWT_SECRET=your_jwt_secret_key_1234567890
+########################################
+# Duracion De Token Usuario
+ExpiresInToken=60m
+#ExpiresInToken=90s
+########################################
+# TOKEN DE RENIEC
+RENIEC_API_TOKEN=<apis-token-14055.pfCOPT3S601bJK1J3dGg7QG6Xtsh6LPT>
+########################################
+# 1:Autenticación SQL Server ; 2:Autenticación Windows
+AUTH_MODE=1
+########################################
+# SQL Server configuration Local 
+#DB_SERVER=DESKTOP-K2A8K17
+#DB_DATABASE=SoftHomeData
+#DB_USER=Natalie           # Usuario de Windows
+#DB_PASSWORD=Peluchin001  # Contraseña de la cuenta 'Natalie'
+#DB_DOMAIN=DESKTOP-K2A8K17 # Dominio (nombre de tu máquina local)
+#DB_PORT=1433
+########################################
+# SQL Server configuration
+DB_SERVER=JorgeTerrones
+DB_DATABASE=ELANT_BASE
+DB_USER=sa
+DB_PASSWORD="Peluchin001"
+########################################
+# Configuración de correo (Gmail)
+NAME_USER="Softhome <mailedificioelant@gmail.com>"
+MAIL_USER=mailedificioelant@gmail.com
+MAIL_PASS=dvwdbqbolwundwoj
+########################################
+#URL FRONT
+FRONTEND_URL=http://localhost:5173
+########################################
