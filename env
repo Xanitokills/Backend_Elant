@@ -23,10 +23,10 @@ AUTH_MODE=1
 #DB_PORT=1433
 ########################################
 # SQL Server configuration
-DB_SERVER=JorgeTerrones
-DB_DATABASE=ELANT_BASE
+DB_SERVER=0.tcp.sa.ngrok.io,10466
+DB_DATABASE=Soft_Elant_1
 DB_USER=sa
-DB_PASSWORD="Peluchin001"
+DB_PASSWORD="Kmzwa8awaa"
 ########################################
 # Configuración de correo (Gmail)
 NAME_USER="Softhome <mailedificioelant@gmail.com>"
